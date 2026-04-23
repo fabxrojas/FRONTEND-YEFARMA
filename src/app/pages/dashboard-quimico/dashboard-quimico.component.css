@@ -1,0 +1,38 @@
+.top-navbar {
+    display: flex;
+    justify-content: space-between; 
+    align-items: center;
+    padding: 0 2rem;
+    height: 60px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #dee2e6;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.user-profile-zone {
+    position: relative;
+}
+
+.username-label {
+    font-weight: 600;
+    margin-left: 0.5rem;
+    color: #495057;
+}
+
+
+::ng-deep .p-button.p-button-text {
+    color: #000000 !important;
+}
+
+::ng-deep .p-button.p-button-text:hover {
+    background: rgba(0, 150, 170, 0.1) !important;
+}
+
+.logo-botica {
+    width: 55px;
+    height: 55px;
+    background-image: url('../../../assets/img/boticalogo.jpg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}

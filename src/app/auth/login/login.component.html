@@ -1,0 +1,30 @@
+<div class="login-container">
+    <div style="text-align: center;">
+        <h1>Sistema para Inventario de Yefarma</h1>
+        <h3>Login para</h3>
+
+        <div class="login-card">
+            <form (ngSubmit)="onLogin()" #loginForm="ngForm">
+                <div class="field">
+                    <label for="username">Usuario:</label>
+                    <input type="text" pInputText id="username" name="username" 
+                           [(ngModel)]="loginData.username" required>
+                </div>
+
+                <div class="field">
+                    <label for="password">Contraseña:</label>
+                    <p-password id="password" name="password" 
+                                [(ngModel)]="loginData.password" [feedback]="false" 
+                                [toggleMask]="true">
+                    </p-password>
+                </div>
+
+                <button pButton type="submit" label="Ingresar"></button>
+            </form>
+            
+            <div style="margin-top: 1rem;">
+                <small class="p-error" *ngIf="errorMessage">{{ errorMessage }}</small>
+            </div>
+        </div>
+    </div>
+</div>
