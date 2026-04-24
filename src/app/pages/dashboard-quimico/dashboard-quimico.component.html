@@ -1,46 +1,44 @@
-<div style="display: flex; flex-direction: column; height: 100vh;">
-    <div style="display: flex; justify-content: space-between; 
-        align-items: center; padding: 1.0rem 3rem; 
-        border-bottom: 1px solid #007b8f; background: rgb(252, 252, 252);
-         z-index: 10;">
-
-        <div style="display: flex; align-items: center; gap: 8px;">
+<div class="main-layout">
+    <header class="top-navbar">
+        <div class="logo-container">
             <div class="logo-botica"></div>
-            <span style="font-weight: bold; color: #000000; font-size: 1.3rem;">BOTICA NUEVO PERÚ</span>
+            <span class="brand-name">BOTICA NUEVO PERÚ</span>
         </div>
-
         <div class="profile-area">
-            <button #btn type="button" pButton icon="pi pi-user" class="p-button-rounded p-button-text p-button-plain"
-                (click)="menu.toggle($event)">
-                <span style="margin-left: 0.5rem; margin-right: 0.5rem; font-weight: 600; font-size: 1.1rem;">{{
-                    userName }}</span>
+            <button #btn type="button" pButton icon="pi pi-user" 
+                    class="p-button-rounded p-button-text p-button-plain"
+                    (click)="menu.toggle($event)">
+                <span class="username-label">{{ userName }}</span>
                 <i class="pi pi-chevron-down"></i>
             </button>
             <p-menu #menu [model]="userOptions" [popup]="true"></p-menu>
         </div>
-    </div>
+    </header>
 
-    <div style="display: flex; flex: 1; overflow: hidden;">
-        <div style="width: 300px; background: #f4f4f4; border-right: 1px solid #ddd; overflow-y: auto;">
+    <div class="content-wrapper">
+        <aside class="sidebar">
             <p-panelMenu [model]="items" [style]="{'width':'100%'}"></p-panelMenu>
-        </div>
+        </aside>
 
-        <div
-            style="flex: 1; padding: 3rem; background-color: #e4e4e4; display: flex; justify-content: center; align-items: flex-start;">
+        <main class="main-content">
+            <div class="dashboard-container" *ngIf="router.url === '/dashboard-quimico'">
+                <header class="dashboard-header">
+                    <h1>Bienvenido, Químico Farmacéutico</h1>
+                    <p>Resumen de estado para: <strong>{{ userName }}</strong></p>
+                </header>
 
-            <div style="background: rgba(255, 255, 255, 0.9); 
-                padding: 30px; border-radius: 15px; 
-                box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 100%;
-                 max-width: 800px; text-align: center;">
-                <h1 style="color: #007b8f; margin-bottom: 1rem;">Bienvenido, Químico Farmacéutico</h1>
-                <p style="color: #444; font-size: 1.1rem;">
-                    Usted ha ingresado como <strong>{{ userName }}</strong>.
-                    Seleccione una opción del menú para comenzar a gestionar el inventario de la botica.
-                </p>
-                <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
-                <i class="pi pi-info-circle" style="color: #0096aa; font-size: 2rem;"></i>
+                <div class="grid-cards">
+                    <div class="card kpi-card stock-low">
+                        <div class="kpi-icon"><i class="pi pi-exclamation-triangle"></i></div>
+                        <div class="kpi-data">
+                            <span class="kpi-title">Stock Bajo</span>
+                            <h2 class="kpi-value">12</h2>
+                        </div>
+                    </div>
+                    </div>
             </div>
 
-        </div>
+            <router-outlet></router-outlet>
+        </main>
     </div>
 </div>

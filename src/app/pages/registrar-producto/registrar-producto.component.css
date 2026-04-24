@@ -1,0 +1,39 @@
+.container-registro {
+    padding: 2rem;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.section-title {
+    color: #007b8f;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+.field label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: block;
+    color: #495057;
+}
+
+/* Efecto para que los campos se vean más modernos */
+::ng-deep .p-inputtext, ::ng-deep .p-dropdown {
+    border-radius: 8px !important;
+}
+
+::ng-deep .p-card {
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+    border-radius: 12px !important;
+}
+
+::ng-deep .p-button {
+    border-radius: 8px !important;
+    transition: all 0.2s;
+}
+
+::ng-deep .p-button:hover {
+    transform: translateY(-2px);
+}

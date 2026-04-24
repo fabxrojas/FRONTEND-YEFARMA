@@ -1,47 +1,58 @@
 /* Contenedor principal que ocupa toda la pantalla */
 .login-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
     height: 100vh;
     width: 100vw;
     margin: 0;
-    
-    /* Imagen de fondo con filtro turquesa (RGBA) según tu prototipo */
-    background: linear-gradient(rgba(0, 150, 170, 0.7), rgba(0, 150, 170, 0.7)), 
-                url('../../../assets/img/fondo_botica.jpg'); 
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Usamos la misma lógica que te funcionó en el dashboard */
+    background-image: url('../../../assets/img/fondo_botica.jpg'); 
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    position: fixed; /* Asegura que cubra todo sin scroll */
+    top: 0;
+    left: 0;
 }
 
-/* La tarjeta blanca donde van los inputs */
-.login-card {
-    background: rgba(255, 255, 255, 0.95); 
-    padding: 2.5rem;
-    border-radius: 15px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+/* Capa de superposición para que el texto se lea mejor (opcional) */
+.login-container::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 123, 143, 0.2); /* Tinte turquesa suave */
+    z-index: 1;
+}
+
+.login-content {
+    position: relative;
+    z-index: 2;
     width: 100%;
     max-width: 400px;
     text-align: center;
 }
 
-/* Título principal fuera de la tarjeta (si decides ponerlo arriba) */
 h1 {
     color: white;
-    font-size: 2.5rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
     margin-bottom: 0.5rem;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 h3 {
-    color: white;
-    font-weight: 400;
+    color: #e0f7fa;
     margin-bottom: 2rem;
 }
 
-/* Estilos para los campos (labels e inputs) */
+/* La tarjeta blanca del login */
+.login-card {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 2.5rem;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
 .field {
     margin-bottom: 1.5rem;
     text-align: left;
@@ -50,34 +61,24 @@ h3 {
 .field label {
     display: block;
     margin-bottom: 0.5rem;
-    color: #007b8f; 
-    font-weight: 600;
+    color: #007b8f;
+    font-weight: bold;
 }
 
-/* Ajuste para que PrimeNG ocupe todo el ancho */
-input, p-password {
+/* Ajuste para que los inputs de PrimeNG ocupen todo el ancho */
+input[pInputText], p-password {
+    width: 100% !important;
+}
+
+::ng-deep .p-password input {
+    width: 100% !important;
+}
+
+button[pButton] {
     width: 100%;
-}
-
-/* Botón personalizado según prototipo */
-::ng-deep .p-button {
-    background-color: #00bcd4 !important;
-    border: none !important;
-    padding: 0.75rem !important;
-    font-size: 1.1rem !important;
-}
-
-::ng-deep .p-button:hover {
-    background-color: #00acc1 !important;
-}
-
-::ng-deep .p-button-danger {
-    background-color: #c63737 !important; /* Rojo oscuro del prototipo */
-    border: none !important;
-    margin-top: 2rem;
-    width: 100%;
-}
-
-::ng-deep .p-button-danger:hover {
-    background-color: #a52a2a !important;
+    background-color: #007b8f;
+    border: none;
+    padding: 0.8rem;
+    font-size: 1.1rem;
+    margin-top: 1rem;
 }

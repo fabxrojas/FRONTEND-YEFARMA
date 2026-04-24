@@ -1,0 +1,40 @@
+<div class="container-registro">
+    <p-card header="Registro de Nuevo Producto">
+        <form [formGroup]="productoForm" (ngSubmit)="guardarProducto()">
+            <div class="p-fluid grid">
+                <div class="col-12"><h4 class="section-title">Datos Obligatorios</h4></div>
+                
+                <div class="field col-12 md:col-6">
+                    <label for="producto">Nombre del Producto</label>
+                    <input pInputText id="producto" formControlName="producto" placeholder="Ej: Amoxicilina 500mg">
+                </div>
+                
+                <div class="field col-12 md:col-6">
+                    <label for="rs">Registro Sanitario (RS)</label>
+                    <input pInputText id="rs" formControlName="registroSanitario" placeholder="Ej: EN-04856">
+                </div>
+
+                <div class="field col-12 md:col-4">
+                    <label>Tipo</label>
+                    <p-select [options]="tipos" formControlName="tipo" optionLabel="nombre" placeholder="Seleccione Tipo"></p-select>
+                </div>
+
+                <div class="field col-12 md:col-4">
+                    <label>Forma Farmacéutica</label>
+                    <p-select [options]="formas" formControlName="formaFarmaceutica" optionLabel="nombre" placeholder="Seleccione Forma"></p-select>
+                </div>
+
+                <div class="field col-12 md:col-4">
+                    <label>Precio (S/.)</label>
+                    <p-inputNumber formControlName="precio" mode="currency" currency="PEN" locale="es-PE" placeholder="0.00"></p-inputNumber>
+                </div>
+
+                <div class="col-12 flex justify-content-end mt-4 gap-2">
+                    <p-button label="Limpiar" icon="pi pi-refresh" severity="secondary" (click)="limpiarFormulario()"></p-button>
+                    <p-button label="Registrar Producto" icon="pi pi-save" severity="success" type="submit" [disabled]="productoForm.invalid"></p-button>
+                </div>
+            </div>
+        </form>
+    </p-card>
+    
+</div>

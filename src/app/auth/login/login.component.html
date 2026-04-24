@@ -1,28 +1,27 @@
 <div class="login-container">
-    <div style="text-align: center;">
-        <h1>Sistema para Inventario de Yefarma</h1>
-        <h3>Login para</h3>
+    <div class="login-content">
+        <h1>Sistema de Inventario para Yefarma</h1>
+        <h3>Panel de Acceso</h3>
 
         <div class="login-card">
             <form (ngSubmit)="onLogin()" #loginForm="ngForm">
                 <div class="field">
                     <label for="username">Usuario:</label>
-                    <input type="text" pInputText id="username" name="username" 
-                           [(ngModel)]="loginData.username" required>
+                    <input type="text" pInputText id="username" name="username" [(ngModel)]="loginData.username"
+                        required placeholder="Ingrese su usuario">
                 </div>
 
                 <div class="field">
                     <label for="password">Contraseña:</label>
-                    <p-password id="password" name="password" 
-                                [(ngModel)]="loginData.password" [feedback]="false" 
-                                [toggleMask]="true">
+                    <p-password id="password" name="password" [(ngModel)]="loginData.password" [feedback]="false"
+                        [toggleMask]="true" placeholder="Ingrese su contraseña" autocomplete="new-password">
                     </p-password>
                 </div>
 
                 <button pButton type="submit" label="Ingresar"></button>
             </form>
-            
-            <div style="margin-top: 1rem;">
+
+            <div style="margin-top: 1rem; min-height: 20px;">
                 <small class="p-error" *ngIf="errorMessage">{{ errorMessage }}</small>
             </div>
         </div>

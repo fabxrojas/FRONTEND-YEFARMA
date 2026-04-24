@@ -1,31 +1,31 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router'; // Importar Router para el logout [cite: 56]
+import { Router, RouterOutlet } from '@angular/router'; // 1. Añadimos RouterOutlet
 import { PanelMenuModule } from 'primeng/panelmenu';
-import { MenuModule } from 'primeng/menu'; // Necesario para el popup de perfil
-import { ButtonModule } from 'primeng/button'; // Necesario para el botón de perfil
+import { MenuModule } from 'primeng/menu';
+import { ButtonModule } from 'primeng/button';
 import { MenuItem } from 'primeng/api';
 import { MENU_ITEMS } from '../../core/constants/menu-config';
 
 @Component({
   selector: 'app-dashboard-quimico',
   standalone: true,
-  imports: [CommonModule, PanelMenuModule, MenuModule, ButtonModule],
+  // 2. IMPORTANTE: Agregamos RouterOutlet a los imports
+  imports: [CommonModule, PanelMenuModule, MenuModule, ButtonModule, RouterOutlet], 
   templateUrl: './dashboard-quimico.component.html',
-  styleUrls: ['./dashboard-quimico.component.css'] // Asegúrate de tener el CSS
+  styleUrls: ['./dashboard-quimico.component.css']
 })
 export class DashboardQuimicoComponent implements OnInit {
-  items: MenuItem[] = []; // Menú lateral
-  userOptions: MenuItem[] = []; // Menú superior derecho [cite: 40]
-  userName: string = 'FabrizioRO'; // Dato simulado
+  items: MenuItem[] = [];
+  userOptions: MenuItem[] = [];
+  userName: string = 'FabrizioRO';
 
-  constructor(private router: Router) {}
+  // 3. CAMBIO CLAVE: 'public router' para que el HTML pueda leer router.url
+  constructor(public router: Router) {} 
 
   ngOnInit() {
-    // Menú lateral configurado anteriormente
     this.items = MENU_ITEMS['QUIMICO FARMACEUTICO'];
 
-    // Configuración de opciones de perfil (Esquina superior derecha) [cite: 50, 54]
     this.userOptions = [
       {
         label: 'Perfil',
@@ -42,7 +42,7 @@ export class DashboardQuimicoComponent implements OnInit {
   }
 
   logout() {
-    localStorage.clear(); // Limpia datos de sesión [cite: 61]
-    this.router.navigate(['/login']); // Redirige al login [cite: 56]
+    localStorage.clear();
+    this.router.navigate(['/login']);
   }
 }
