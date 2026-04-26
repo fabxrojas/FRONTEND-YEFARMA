@@ -1,40 +1,91 @@
-<div class="container-registro">
-    <p-card header="Registro de Nuevo Producto">
-        <form [formGroup]="productoForm" (ngSubmit)="guardarProducto()">
-            <div class="p-fluid grid">
-                <div class="col-12"><h4 class="section-title">Datos Obligatorios</h4></div>
-                
-                <div class="field col-12 md:col-6">
-                    <label for="producto">Nombre del Producto</label>
-                    <input pInputText id="producto" formControlName="producto" placeholder="Ej: Amoxicilina 500mg">
-                </div>
-                
-                <div class="field col-12 md:col-6">
-                    <label for="rs">Registro Sanitario (RS)</label>
-                    <input pInputText id="rs" formControlName="registroSanitario" placeholder="Ej: EN-04856">
-                </div>
+<div class="p-4">
+    <p-card header="Gestión de Inventario - Productos">
+        <p-toast></p-toast>
+        <p-confirmDialog></p-confirmDialog>
 
-                <div class="field col-12 md:col-4">
-                    <label>Tipo</label>
-                    <p-select [options]="tipos" formControlName="tipo" optionLabel="nombre" placeholder="Seleccione Tipo"></p-select>
-                </div>
+        <div class="flex justify-content-end mb-3">
+            <button pButton label="Nuevo Producto" icon="pi pi-plus" class="p-button-success"
+                (click)="agregarNuevaFila()"></button>
+        </div>
 
-                <div class="field col-12 md:col-4">
-                    <label>Forma Farmacéutica</label>
-                    <p-select [options]="formas" formControlName="formaFarmaceutica" optionLabel="nombre" placeholder="Seleccione Forma"></p-select>
-                </div>
+        <p-table #dt [value]="productos" dataKey="id_producto" editMode="row" [tableStyle]="{'min-width': '50rem'}">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th style="width:10%">Código</th>
+                    <th style="width:25%">Nombre</th>
+                    <th style="width:15%">Tipo</th>
+                    <th style="width:15%">Forma</th>
+                    <th style="width:15%">Precio</th>
+                    <th style="width:20%">Acciones</th>
+                </tr>
+            </ng-template>
 
-                <div class="field col-12 md:col-4">
-                    <label>Precio (S/.)</label>
-                    <p-inputNumber formControlName="precio" mode="currency" currency="PEN" locale="es-PE" placeholder="0.00"></p-inputNumber>
-                </div>
+            <ng-template pTemplate="body" let-prod let-editing="editing" let-ri="rowIndex">
+                <tr [pEditableRow]="prod">
+                    <td>{{prod.codigo}}</td>
+                    <td>
+                        <p-cellEditor>
+                            <ng-template pTemplate="input">
+                                <input pInputText type="text" [(ngModel)]="prod.producto">
+                            </ng-template>
+                            <ng-template pTemplate="output">{{prod.producto}}</ng-template>
+                        </p-cellEditor>
+                    </td>
+                    <td>
+                        <p-cellEditor>
+                            <ng-template pTemplate="input">
+                                <p-select [options]="tipos" [(ngModel)]="prod.tipo" optionLabel="nombre"
+                                    appendTo="body"></p-select>
+                            </ng-template>
+                            <ng-template pTemplate="output">{{prod.tipo?.nombre}}</ng-template>
+                        </p-cellEditor>
+                    </td>
+                    <td>
+                        <p-cellEditor>
+                            <ng-template pTemplate="input">
+                                <p-select [options]="formas" [(ngModel)]="prod.formaFarmaceutica" optionLabel="nombre"
+                                    appendTo="body"></p-select>
+                            </ng-template>
+                            <ng-template pTemplate="output">{{prod.formaFarmaceutica?.nombre}}</ng-template>
+                        </p-cellEditor>
+                    </td>
+                    <td>
+                        <p-cellEditor>
+                            <ng-template pTemplate="input">
+                                <p-inputNumber [(ngModel)]="prod.precio" mode="currency" currency="PEN"
+                                    locale="es-PE"></p-inputNumber>
+                            </ng-template>
+                            <ng-template pTemplate="output">{{prod.precio | currency:'PEN':'S/.'}}</ng-template>
+                        </p-cellEditor>
+                    </td>
+                    <td>
+                        <div class="flex align-items-center justify-content-center gap-2">
+                            <button *ngIf="!editing" pButton pRipple type="button" pInitEditableRow icon="pi pi-pencil"
+                                (click)="onRowEditInit(prod)" class="p-button-rounded p-button-text"
+                                pTooltip="Editar" tooltipPosition="top">
+                            </button>
 
-                <div class="col-12 flex justify-content-end mt-4 gap-2">
-                    <p-button label="Limpiar" icon="pi pi-refresh" severity="secondary" (click)="limpiarFormulario()"></p-button>
-                    <p-button label="Registrar Producto" icon="pi pi-save" severity="success" type="submit" [disabled]="productoForm.invalid"></p-button>
-                </div>
-            </div>
-        </form>
+                            <button *ngIf="editing" pButton pRipple type="button" icon="pi pi-check"
+                                (click)="validarYGuardar(prod)"
+                                class="p-button-rounded p-button-text p-button-success mr-2" pTooltip="Guardar"
+                                tooltipPosition="top">
+                            </button>
+
+                            <button *ngIf="editing" pButton pRipple type="button" pCancelEditableRow icon="pi pi-times"
+                                (click)="onRowEditCancel(prod, ri)"
+                                class="p-button-rounded p-button-text p-button-danger" pTooltip="Cancelar"
+                                tooltipPosition="top">
+                            </button>
+
+                            <button *ngIf="!editing" pButton pRipple type="button" icon="pi pi-trash"
+                                (click)="confirmarEliminacion(prod)"
+                                class="p-button-rounded p-button-text p-button-danger" pTooltip="Eliminar"
+                                tooltipPosition="top">
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
     </p-card>
-    
 </div>

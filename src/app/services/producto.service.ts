@@ -6,10 +6,14 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class ProductoService {
-  // La URL debe coincidir con el @RequestMapping de tu ProductoController.java
   private apiUrl = 'http://localhost:9090/api/productos'; 
 
   constructor(private http: HttpClient) { }
+
+  // 1. OBTENER TODO EL INVENTARIO (Nuevo: Necesario para llenar la tabla)
+  listarTodos(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/listar`);
+  }
 
   // Obtener los Tipos desde el Backend
   getTipos(): Observable<any[]> {
@@ -21,8 +25,14 @@ export class ProductoService {
     return this.http.get<any[]>(`${this.apiUrl}/formas`);
   }
 
-  // Enviar el nuevo producto a la DB
+  // 2. REGISTRAR O ACTUALIZAR (Modificado: Spring Boot usará el ID para decidir si hace INSERT o UPDATE)
   registrar(producto: any): Observable<any> {
+    // Si el producto ya tiene id_producto, Hibernate hará un Update automáticamente
     return this.http.post<any>(`${this.apiUrl}/registrar`, producto);
+  }
+
+  // 3. ELIMINAR PRODUCTO (Nuevo: Para el botón de la papelera)
+  eliminar(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/${id}`);
   }
 }
