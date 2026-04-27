@@ -13,7 +13,6 @@ export const MENU_ITEMS: { [key: string]: MenuItem[] } = {
       items: [
         { label: 'Productos', icon: 'pi pi-list', routerLink: '/dashboard-quimico/inventario/nuevo' },
         { label: 'Ingreso de Productos', icon: 'pi pi-download', routerLink: '/dashboard-quimico/inventario/ingreso' },
-        { label: 'Modificar Datos del Producto', icon: 'pi pi-pencil', routerLink: '/dashboard-quimico/inventario/editar' },
         { label: 'Visualizar Inventario', icon: 'pi pi-eye', routerLink: '/dashboard-quimico/inventario/stock' }
       ]
     },

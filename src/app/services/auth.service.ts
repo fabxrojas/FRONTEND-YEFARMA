@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
 export class AuthService {
 
   // URL de tu API de Java (asegúrate de que el puerto sea el 9090)
-  private apiUrl = 'http://localhost:9090/api/auth/login';
+  private apiUrl = 'http://localhost:8081/api/auth/login';
 
   constructor(private http: HttpClient) { }
 

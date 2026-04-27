@@ -14,7 +14,7 @@ export const appConfig: ApplicationConfig = {
     provideAnimationsAsync(),
     providePrimeNG({
       theme: {
-        preset: Lara,   // aquí defines el tema
+        preset: Lara,   
         options: {
           darkModeSelector: '.app-dark' // opcional
         }

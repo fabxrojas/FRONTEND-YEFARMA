@@ -1,0 +1,59 @@
+<div class="grid">
+    <div class="col-12 md:col-5">
+        <p-card header="Datos del Producto">
+            <div class="p-fluid">
+                <label>Buscar Medicamento</label>
+                <p-autoComplete [(ngModel)]="productoSeleccionado" [suggestions]="resultadosBusqueda"
+                    (completeMethod)="buscarProducto($event)" field="producto"
+                    placeholder="Escriba el nombre del producto" [forceSelection]="true">
+                </p-autoComplete>
+            </div>
+
+            <div *ngIf="productoSeleccionado" class="mt-4 animate-fadein">
+                <p><strong>Código:</strong> {{productoSeleccionado.codigo}}</p>
+                <p><strong>Registro Sanitario:</strong> {{productoSeleccionado.registroSanitario}}</p>
+                <p><strong>Precio Base:</strong> S/ {{productoSeleccionado.precio}}</p>
+            </div>
+        </p-card>
+    </div>
+
+    <div class="col-12 md:col-7">
+        <p-card header="Detalles de Reabastecimiento">
+            <div class="p-fluid grid">
+                <div class="field col-12 md:col-6">
+                    <label>Proveedor</label>
+                    <p-select [options]="proveedores" [(ngModel)]="nuevoIngreso.proveedor" optionLabel="nombre"
+                        placeholder="Seleccione Proveedor"></p-select>
+                </div>
+
+                <div class="field col-12 md:col-6">
+                    <label>Número de Lote</label>
+                    <input pInputText [(ngModel)]="nuevoIngreso.lote" placeholder="Ej: LOTE-2026-001" />
+                </div>
+
+                <div class="field col-12 md:col-4">
+                    <label>Cantidad (Unidades)</label>
+                    <p-inputNumber [(ngModel)]="nuevoIngreso.cantidad" [min]="1" showButtons="true"></p-inputNumber>
+                </div>
+
+                <div class="field col-12 md:col-4">
+                    <label>F. Fabricación</label>
+                    <p-datepicker [(ngModel)]="nuevoIngreso.fechaFabricacion" dateFormat="dd/mm/yy"
+                        [showIcon]="true"></p-datepicker>
+                </div>
+
+                <div class="field col-12 md:col-4">
+                    <label>F. Vencimiento</label>
+                    <p-datepicker [(ngModel)]="nuevoIngreso.fechaVencimiento" dateFormat="dd/mm/yy"
+                        [showIcon]="true"></p-datepicker>
+                </div>
+            </div>
+
+            <div class="mt-3 flex justify-content-end">
+                <p-button label="Confirmar Ingreso de Stock" icon="pi pi-check" severity="success"
+                    (onClick)="confirmarIngreso()">
+                </p-button>
+            </div>
+        </p-card>
+    </div>
+</div>

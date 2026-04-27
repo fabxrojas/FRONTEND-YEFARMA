@@ -36,7 +36,8 @@ export class RegistrarProductoComponent implements OnInit {
   productos: any[] = [];
   tipos: any[] = [];
   formas: any[] = [];
-
+  marcas: any[] = [];
+  presentaciones: any[] = [];
 
   // Para revertir cambios si el usuario cancela la edición de una fila
   clonProductos: { [s: string]: any } = {};
@@ -60,6 +61,8 @@ export class RegistrarProductoComponent implements OnInit {
     // Cargamos los selectores
     this.productoService.getTipos().subscribe(data => this.tipos = data);
     this.productoService.getFormas().subscribe(data => this.formas = data);
+    this.productoService.getMarcas().subscribe(data => this.marcas = data);
+    this.productoService.getPresentaciones().subscribe(data => this.presentaciones = data);
   }
 
   // --- LÓGICA DE EDICIÓN EN FILA ---
@@ -67,6 +70,8 @@ export class RegistrarProductoComponent implements OnInit {
   onRowEditInit(producto: any) {
     // Guardamos una copia de la fila antes de editar
     this.clonProductos[producto.id_producto] = { ...producto };
+    this.productoService.getMarcas().subscribe(data => this.marcas = data);
+    this.productoService.getPresentaciones().subscribe(data => this.presentaciones = data);
   }
 
   onRowEditSave(producto: any) {
@@ -141,7 +146,7 @@ export class RegistrarProductoComponent implements OnInit {
 
   onRowEditCancel(producto: any, index: number) {
     if (producto.nuevo) {
-      this.productos.shift(); // Quita la primera fila si era la nueva
+      this.productos = this.productos.filter((p, i) => i !== index); // Si es una fila nueva sin guardar, la eliminamos completamente 
     } else {
       this.productos[index] = this.clonProductos[producto.id_producto];
       delete this.clonProductos[producto.id_producto];
@@ -180,7 +185,7 @@ export class RegistrarProductoComponent implements OnInit {
     };
 
     // Lo agregamos al inicio del arreglo
-    this.productos = [nuevoProducto, ...this.productos];
+    this.productos = [...this.productos, nuevoProducto];
 
     // 4. EL TRUCO: Esperamos un milisegundo a que Angular renderice la fila y activamos la edición
     setTimeout(() => {
@@ -196,11 +201,11 @@ export class RegistrarProductoComponent implements OnInit {
       producto.formaFarmaceutica;
 
     if (!esValido) {
-      // Mostramos el error y NO cerramos la fila
+      // Mostramos el error 
       this.messageService.add({
         severity: 'warn',
         summary: 'Atención',
-        detail: 'Debe completar todos los campos (Nombre, Tipo, Forma y Precio > 0)'
+        detail: 'Debe completar todos los campos correctamente antes de guardar.'
       });
       return; // Detenemos la ejecución aquí
     }

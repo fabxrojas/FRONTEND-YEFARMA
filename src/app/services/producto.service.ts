@@ -6,11 +6,11 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class ProductoService {
-  private apiUrl = 'http://localhost:9090/api/productos'; 
+  private apiUrl = 'http://localhost:8081/api/productos'; 
 
   constructor(private http: HttpClient) { }
 
-  // 1. OBTENER TODO EL INVENTARIO (Nuevo: Necesario para llenar la tabla)
+  // 1. OBTENER TODO EL INVENTARIO 
   listarTodos(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/listar`);
   }
@@ -25,9 +25,21 @@ export class ProductoService {
     return this.http.get<any[]>(`${this.apiUrl}/formas`);
   }
 
+  getMarcas(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/marcas`);
+  }
+
+  getPresentaciones(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/presentaciones`);
+  }
+
+  buscarPorNombre(query: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/buscar?q=${query}`);
+  }
+
+
   // 2. REGISTRAR O ACTUALIZAR (Modificado: Spring Boot usará el ID para decidir si hace INSERT o UPDATE)
   registrar(producto: any): Observable<any> {
-    // Si el producto ya tiene id_producto, Hibernate hará un Update automáticamente
     return this.http.post<any>(`${this.apiUrl}/registrar`, producto);
   }
 
