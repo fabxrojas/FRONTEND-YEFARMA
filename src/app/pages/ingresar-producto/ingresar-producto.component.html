@@ -1,59 +1,227 @@
-<div class="grid">
-    <div class="col-12 md:col-5">
-        <p-card header="Datos del Producto">
-            <div class="p-fluid">
-                <label>Buscar Medicamento</label>
-                <p-autoComplete [(ngModel)]="productoSeleccionado" [suggestions]="resultadosBusqueda"
-                    (completeMethod)="buscarProducto($event)" field="producto"
-                    placeholder="Escriba el nombre del producto" [forceSelection]="true">
-                </p-autoComplete>
-            </div>
+<p-toast></p-toast>
 
-            <div *ngIf="productoSeleccionado" class="mt-4 animate-fadein">
-                <p><strong>Código:</strong> {{productoSeleccionado.codigo}}</p>
-                <p><strong>Registro Sanitario:</strong> {{productoSeleccionado.registroSanitario}}</p>
-                <p><strong>Precio Base:</strong> S/ {{productoSeleccionado.precio}}</p>
-            </div>
-        </p-card>
+<div class="card p-fluid w-full p-0">
+    <h2 class="text-center mb-3 text-cyan-800">Ingresar Productos</h2>
+
+    <!-- BUSCADOR TOTALMENTE EXPANDIDO -->
+    <div class="field w-full mb-4 px-2">
+        <label class="font-bold text-sm text-cyan-800">Buscar producto:</label>
+        <p-autoComplete [(ngModel)]="productoSeleccionado" [suggestions]="resultadosBusqueda"
+            (completeMethod)="buscarProducto($event)" (onSelect)="fijarProducto($event)" field="producto"
+            placeholder="Ingresa al menos 3 caracteres del nombre..." [forceSelection]="false" styleClass="w-full"
+            inputStyleClass="w-full p-inputtext-lg" emptyMessage="No se encontraron productos">
+        </p-autoComplete>
     </div>
 
-    <div class="col-12 md:col-7">
-        <p-card header="Detalles de Reabastecimiento">
-            <div class="p-fluid grid">
-                <div class="field col-12 md:col-6">
-                    <label>Proveedor</label>
+    <div class="grid w-full m-0 p-0 align-items-stretch" *ngIf="productoFijado">
+
+        <!-- COLUMNA IZQUIERDA: Datos del Producto -->
+        <div class="col-12 md:col-6 p-2">
+            <p-card header="Datos del producto" styleClass="border-1 border-cyan-100 shadow-none h-full w-full">
+                <div class="field mb-3">
+                    <label class="font-bold text-sm text-cyan-800">Código:</label>
+                    <!-- Agregamos 'p-inputtext-lg' para el tamaño grande -->
+                    <input pInputText [value]="productoFijado.codigo" readonly disabled class="w-full p-inputtext-lg" />
+                </div>
+                <div class="field mb-3">
+                    <label class="font-bold text-sm text-cyan-800">Producto:</label>
+                    <input pInputText [value]="productoFijado.producto" readonly disabled
+                        class="w-full p-inputtext-lg" />
+                </div>
+                <div class="field mb-3">
+                    <label class="font-bold text-sm text-cyan-800">Forma Farmacéutica:</label>
+                    <input pInputText [value]="productoFijado.formaFarmaceutica?.nombre" readonly disabled
+                        class="w-full p-inputtext-lg" />
+                </div>
+                <div class="field mb-3">
+                    <label class="font-bold text-sm text-cyan-800">Precio:</label>
+                    <input pInputText
+                        [value]="productoFijado.precio != null ? (productoFijado.precio | currency:'PEN':'S/. ':'1.2-2') : ''"
+                        readonly disabled class="w-full p-inputtext-lg" />
+                </div>
+                <div class="field mb-3">
+                    <label class="font-bold text-sm text-cyan-800">Registro Sanitario:</label>
+                    <input pInputText [value]="productoFijado.registroSanitario" readonly disabled
+                        class="w-full p-inputtext-lg" />
+                </div>
+            </p-card>
+        </div>
+
+        <!-- COLUMNA DERECHA: Reabastecimiento -->
+        <div class="col-12 md:col-6 p-2">
+            <p-card header="Reabastecimiento" styleClass="border-1 border-cyan-100 shadow-none h-full w-full">
+                <div class="field mb-3">
+                    <label class="font-bold text-sm text-cyan-800">Proveedor:</label>
+                    <!-- Agregamos 'p-select-lg' para igualar el tamaño -->
                     <p-select [options]="proveedores" [(ngModel)]="nuevoIngreso.proveedor" optionLabel="nombre"
-                        placeholder="Seleccione Proveedor"></p-select>
+                        placeholder="Seleccionar proveedor" styleClass="w-full p-select-lg"></p-select>
+                </div>
+                <div class="field mb-4">
+                    <label class="font-bold text-sm text-cyan-800">Presentación:</label>
+                    <p-select [options]="presentaciones" [(ngModel)]="nuevoIngreso.presentacion" optionLabel="nombre"
+                        placeholder="Seleccionar presentación" styleClass="w-full p-select-lg"></p-select>
                 </div>
 
-                <div class="field col-12 md:col-6">
-                    <label>Número de Lote</label>
-                    <input pInputText [(ngModel)]="nuevoIngreso.lote" placeholder="Ej: LOTE-2026-001" />
+                <div class="field mb-4">
+                    <!-- Botón más grande para destacar la acción principal -->
+                    <p-button label="Ingresar detalles" icon="pi pi-plus" styleClass="p-button-info w-full p-button-lg"
+                        (onClick)="abrirModalDetalles()"></p-button>
                 </div>
 
-                <div class="field col-12 md:col-4">
-                    <label>Cantidad (Unidades)</label>
-                    <p-inputNumber [(ngModel)]="nuevoIngreso.cantidad" [min]="1" showButtons="true"></p-inputNumber>
+                <!-- Tabla de detalles con espaciado equilibrado -->
+                <div class="field mb-3">
+                    <label class="font-bold text-sm text-cyan-800">Detalle(s) pendiente(s):</label>
+                    <p-table [value]="detallesIngreso" [scrollable]="true" scrollHeight="130px"
+                        styleClass="p-datatable-sm p-datatable-striped w-full">
+                        <ng-template pTemplate="header">
+                            <tr>
+                                <th style="width: 30%">Marca</th>
+                                <th style="width: 20%">Un.</th>
+                                <th style="width: 20%">Cant.</th>
+                                <th style="width: 20%">Venc.</th>
+                                <th style="width: 10%">Acciones</th>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="body" let-detalle let-i="rowIndex">
+                            <tr>
+                                <td>{{detalle.marca.nombre}}</td>
+                                <td>{{detalle.unidad.nombre}}</td>
+                                <td>{{detalle.cantidad_ingresada}}</td>
+                                <td>{{detalle.fechaVencimiento | date:'dd/MM/yy'}}</td>
+                                <td class="text-center">
+                                    <p-button icon="pi pi-trash"
+                                        styleClass="p-button-danger p-button-text p-button-sm p-0"
+                                        (onClick)="eliminarDetalle(i)"></p-button>
+                                </td>
+                            </tr>
+                        </ng-template>
+                    </p-table>
                 </div>
 
-                <div class="field col-12 md:col-4">
-                    <label>F. Fabricación</label>
-                    <p-datepicker [(ngModel)]="nuevoIngreso.fechaFabricacion" dateFormat="dd/mm/yy"
-                        [showIcon]="true"></p-datepicker>
+                <!-- Botones de acción final también en tamaño grande -->
+                <div class="flex gap-2">
+                    <p-button label="Confirmar" styleClass="p-button-info flex-1 p-button-lg"
+                        (onClick)="confirmarIngresosBatch()" [disabled]="detallesIngreso.length === 0"></p-button>
+                    <p-button label="Cancelar" styleClass="p-button-info p-button-outlined flex-1 p-button-lg"
+                        (onClick)="cancelarIngreso()"></p-button>
                 </div>
-
-                <div class="field col-12 md:col-4">
-                    <label>F. Vencimiento</label>
-                    <p-datepicker [(ngModel)]="nuevoIngreso.fechaVencimiento" dateFormat="dd/mm/yy"
-                        [showIcon]="true"></p-datepicker>
-                </div>
-            </div>
-
-            <div class="mt-3 flex justify-content-end">
-                <p-button label="Confirmar Ingreso de Stock" icon="pi pi-check" severity="success"
-                    (onClick)="confirmarIngreso()">
-                </p-button>
-            </div>
-        </p-card>
+            </p-card>
+        </div>
     </div>
 </div>
+
+
+<p-dialog header="Ingresar Detalles" [(visible)]="mostrarModalDetalles" [modal]="true" [style]="{width: '500px'}"
+    styleClass="p-fluid">
+
+    <!-- Sección de Marca (Ya funcional) -->
+    <div class="field">
+        <label class="font-bold text-sm text-cyan-800">Marca:</label>
+        <div class="flex gap-2">
+            <p-select [options]="marcasDelProducto" [(ngModel)]="nuevoIngreso.marca" optionLabel="nombre"
+                placeholder="Seleccionar marca" class="flex-1" appendTo="body"></p-select>
+            <p-button label="Añadir/Asociar" (onClick)="abrirModalMarca()" styleClass="p-button-success"></p-button>
+        </div>
+    </div>
+
+    <!-- NUEVA SECCIÓN: UNIDAD POR PRESENTACIÓN -->
+    <div class="field">
+        <label class="font-bold text-sm text-cyan-800">Unidad(es) por Presentación:</label>
+        <div class="flex gap-2">
+            <!-- Combo que carga las opciones de la tabla unidades_detalle -->
+            <p-select [options]="presentaciones" [(ngModel)]="nuevoIngreso.presentacion" optionLabel="label"
+                placeholder="Seleccionar Unidad - Cantidad" class="flex-1" appendTo="body"></p-select>
+            <p-button label="Añadir" (onClick)="abrirModalNuevaPresentacion()" styleClass="p-button-info"></p-button>
+        </div>
+    </div>
+
+    <div class="field">
+        <label class="font-bold text-sm text-cyan-800">Cantidad Recibida:</label>
+        <p-inputNumber [(ngModel)]="nuevoIngreso.cantidad_ingresada" placeholder="Ej: 10" [min]="1"></p-inputNumber>
+    </div>
+
+    <div class="grid">
+        <div class="col-6">
+            <div class="field">
+                <label class="font-bold text-sm text-cyan-800">Fecha de fabricación:</label>
+                <p-datepicker [(ngModel)]="nuevoIngreso.fechaFabricacion" dateFormat="dd/mm/yy" [showIcon]="true"
+                    appendTo="body"></p-datepicker>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="field">
+                <label class="font-bold text-sm text-cyan-800">Fecha de vencimiento:</label>
+                <p-datepicker [(ngModel)]="nuevoIngreso.fechaVencimiento" dateFormat="dd/mm/yy" [showIcon]="true"
+                    appendTo="body"></p-datepicker>
+            </div>
+        </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+        <p-button label="Guardar temporalmente" (onClick)="agregarDetalle()" styleClass="w-full"></p-button>
+    </ng-template>
+</p-dialog>
+
+<!-- NUEVO MODAL: CREAR NUEVA UNIDAD DE PRESENTACIÓN -->
+<p-dialog header="Crear nueva unidad de presentación" [(visible)]="mostrarModalUnidad" [modal]="true"
+    [style]="{width: '400px'}" styleClass="p-fluid">
+    <div class="field">
+        <label class="font-bold text-cyan-800">Unidad de Medida:</label>
+        <!-- Usa la lista maestra de unidades (Caja, Blister, etc.) -->
+        <p-select [options]="unidades" [(ngModel)]="nuevaUnidadPresentacion.unidadMedida" optionLabel="nombre"
+            placeholder="Seleccionar unidad" appendTo="body"></p-select>
+    </div>
+
+    <div class="field">
+        <label class="font-bold text-cyan-800">Cantidad por presentación:</label>
+        <p-inputNumber [(ngModel)]="nuevaUnidadPresentacion.cantidad" placeholder="Ej: 10, 20, 100" [min]="1"
+            mode="decimal" [minFractionDigits]="2"></p-inputNumber>
+        <small class="text-gray-500">Ejemplo: Si es Caja de 10 unidades, ingrese 10.</small>
+    </div>
+
+    <ng-template pTemplate="footer">
+        <p-button label="Enviar" icon="pi pi-send" (onClick)="guardarNuevaPresentacion()"
+            styleClass="p-button-primary"></p-button>
+    </ng-template>
+</p-dialog>
+
+<!-- MODAL PARA AÑADIR/ASOCIAR MARCA -->
+<p-dialog header="Añadir o Asociar Marca al Producto" [(visible)]="mostrarModalMarca" [modal]="true"
+    [style]="{width: '450px'}" styleClass="p-fluid">
+
+    <div class="flex flex-column gap-3 mb-4">
+        <!-- Opción: Existente -->
+        <div class="flex align-items-center">
+            <p-radioButton name="opcionMarca" value="existente" [(ngModel)]="tipoOperacionMarca"
+                inputId="marcaExistente">
+            </p-radioButton>
+            <label for="marcaExistente" class="ml-2 cursor-pointer">Seleccionar Existente</label>
+        </div>
+
+        <!-- Opción: Nueva -->
+        <div class="flex align-items-center">
+            <p-radioButton name="opcionMarca" value="nueva" [(ngModel)]="tipoOperacionMarca" inputId="marcaNueva">
+            </p-radioButton>
+            <label for="marcaNueva" class="ml-2 cursor-pointer">Crear Nueva</label>
+        </div>
+    </div>
+
+    <!-- Marca Existente: Aquí SÍ usamos todas las marcas de la BD -->
+    <div class="field" *ngIf="tipoOperacionMarca === 'existente'">
+        <label class="font-bold text-cyan-800">Marca Existente:</label>
+        <p-select [options]="todasLasMarcasBD" [(ngModel)]="marcaParaAsociar" optionLabel="nombre"
+            placeholder="Seleccione una marca..." appendTo="body" [filter]="true"
+            emptyMessage="No hay marcas disponibles">
+        </p-select>
+    </div>
+
+    <!-- Crear Nueva -->
+    <div class="field" *ngIf="tipoOperacionMarca === 'nueva'">
+        <label class="font-bold text-cyan-800">Nombre de la Nueva Marca:</label>
+        <input pInputText [(ngModel)]="nombreNuevaMarca" placeholder="Ej: Laboratorios Roche" />
+    </div>
+
+    <ng-template pTemplate="footer">
+        <p-button label="Guardar y Asociar" icon="pi pi-check" (onClick)="ejecutarAccionMarca()"></p-button>
+    </ng-template>
+</p-dialog>

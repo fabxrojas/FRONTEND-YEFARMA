@@ -6,7 +6,8 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class ProductoService {
-  private apiUrl = 'http://localhost:8081/api/productos'; 
+  private apiUrl = 'http://localhost:8081/api/productos';
+  private marcaUrl = 'http://localhost:8081/api/marcas';
 
   constructor(private http: HttpClient) { }
 
@@ -15,35 +16,64 @@ export class ProductoService {
     return this.http.get<any[]>(`${this.apiUrl}/listar`);
   }
 
-  // Obtener los Tipos desde el Backend
   getTipos(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/tipos`);
   }
 
-  // Obtener las Formas desde el Backend
   getFormas(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/formas`);
   }
 
   getMarcas(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/marcas`);
+    return this.http.get<any[]>('http://localhost:8081/api/marcas');
+  }
+
+  // NUEVO: Obtiene solo las marcas asociadas a un producto específico
+  getMarcasPorProducto(idProducto: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/${idProducto}/marcas`);
   }
 
   getPresentaciones(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/presentaciones`);
   }
 
-  buscarPorNombre(query: string): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/buscar?q=${query}`);
+  getUnidadesMedida(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/unidades-medida`);
+  }
+  getUnidadesDetalle(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/unidades-detalle`);
   }
 
+  getProveedores(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/proveedores`);
+  }
 
-  // 2. REGISTRAR O ACTUALIZAR (Modificado: Spring Boot usará el ID para decidir si hace INSERT o UPDATE)
+  buscarPorNombre(query: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/buscar?query=${query}`);
+  }
+
+  // MÉTODOS PARA EL MODAL DE MARCAS 
+
+  // Crea una marca nueva y la asocia al producto en la tabla producto_marca
+  guardarYAsociarMarca(payload: { nombreMarca: string, idProducto: number }): Observable<any> {
+    return this.http.post<any>(`${this.marcaUrl}/guardar-y-asociar`, payload);
+  }
+
+  guardarUnidadDetalle(payload: { id_unid_medi: number, cantidad: number }): Observable<any> {
+    return this.http.post<any>(`http://localhost:8081/api/unidades-detalle`, payload);
+  }
+
+  // Asocia una marca que ya existe en la BD a un producto que no la tenía mapeada
+  asociarMarcaExistente(payload: { idMarca: number, idProducto: number }): Observable<any> {
+    return this.http.post<any>(`${this.marcaUrl}/asociar-existente`, payload);
+  }
+
+  // ---------------------------------------
+
   registrar(producto: any): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/registrar`, producto);
   }
 
-  // 3. ELIMINAR PRODUCTO (Nuevo: Para el botón de la papelera)
   eliminar(id: number): Observable<any> {
     return this.http.delete<any>(`${this.apiUrl}/${id}`);
   }

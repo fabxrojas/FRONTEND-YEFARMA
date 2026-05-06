@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core'; // IMPORTANTE: Añadido OnInit
+import { Component, OnInit } from '@angular/core'; 
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -63,6 +63,7 @@ export class LoginComponent implements OnInit { // IMPORTANTE: "implements OnIni
           localStorage.setItem('userName', res.username);
           localStorage.setItem('realName', res.nombre);
           localStorage.setItem('userRole', res.rol.toString());
+          localStorage.setItem('usuario', JSON.stringify(res));
 
           // Redirección corregida (sin .html)
           if (res.rol === 1) {

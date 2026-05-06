@@ -36,8 +36,6 @@ export class RegistrarProductoComponent implements OnInit {
   productos: any[] = [];
   tipos: any[] = [];
   formas: any[] = [];
-  marcas: any[] = [];
-  presentaciones: any[] = [];
 
   // Para revertir cambios si el usuario cancela la edición de una fila
   clonProductos: { [s: string]: any } = {};
@@ -61,8 +59,6 @@ export class RegistrarProductoComponent implements OnInit {
     // Cargamos los selectores
     this.productoService.getTipos().subscribe(data => this.tipos = data);
     this.productoService.getFormas().subscribe(data => this.formas = data);
-    this.productoService.getMarcas().subscribe(data => this.marcas = data);
-    this.productoService.getPresentaciones().subscribe(data => this.presentaciones = data);
   }
 
   // --- LÓGICA DE EDICIÓN EN FILA ---
@@ -70,8 +66,6 @@ export class RegistrarProductoComponent implements OnInit {
   onRowEditInit(producto: any) {
     // Guardamos una copia de la fila antes de editar
     this.clonProductos[producto.id_producto] = { ...producto };
-    this.productoService.getMarcas().subscribe(data => this.marcas = data);
-    this.productoService.getPresentaciones().subscribe(data => this.presentaciones = data);
   }
 
   onRowEditSave(producto: any) {
@@ -187,7 +181,6 @@ export class RegistrarProductoComponent implements OnInit {
     // Lo agregamos al inicio del arreglo
     this.productos = [...this.productos, nuevoProducto];
 
-    // 4. EL TRUCO: Esperamos un milisegundo a que Angular renderice la fila y activamos la edición
     setTimeout(() => {
       this.table.initRowEdit(nuevoProducto);
     }, 1);
