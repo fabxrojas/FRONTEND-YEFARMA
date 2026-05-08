@@ -20,9 +20,9 @@ export const MENU_ITEMS: { [key: string]: MenuItem[] } = {
       label: 'Reabastecimiento',
       icon: 'pi pi-sync',
       items: [
-        { label: 'Registrar Proveedor', icon: 'pi pi-truck', routerLink: '/logistica/proveedor' },
-        { label: 'Crear Guía de Remisión', icon: 'pi pi-file-plus', routerLink: '/logistica/crear-guia' },
-        { label: 'Validar Guía de Remisión', icon: 'pi pi-check-square', routerLink: '/logistica/validar-guia' }
+        { label: 'Registrar Proveedor', icon: 'pi pi-truck', routerLink: '/dashboard-quimico/reabastecimiento/proveedor' },
+        { label: 'Crear Guía de Remisión', icon: 'pi pi-file-plus', routerLink: '/dashboard-quimico/reabastecimiento/crear-guia' },
+        { label: 'Validar Guía de Remisión', icon: 'pi pi-check-square', routerLink: '/dashboard-quimico/reabastecimiento/validar-guia' }
       ]
     },
     {

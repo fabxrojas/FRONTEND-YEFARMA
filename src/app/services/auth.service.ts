@@ -22,14 +22,12 @@ export class AuthService {
   }
 
   getCurrentUserId(): number {
-    // Buscamos si guardaste al usuario en la memoria del navegador durante el login
     const usuarioLogueado = localStorage.getItem('usuario'); 
     
     if (usuarioLogueado) {
       // Convertimos el texto guardado de vuelta a un objeto JavaScript
       const userObj = JSON.parse(usuarioLogueado);
       
-      // Retornamos el ID. OJO: Cambia 'id_usuario' si en tu BD o Java se llama distinto
       return userObj.id_usuario || userObj.idUsuario || 1; 
     }
     

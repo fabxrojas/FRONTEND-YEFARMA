@@ -5,3 +5,8 @@ html, body {
   width: 100%;
   overflow: hidden; /* Quita scrolls y bordes blancos */
 }
+
+.p-card {
+    border-radius: 15px !important;
+    overflow: hidden; 
+}

@@ -10,7 +10,6 @@ export class IngresoProductoService {
 
   constructor(private http: HttpClient) { }
 
-  // Recibe el arreglo completo de detalles y lo envía al endpoint /batch
   registrarIngresoBatch(detalles: any[]): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/batch`, detalles);
   }

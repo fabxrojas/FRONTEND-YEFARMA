@@ -1,0 +1,11 @@
+::ng-deep .p-select {
+    width: 100% !important;
+    display: flex !important;
+}
+
+::ng-deep .p-select-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; 
+}
+

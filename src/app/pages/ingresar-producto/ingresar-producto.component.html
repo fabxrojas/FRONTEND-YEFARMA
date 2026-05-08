@@ -8,7 +8,7 @@
         <label class="font-bold text-sm text-cyan-800">Buscar producto:</label>
         <p-autoComplete [(ngModel)]="productoSeleccionado" [suggestions]="resultadosBusqueda"
             (completeMethod)="buscarProducto($event)" (onSelect)="fijarProducto($event)" field="producto"
-            placeholder="Ingresa al menos 3 caracteres del nombre..." [forceSelection]="false" styleClass="w-full"
+            placeholder="Ingresa al menos 3 caracteres del nombre" [forceSelection]="false" styleClass="w-full"
             inputStyleClass="w-full p-inputtext-lg" emptyMessage="No se encontraron productos">
         </p-autoComplete>
     </div>
@@ -17,10 +17,9 @@
 
         <!-- COLUMNA IZQUIERDA: Datos del Producto -->
         <div class="col-12 md:col-6 p-2">
-            <p-card header="Datos del producto" styleClass="border-1 border-cyan-100 shadow-none h-full w-full">
+            <p-card header="Datos del producto" styleClass="border-round-xl shadow-2">
                 <div class="field mb-3">
                     <label class="font-bold text-sm text-cyan-800">Código:</label>
-                    <!-- Agregamos 'p-inputtext-lg' para el tamaño grande -->
                     <input pInputText [value]="productoFijado.codigo" readonly disabled class="w-full p-inputtext-lg" />
                 </div>
                 <div class="field mb-3">
@@ -49,60 +48,75 @@
 
         <!-- COLUMNA DERECHA: Reabastecimiento -->
         <div class="col-12 md:col-6 p-2">
-            <p-card header="Reabastecimiento" styleClass="border-1 border-cyan-100 shadow-none h-full w-full">
-                <div class="field mb-3">
-                    <label class="font-bold text-sm text-cyan-800">Proveedor:</label>
-                    <!-- Agregamos 'p-select-lg' para igualar el tamaño -->
-                    <p-select [options]="proveedores" [(ngModel)]="nuevoIngreso.proveedor" optionLabel="nombre"
-                        placeholder="Seleccionar proveedor" styleClass="w-full p-select-lg"></p-select>
-                </div>
-                <div class="field mb-4">
-                    <label class="font-bold text-sm text-cyan-800">Presentación:</label>
-                    <p-select [options]="presentaciones" [(ngModel)]="nuevoIngreso.presentacion" optionLabel="nombre"
-                        placeholder="Seleccionar presentación" styleClass="w-full p-select-lg"></p-select>
+            <p-card header="Reabastecimiento" styleClass="border-round-xl shadow-2 h-full flex flex-column"
+                [style]="{'min-height': '540px'}">
+                <div class="flex-grow-1">
+                    <div class="field mb-3">
+                        <label class="font-bold text-sm text-cyan-800">Proveedor:</label>
+                        <p-select [options]="proveedores" [(ngModel)]="nuevoIngreso.proveedor" optionLabel="nombre"
+                            placeholder="Seleccionar proveedor" styleClass="w-full p-select-lg"></p-select>
+                    </div>
+
+                    <div class="field mb-4">
+                        <label class="font-bold text-sm text-cyan-800">Presentación:</label>
+                        <p-select [options]="presentaciones" [(ngModel)]="nuevoIngreso.presentacion"
+                            optionLabel="nombre" placeholder="Seleccionar presentación"
+                            styleClass="w-full p-select-lg"></p-select>
+                    </div>
+
+                    <div class="field mb-4">
+                        <p-button label="Ingresar detalles" icon="pi pi-plus"
+                            styleClass="p-button-info w-full p-button-lg" (onClick)="abrirModalDetalles()"></p-button>
+                    </div>
+
+                    <div class="field mt-3">
+                        <label class="font-bold text-sm text-cyan-800">Detalle(s) pendiente(s):</label>
+
+                        <div style="height: 90px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 6px;"
+                            class="bg-gray-50">
+
+                            <div *ngIf="listaDetallesTemporales.length === 0"
+                                class="flex align-items-center justify-content-center h-full text-gray-400 italic text-xs">
+                                No hay detalles agregados
+                            </div>
+
+                            <p-table *ngIf="listaDetallesTemporales.length > 0" [value]="listaDetallesTemporales"
+                                [autoLayout]="true" styleClass="p-datatable-sm p-datatable-striped">
+                                <ng-template pTemplate="header">
+                                    <tr style="position: sticky; top: 0; z-index: 10; background: white;">
+                                        <th class="text-center text-xs">Marca</th>
+                                        <th class="text-center text-xs">Un. x Pres.</th>
+                                        <th class="text-center text-xs">Cant.</th>
+                                        <th class="text-center text-xs">F. Ven.</th>
+                                        <th class="text-center text-xs"></th>
+                                    </tr>
+                                </ng-template>
+                                <ng-template pTemplate="body" let-detalle let-ri="rowIndex">
+                                    <tr>
+                                        <td class="text-center text-sm">{{ detalle.marca.nombre }}</td>
+                                        <td class="text-center text-sm">{{ detalle.unidad.label }}</td>
+                                        <td class="text-center text-sm">{{ detalle.cantidadRecibida }}</td>
+                                        <td class="text-center text-sm">{{ detalle.fechaVencimiento | date:'dd/MM/yy' }}
+                                        </td>
+                                        <td class="text-center">
+                                            <p-button icon="pi pi-trash"
+                                                styleClass="p-button-danger p-button-text p-button-sm"
+                                                (onClick)="eliminarDetalleTemporal(ri)">
+                                            </p-button>
+                                        </td>
+                                    </tr>
+                                </ng-template>
+                            </p-table>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="field mb-4">
-                    <!-- Botón más grande para destacar la acción principal -->
-                    <p-button label="Ingresar detalles" icon="pi pi-plus" styleClass="p-button-info w-full p-button-lg"
-                        (onClick)="abrirModalDetalles()"></p-button>
-                </div>
-
-                <!-- Tabla de detalles con espaciado equilibrado -->
-                <div class="field mb-3">
-                    <label class="font-bold text-sm text-cyan-800">Detalle(s) pendiente(s):</label>
-                    <p-table [value]="detallesIngreso" [scrollable]="true" scrollHeight="130px"
-                        styleClass="p-datatable-sm p-datatable-striped w-full">
-                        <ng-template pTemplate="header">
-                            <tr>
-                                <th style="width: 30%">Marca</th>
-                                <th style="width: 20%">Un.</th>
-                                <th style="width: 20%">Cant.</th>
-                                <th style="width: 20%">Venc.</th>
-                                <th style="width: 10%">Acciones</th>
-                            </tr>
-                        </ng-template>
-                        <ng-template pTemplate="body" let-detalle let-i="rowIndex">
-                            <tr>
-                                <td>{{detalle.marca.nombre}}</td>
-                                <td>{{detalle.unidad.nombre}}</td>
-                                <td>{{detalle.cantidad_ingresada}}</td>
-                                <td>{{detalle.fechaVencimiento | date:'dd/MM/yy'}}</td>
-                                <td class="text-center">
-                                    <p-button icon="pi pi-trash"
-                                        styleClass="p-button-danger p-button-text p-button-sm p-0"
-                                        (onClick)="eliminarDetalle(i)"></p-button>
-                                </td>
-                            </tr>
-                        </ng-template>
-                    </p-table>
-                </div>
-
-                <!-- Botones de acción final también en tamaño grande -->
-                <div class="flex gap-2">
-                    <p-button label="Confirmar" styleClass="p-button-info flex-1 p-button-lg"
-                        (onClick)="confirmarIngresosBatch()" [disabled]="detallesIngreso.length === 0"></p-button>
-                    <p-button label="Cancelar" styleClass="p-button-info p-button-outlined flex-1 p-button-lg"
+                <div class="flex gap-3 mt-auto pt-4 justify-content-start">
+                    <p-button label="Confirmar" icon="pi pi-check"
+                        styleClass="p-button-success shadow-2 border-round-lg flex-1"
+                        (onClick)="confirmarIngresosBatch()"
+                        [disabled]="listaDetallesTemporales.length === 0"></p-button>
+                    <p-button label="Cancelar" icon="pi pi-times" styleClass="p-button-danger border-round-lg flex-1"
                         (onClick)="cancelarIngreso()"></p-button>
                 </div>
             </p-card>
@@ -125,19 +139,25 @@
     </div>
 
     <!-- NUEVA SECCIÓN: UNIDAD POR PRESENTACIÓN -->
-    <div class="field">
-        <label class="font-bold text-sm text-cyan-800">Unidad(es) por Presentación:</label>
+    <div class="field mb-3">
+        <label class="block font-bold text-sm text-cyan-800 mb-2">Unidad(es) por Presentación:</label>
         <div class="flex gap-2">
-            <!-- Combo que carga las opciones de la tabla unidades_detalle -->
-            <p-select [options]="presentaciones" [(ngModel)]="nuevoIngreso.presentacion" optionLabel="label"
-                placeholder="Seleccionar Unidad - Cantidad" class="flex-1" appendTo="body"></p-select>
-            <p-button label="Añadir" (onClick)="abrirModalNuevaPresentacion()" styleClass="p-button-info"></p-button>
+            <!-- Se añade styleClass para mantener el tamaño grande y facilitar la lectura -->
+            <p-select [options]="listaUnidadesDetalle" [(ngModel)]="nuevoIngreso.unidad" optionLabel="label"
+                placeholder="Seleccionar Unidad - Cantidad" class="flex-1" appendTo="body">
+            </p-select>
+
+            <!-- Botón de añadir con diseño consistente -->
+            <p-button label="Añadir" icon="pi pi-plus" (onClick)="abrirModalNuevaPresentacion()"
+                styleClass="p-button-info border-round-lg shadow-1">
+            </p-button>
         </div>
     </div>
 
     <div class="field">
-        <label class="font-bold text-sm text-cyan-800">Cantidad Recibida:</label>
-        <p-inputNumber [(ngModel)]="nuevoIngreso.cantidad_ingresada" placeholder="Ej: 10" [min]="1"></p-inputNumber>
+        <label>Cantidad Recibida:</label>
+        <p-inputNumber [(ngModel)]="nuevoIngreso.cantidadRecibida" placeholder="Ej: 10" class="w-full">
+        </p-inputNumber>
     </div>
 
     <div class="grid">
@@ -145,43 +165,47 @@
             <div class="field">
                 <label class="font-bold text-sm text-cyan-800">Fecha de fabricación:</label>
                 <p-datepicker [(ngModel)]="nuevoIngreso.fechaFabricacion" dateFormat="dd/mm/yy" [showIcon]="true"
-                    appendTo="body"></p-datepicker>
+                    placeholder="dd/mm/aaaa" [readonlyInput]="true" appendTo="body" styleClass="w-full">
+                </p-datepicker>
             </div>
         </div>
         <div class="col-6">
             <div class="field">
                 <label class="font-bold text-sm text-cyan-800">Fecha de vencimiento:</label>
                 <p-datepicker [(ngModel)]="nuevoIngreso.fechaVencimiento" dateFormat="dd/mm/yy" [showIcon]="true"
-                    appendTo="body"></p-datepicker>
+                    placeholder="dd/mm/aaaa" [readonlyInput]="true" appendTo="body" styleClass="w-full">
+                </p-datepicker>
             </div>
         </div>
     </div>
 
-    <ng-template pTemplate="footer">
-        <p-button label="Guardar temporalmente" (onClick)="agregarDetalle()" styleClass="w-full"></p-button>
-    </ng-template>
+    <p-button label="Guardar temporalmente" icon="pi pi-check" (onClick)="guardarTemporalmente()"
+        styleClass="p-button-success w-full">
+    </p-button>
 </p-dialog>
 
-<!-- NUEVO MODAL: CREAR NUEVA UNIDAD DE PRESENTACIÓN -->
+<!--  MODAL CREAR NUEVA UNIDAD DE PRESENTACIÓN -->
 <p-dialog header="Crear nueva unidad de presentación" [(visible)]="mostrarModalUnidad" [modal]="true"
     [style]="{width: '400px'}" styleClass="p-fluid">
-    <div class="field">
+
+    <div class="field mb-3">
         <label class="font-bold text-cyan-800">Unidad de Medida:</label>
-        <!-- Usa la lista maestra de unidades (Caja, Blister, etc.) -->
         <p-select [options]="unidades" [(ngModel)]="nuevaUnidadPresentacion.unidadMedida" optionLabel="nombre"
-            placeholder="Seleccionar unidad" appendTo="body"></p-select>
+            placeholder="Seleccionar unidad" appendTo="body" styleClass="w-full"></p-select>
     </div>
 
-    <div class="field">
+    <div class="field mb-3">
         <label class="font-bold text-cyan-800">Cantidad por presentación:</label>
         <p-inputNumber [(ngModel)]="nuevaUnidadPresentacion.cantidad" placeholder="Ej: 10, 20, 100" [min]="1"
-            mode="decimal" [minFractionDigits]="2"></p-inputNumber>
+            mode="decimal" [minFractionDigits]="0" styleClass="w-full" inputStyleClass="w-full">
+        </p-inputNumber>
         <small class="text-gray-500">Ejemplo: Si es Caja de 10 unidades, ingrese 10.</small>
     </div>
 
     <ng-template pTemplate="footer">
         <p-button label="Enviar" icon="pi pi-send" (onClick)="guardarNuevaPresentacion()"
-            styleClass="p-button-primary"></p-button>
+            styleClass="p-button-primary border-round-lg">
+        </p-button>
     </ng-template>
 </p-dialog>
 

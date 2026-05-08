@@ -12,16 +12,19 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { ToastModule } from 'primeng/toast';
 import { TableModule } from 'primeng/table';
 import { RadioButtonModule } from 'primeng/radiobutton';
+import { DropdownModule } from 'primeng/dropdown';
 
 import { IngresoProductoService } from '../../services/ingreso-producto.service';
 import { AuthService } from '../../services/auth.service';
 import { DialogModule } from 'primeng/dialog';
 
+import { ProveedorService } from '../../services/proveedor.service';
+
 @Component({
   selector: 'app-ingresar-producto',
   standalone: true,
   imports: [
-    CommonModule, FormsModule, AutoCompleteModule, InputNumberModule,
+    CommonModule, FormsModule, AutoCompleteModule, InputNumberModule, DropdownModule,
     DatePickerModule, SelectModule, ButtonModule, CardModule, ToastModule,
     TableModule, DialogModule, RadioButtonModule
   ],
@@ -44,6 +47,8 @@ export class IngresarProductoComponent implements OnInit {
 
   // Arreglo para guardar los detalles pendientes antes de confirmar
   detallesIngreso: any[] = [];
+
+  listaDetallesTemporales: any[] = []; // Para mostrar los detalles que se han agregado temporalmente antes de confirmar el ingreso
 
   // Objeto mapeado al formulario HTML
   nuevoIngreso: any = {
@@ -76,11 +81,13 @@ export class IngresarProductoComponent implements OnInit {
     private productoService: ProductoService,
     private messageService: MessageService,
     private ingresoProductoService: IngresoProductoService,
-    private authService: AuthService
+    private authService: AuthService,
+    private proveedorService: ProveedorService
   ) { }
 
   ngOnInit(): void {
     this.cargarCatalogos();
+    this.cargarProveedores();
   }
 
   abrirModalMarca() {
@@ -93,6 +100,18 @@ export class IngresarProductoComponent implements OnInit {
       error: (err) => {
         console.error("Error al abrir modal:", err);
         this.mostrarModalMarca = true;
+      }
+    });
+  }
+
+  cargarProveedores() {
+    this.proveedorService.getProveedores().subscribe({
+      next: (data) => {
+        this.proveedores = data;
+        console.log('Proveedores listos para ingreso:', this.proveedores);
+      },
+      error: (err) => {
+        console.error('Error al obtener proveedores:', err);
       }
     });
   }
@@ -111,25 +130,34 @@ export class IngresarProductoComponent implements OnInit {
 
     // 2. Presentaciones Generales (Tabla 'presentacion')
     this.productoService.getPresentaciones().subscribe(data => {
-      this.presentaciones = data; //[cite: 1]
+      this.presentaciones = data;
     });
 
     // 3. Unidades de Medida Maestras (Tabla 'unidad_medida')
     this.productoService.getUnidadesMedida().subscribe(data => {
-      this.unidades = data; //[cite: 2]
+      this.unidades = data;
     });
 
     // 4. Unidades Detalle (Tabla 'unidades_detalle')
-    this.productoService.getUnidadesDetalle().subscribe(data => {
-      this.listaUnidadesDetalle = data.map(ud => ({
-        ...ud,
-        label: `${ud.unidadMedida.abreviatura} x ${ud.cantidad}` //[cite: 1, 2]
-      }));
+    this.productoService.getUnidadesDetalle().subscribe({
+      next: (data) => {
+        this.listaUnidadesDetalle = data.map(ud => ({
+          ...ud,
+          // Cambiamos 'abreviatura' por 'Nombre' y añadimos el sufijo
+          label: `${ud.unidadMedida.nombre} x ${ud.cantidad} unidades`
+        }));
+      },
+      error: (err) => console.error("Error al cargar unidades", err)
     });
 
-    // 5. Proveedores Reales
-    this.productoService.getProveedores().subscribe(data => {
-      this.proveedores = data; //[cite: 3]
+    this.proveedorService.getProveedores().subscribe({
+      next: (data) => {
+        this.proveedores = data;
+        console.log('Proveedores cargados en catálogo:', this.proveedores);
+      },
+      error: (err) => {
+        console.error('Error al cargar proveedores en el catálogo:', err);
+      }
     });
   }
 
@@ -153,6 +181,7 @@ export class IngresarProductoComponent implements OnInit {
 
     this.mostrarModalDetalles = true;
   }
+
 
   agregarDetalle() {
     // Validamos solo los campos que están dentro del modal
@@ -196,6 +225,38 @@ export class IngresarProductoComponent implements OnInit {
     this.detallesIngreso.splice(index, 1);
   }
 
+  guardarTemporalmente() {
+    // Creamos el objeto con los datos del modal
+    const nuevoDetalle = {
+      marca: this.nuevoIngreso.marca,
+      unidad: this.nuevoIngreso.unidad,
+      cantidadRecibida: this.nuevoIngreso.cantidadRecibida,
+      fechaFabricacion: this.nuevoIngreso.fechaFabricacion,
+      fechaVencimiento: this.nuevoIngreso.fechaVencimiento
+    };
+
+    // Lo añadimos a la lista (spread operator para forzar el refresco de la tabla)
+    this.listaDetallesTemporales = [...this.listaDetallesTemporales, nuevoDetalle];
+
+    // Cerramos el modal y limpiamos los campos para el siguiente producto
+    this.mostrarModalDetalles = false;
+    this.limpiarFormularioDetalle();
+  }
+
+  eliminarDetalleTemporal(index: number) {
+    this.listaDetallesTemporales.splice(index, 1);
+    this.listaDetallesTemporales = [...this.listaDetallesTemporales]; // Refrescar referencia
+  }
+
+  limpiarFormularioDetalle() {
+    this.nuevoIngreso = {
+      marca: null,
+      unidad: null,
+      cantidadRecibida: null,
+      fechaFabricacion: null,
+      fechaVencimiento: null
+    };
+  }
 
   // 3. Envía TODO el arreglo a la base de datos
   confirmarIngresosBatch() {
@@ -283,38 +344,37 @@ export class IngresarProductoComponent implements OnInit {
   }
 
   abrirModalNuevaPresentacion() {
+    this.nuevaUnidadPresentacion = { unidadMedida: null, cantidad: null };
     this.mostrarModalUnidad = true;
   }
 
   guardarNuevaPresentacion() {
-    if (!this.nuevaUnidadPresentacion.unidadMedida || !this.nuevaUnidadPresentacion.cantidad) {
-      this.mostrarError('Debe seleccionar una unidad y especificar la cantidad.');
-      return;
-    }
-
-    const payload = {
-      id_unid_medi: this.nuevaUnidadPresentacion.unidadMedida.idUnidad,
+    const data = {
+      unidadMedida: this.nuevaUnidadPresentacion.unidadMedida,
       cantidad: this.nuevaUnidadPresentacion.cantidad
     };
 
-    this.productoService.guardarUnidadDetalle(payload).subscribe({
-      next: () => {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Éxito',
-          detail: 'Nueva presentación creada correctamente.'
-        });
+    this.productoService.guardarUnidadDetalle(data).subscribe({
+      next: (res) => {
+        this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Presentación creada correctamente' });
+
+        // 1. Formateamos el objeto que viene del servidor para que tenga el 'label' que espera el combo
+        const itemNuevo = {
+          ...res,
+          label: `${res.unidadMedida.nombre} x ${res.cantidad} unidades`
+        };
+
+        // 2. Actualizamos la lista local (usando spread operator para refrescar la referencia)
+        this.listaUnidadesDetalle = [...this.listaUnidadesDetalle, itemNuevo];
+
+        // 3. SELECCIÓN AUTOMÁTICA: Asignamos el nuevo objeto al combo del modal principal
+        this.nuevoIngreso.unidad = itemNuevo;
+
+        // 4. Limpieza y cierre de modales
         this.mostrarModalUnidad = false;
-
-        // Limpiar datos del modal secundario
         this.nuevaUnidadPresentacion = { unidadMedida: null, cantidad: null };
-
-        // Refrescar el catálogo de presentaciones en el modal principal
-        this.cargarPresentaciones();
       },
-      error: (err) => {
-        this.mostrarError('Error al guardar la presentación: Es posible que ya exista.');
-      }
+      error: (err) => console.error('Error al guardar:', err)
     });
   }
 
