@@ -1,9 +1,10 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './auth/login/login.component';
 import { DashboardQuimicoComponent } from './pages/dashboard-quimico/dashboard-quimico.component';
-import { RegistrarProductoComponent } from './pages/registrar-producto/registrar-producto.component'; // Importante
+import { RegistrarProductoComponent } from './pages/registrar-producto/registrar-producto.component';
 import { IngresarProductoComponent } from './pages/ingresar-producto/ingresar-producto.component';
 import { RegistrarProveedorComponent } from './pages/registrar-proveedor/registrar-proveedor.component';
+import { CrearUsuarioComponent } from './pages/crear-usuario/crear-usuario.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -18,7 +19,8 @@ export const routes: Routes = [
       { path: 'inventario/stock', component: RegistrarProductoComponent },
       { path: 'reabastecimiento/proveedor', component: RegistrarProveedorComponent},
       { path: 'reabastecimiento/crear-guia', component: RegistrarProveedorComponent},
-      { path: 'reabastecimiento/validar-guia', component: RegistrarProveedorComponent}
+      { path: 'reabastecimiento/validar-guia', component: RegistrarProveedorComponent},
+      { path: 'admin/usuarios', component: CrearUsuarioComponent}
     
     ]
   },

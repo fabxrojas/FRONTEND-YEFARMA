@@ -36,7 +36,7 @@ export const MENU_ITEMS: { [key: string]: MenuItem[] } = {
       label: 'Administración',
       icon: 'pi pi-user-edit',
       items: [
-        { label: 'Crear Nuevo Usuario', icon: 'pi pi-user-plus', routerLink: '/admin/usuarios' }
+        { label: 'Crear Nuevo Usuario', icon: 'pi pi-user-plus', routerLink: '/dashboard-quimico/admin/usuarios' }
       ]
     }
   ],
@@ -50,8 +50,8 @@ export const MENU_ITEMS: { [key: string]: MenuItem[] } = {
       label: 'Inventario',
       icon: 'pi pi-box',
       items: [
-        { label: 'Ingreso de Productos', icon: 'pi pi-download', routerLink: '/inventario/ingreso' },
-        { label: 'Visualizar Inventario', icon: 'pi pi-eye', routerLink: '/inventario/stock' }
+        { label: 'Ingreso de Productos', icon: 'pi pi-download', routerLink: '/dashboard-tecnico/inventario/ingreso' },
+        { label: 'Visualizar Inventario', icon: 'pi pi-eye', routerLink: '/dashboard-tecnico/inventario/stock' }
       ]
     },
     {

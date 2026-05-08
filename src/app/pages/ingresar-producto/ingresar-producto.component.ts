@@ -226,8 +226,15 @@ export class IngresarProductoComponent implements OnInit {
   }
 
   guardarTemporalmente() {
-    // Creamos el objeto con los datos del modal
-    const nuevoDetalle = {
+    // 1. Validamos que los datos necesarios existan
+    if (!this.nuevoIngreso.presentacion || !this.nuevoIngreso.marca || !this.nuevoIngreso.unidad) {
+      // Podrías poner una alerta aquí
+      return;
+    }
+
+    // 2. Creamos el objeto incluyendo la 'presentacion' del card principal
+    const detalle = {
+      presentacion: this.nuevoIngreso.presentacion, // Captura el objeto seleccionado en el card
       marca: this.nuevoIngreso.marca,
       unidad: this.nuevoIngreso.unidad,
       cantidadRecibida: this.nuevoIngreso.cantidadRecibida,
@@ -235,10 +242,10 @@ export class IngresarProductoComponent implements OnInit {
       fechaVencimiento: this.nuevoIngreso.fechaVencimiento
     };
 
-    // Lo añadimos a la lista (spread operator para forzar el refresco de la tabla)
-    this.listaDetallesTemporales = [...this.listaDetallesTemporales, nuevoDetalle];
+    // 3. Insertamos en la lista
+    this.listaDetallesTemporales = [...this.listaDetallesTemporales, detalle];
 
-    // Cerramos el modal y limpiamos los campos para el siguiente producto
+    // 4. Cerramos y limpiamos solo los datos del modal
     this.mostrarModalDetalles = false;
     this.limpiarFormularioDetalle();
   }
@@ -250,6 +257,7 @@ export class IngresarProductoComponent implements OnInit {
 
   limpiarFormularioDetalle() {
     this.nuevoIngreso = {
+      presentacion: null, 
       marca: null,
       unidad: null,
       cantidadRecibida: null,

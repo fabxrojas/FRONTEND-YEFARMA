@@ -1,0 +1,91 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<div class="grid p-3">
+    <div class="col-12">
+        <p-card header="Gestión de Técnicos Farmacéuticos" styleClass="shadow-2 border-round-xl mb-4">
+            <div class="p-fluid grid">
+                <div class="field col-12 md:col-4">
+                    <label class="font-bold text-cyan-800">Nombre:</label>
+                    <input pInputText [(ngModel)]="usuario.nombre" (keypress)="bloquearNumeros($event)"
+                        (input)="validarLetras($event, 'nombre')" placeholder="Ej. Juan" class="w-full">
+                </div>
+
+                <div class="field col-12 md:col-4">
+                    <label class="font-bold text-cyan-800">Apellido Paterno:</label>
+                    <input pInputText [(ngModel)]="usuario.apellidoP" (keypress)="bloquearNumeros($event)"
+                        (input)="validarLetras($event, 'apellidoP')" placeholder="Perez" class="w-full">
+                </div>
+
+                <div class="field col-12 md:col-4">
+                    <label class="font-bold text-cyan-800">Apellido Materno:</label>
+                    <input pInputText [(ngModel)]="usuario.apellidoM" (keypress)="bloquearNumeros($event)"
+                        (input)="validarLetras($event, 'apellidoM')" placeholder="Gomez" class="w-full">
+                </div>
+
+                <div class="field col-12 md:col-6">
+                    <label class="font-bold text-cyan-800">Correo Electrónico:</label>
+                    <input pInputText [(ngModel)]="usuario.correo" (input)="detectarCambios()" type="email"
+                        class="w-full">
+                </div>
+                <div class="field col-12 md:col-6">
+                    <label class="font-bold text-cyan-800">Contraseña:</label>
+                    <p-password [(ngModel)]="usuario.contrasena" (onInput)="detectarCambios()" [feedback]="false"
+                        [toggleMask]="true" [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}">
+                    </p-password>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap gap-2 mt-2">
+                <p-button *ngIf="!usuario.id_usuario" label="Registrar" icon="pi pi-user-plus"
+                    (onClick)="crearUsuario()" severity="info"></p-button>
+
+                <p-button *ngIf="usuario.id_usuario" label="Modificar Datos" icon="pi pi-pencil"
+                    [disabled]="botonModificarDesactivado" (onClick)="modificarUsuario()" severity="warn"></p-button>
+
+                <p-button *ngIf="usuario.id_usuario" label="Eliminar Usuario" icon="pi pi-trash"
+                    (onClick)="eliminarUsuario()" severity="danger"></p-button>
+
+                <p-button label="Limpiar / Nuevo" icon="pi pi-refresh" (onClick)="limpiarFormulario()"
+                    styleClass="p-button-info"></p-button>
+            </div>
+        </p-card>
+    </div>
+
+    <div class="col-12">
+        <p-card header="Lista de Personal Registrado" styleClass="shadow-2 border-round-xl">
+            <p-table [value]="usuarios" selectionMode="single" (onRowSelect)="seleccionarFila($event.data)"
+                [paginator]="true" [rows]="5" responsiveLayout="scroll" styleClass="p-datatable-striped">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th style="width:10%; text-align: center;">Usuario</th>
+                        <th style="width:25%; text-align: center;">Nombre Completo</th>
+                        <th style="width:20%; text-align: center;">Correo</th>
+                        <th style="width:10%; text-align: center;">Rol</th>
+                        <th style="width:20%; text-align: center;">Fecha Registro</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-u>
+                    <tr [pSelectableRow]="u" class="cursor-pointer">
+                        <td style="text-align: center;">
+                            {{ u.nombreUser }}
+                        </td>
+                        <td style="text-align: center;">{{ u.nombre }} {{ u.apellidoP }} {{ u.apellidoM }}</td>
+                        <td style="text-align: center;">{{ u.correo }}</td>
+                        <td style="text-align: center;">
+                            <p-tag [severity]="u.idRol === 1 ? 'info' : 'warn'"
+                                [value]="u.idRol === 1 ? 'Químico' : 'Técnico'">
+                            </p-tag>
+                        </td>
+                        <td style="text-align: center;">{{ u.fechaCreacion | date:'dd/MM/yyyy' }}</td>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="emptymessage">
+                    <tr>
+                        <td colspan="4" class="text-center p-4">No hay técnicos registrados.</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </p-card>
+    </div>
+</div>

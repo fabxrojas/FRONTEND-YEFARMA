@@ -4,7 +4,7 @@
     <h2 class="text-center mb-3 text-cyan-800">Ingresar Productos</h2>
 
     <!-- BUSCADOR TOTALMENTE EXPANDIDO -->
-    <div class="field w-full mb-4 px-2">
+    <div class="field w-full mb-6 px-2">
         <label class="font-bold text-sm text-cyan-800">Buscar producto:</label>
         <p-autoComplete [(ngModel)]="productoSeleccionado" [suggestions]="resultadosBusqueda"
             (completeMethod)="buscarProducto($event)" (onSelect)="fijarProducto($event)" field="producto"
@@ -49,7 +49,7 @@
         <!-- COLUMNA DERECHA: Reabastecimiento -->
         <div class="col-12 md:col-6 p-2">
             <p-card header="Reabastecimiento" styleClass="border-round-xl shadow-2 h-full flex flex-column"
-                [style]="{'min-height': '540px'}">
+                [style]="{'min-height': '20px'}">
                 <div class="flex-grow-1">
                     <div class="field mb-3">
                         <label class="font-bold text-sm text-cyan-800">Proveedor:</label>
@@ -69,14 +69,14 @@
                             styleClass="p-button-info w-full p-button-lg" (onClick)="abrirModalDetalles()"></p-button>
                     </div>
 
-                    <div class="field mt-3">
+                    <div class="field mt-2">
                         <label class="font-bold text-sm text-cyan-800">Detalle(s) pendiente(s):</label>
 
                         <div style="height: 90px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 6px;"
                             class="bg-gray-50">
 
                             <div *ngIf="listaDetallesTemporales.length === 0"
-                                class="flex align-items-center justify-content-center h-full text-gray-400 italic text-xs">
+                                class="flex align-items-center justify-content-center h-full text-gray-400 italic">
                                 No hay detalles agregados
                             </div>
 
@@ -84,18 +84,23 @@
                                 [autoLayout]="true" styleClass="p-datatable-sm p-datatable-striped">
                                 <ng-template pTemplate="header">
                                     <tr style="position: sticky; top: 0; z-index: 10; background: white;">
-                                        <th class="text-center text-xs">Marca</th>
-                                        <th class="text-center text-xs">Un. x Pres.</th>
-                                        <th class="text-center text-xs">Cant.</th>
-                                        <th class="text-center text-xs">F. Ven.</th>
-                                        <th class="text-center text-xs"></th>
+                                        <th class="text-center">Presentación</th>
+                                        <th class="text-center">Marca</th>
+                                        <th class="text-center ">Un. x Pres.</th>
+                                        <th class="text-center">Cant. Rec.</th>
+                                        <th class="text center">F. Fab.</th>
+                                        <th class="text-center">F. Ven.</th>
+                                        <th class="text-center">Acciones</th>
                                     </tr>
                                 </ng-template>
                                 <ng-template pTemplate="body" let-detalle let-ri="rowIndex">
                                     <tr>
-                                        <td class="text-center text-sm">{{ detalle.marca.nombre }}</td>
-                                        <td class="text-center text-sm">{{ detalle.unidad.label }}</td>
-                                        <td class="text-center text-sm">{{ detalle.cantidadRecibida }}</td>
+                                        <td class="text-center">{{ detalle.presentacion.nombre }}</td>
+                                        <td class="text-center">{{ detalle.marca.nombre }}</td>
+                                        <td class="text-center">{{ detalle.unidad.label }}</td>
+                                        <td class="text-center">{{ detalle.cantidadRecibida }}</td>
+                                        <td class="text-center">{{ detalle.fechaFabricacion | date:'dd/MM/yy' }}
+                                        </td>
                                         <td class="text-center text-sm">{{ detalle.fechaVencimiento | date:'dd/MM/yy' }}
                                         </td>
                                         <td class="text-center">
@@ -111,7 +116,7 @@
                     </div>
                 </div>
 
-                <div class="flex gap-3 mt-auto pt-4 justify-content-start">
+                <div class="flex gap-3 mt-auto pt-3 justify-content-start">
                     <p-button label="Confirmar" icon="pi pi-check"
                         styleClass="p-button-success shadow-2 border-round-lg flex-1"
                         (onClick)="confirmarIngresosBatch()"
@@ -128,7 +133,6 @@
 <p-dialog header="Ingresar Detalles" [(visible)]="mostrarModalDetalles" [modal]="true" [style]="{width: '500px'}"
     styleClass="p-fluid">
 
-    <!-- Sección de Marca (Ya funcional) -->
     <div class="field">
         <label class="font-bold text-sm text-cyan-800">Marca:</label>
         <div class="flex gap-2">
@@ -138,16 +142,14 @@
         </div>
     </div>
 
-    <!-- NUEVA SECCIÓN: UNIDAD POR PRESENTACIÓN -->
+    <!-- UNIDAD POR PRESENTACIÓN -->
     <div class="field mb-3">
         <label class="block font-bold text-sm text-cyan-800 mb-2">Unidad(es) por Presentación:</label>
         <div class="flex gap-2">
-            <!-- Se añade styleClass para mantener el tamaño grande y facilitar la lectura -->
             <p-select [options]="listaUnidadesDetalle" [(ngModel)]="nuevoIngreso.unidad" optionLabel="label"
                 placeholder="Seleccionar Unidad - Cantidad" class="flex-1" appendTo="body">
             </p-select>
 
-            <!-- Botón de añadir con diseño consistente -->
             <p-button label="Añadir" icon="pi pi-plus" (onClick)="abrirModalNuevaPresentacion()"
                 styleClass="p-button-info border-round-lg shadow-1">
             </p-button>
