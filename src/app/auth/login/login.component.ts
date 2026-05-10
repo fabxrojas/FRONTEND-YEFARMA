@@ -26,7 +26,7 @@ import { UsuarioService } from '../../services/usuario.service'; // Asegúrate d
     DialogModule,
     ToastModule
   ],
-  providers: [MessageService], // Proveedor local para mensajes
+  providers: [MessageService], 
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
@@ -90,7 +90,6 @@ export class LoginComponent implements OnInit {
       next: (res) => {
         console.log('Objeto recibido:', res);
 
-        // Si llega aquí, es porque el servidor respondió 200 OK
         if (res && res.status === 'success') {
           localStorage.setItem('usuario', JSON.stringify(res));
 
@@ -103,7 +102,6 @@ export class LoginComponent implements OnInit {
             this.errorMessage = 'Rol no reconocido: ' + rol;
           }
         } else {
-          // Caso poco común: respondió 200 pero el status no es success
           this.errorMessage = 'No se pudo iniciar sesión. Verifique sus datos.';
         }
       },

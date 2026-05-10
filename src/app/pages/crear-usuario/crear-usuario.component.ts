@@ -168,7 +168,6 @@ export class CrearUsuarioComponent implements OnInit {
     this.detectarCambios();
   }
 
-  // LIMPIEZA PROFUNDA (Anti-autocompletado)
   limpiarFormulario() {
     this.usuario = {
       id_usuario: null,
@@ -183,7 +182,6 @@ export class CrearUsuarioComponent implements OnInit {
     this.botonModificarDesactivado = true;
     this.usuarioOriginalJSON = '';
 
-    // Pequeño delay para asegurar que el DOM limpie los rastros del navegador
     setTimeout(() => {
       this.usuario.correo = '';
       this.usuario.contrasena = '';
