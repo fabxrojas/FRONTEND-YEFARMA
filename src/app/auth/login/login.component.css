@@ -17,12 +17,11 @@
     left: 0;
 }
 
-/* Capa de superposición para que el texto se lea mejor (opcional) */
 .login-container::before {
     content: "";
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 123, 143, 0.2); /* Tinte turquesa suave */
+    background: rgba(0, 123, 143, 0.2); 
     z-index: 1;
 }
 
@@ -45,7 +44,6 @@ h3 {
     margin-bottom: 2rem;
 }
 
-/* La tarjeta blanca del login */
 .login-card {
     background: rgba(255, 255, 255, 0.95);
     padding: 2.5rem;
@@ -65,7 +63,6 @@ h3 {
     font-weight: bold;
 }
 
-/* Ajuste para que los inputs de PrimeNG ocupen todo el ancho */
 input[pInputText], p-password {
     width: 100% !important;
 }
@@ -81,4 +78,9 @@ button[pButton] {
     padding: 0.8rem;
     font-size: 1.1rem;
     margin-top: 1rem;
+}
+
+:host ::ng-deep .p-password, /* Asegurar que los inputs de contraseña ocupen todo el ancho */
+:host ::ng-deep .p-password input {
+    width: 100% !important;
 }

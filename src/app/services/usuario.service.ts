@@ -30,4 +30,18 @@ export class UsuarioService {
   eliminarUsuario(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/eliminar/${id}`);
   }
+
+  solicitarRecuperacion(email: string) {
+    return this.http.post(`${this.apiUrl}/recuperar-contrasena`, { correo: email });
+  }
+
+  cambiarContrasena(token: string, nuevaContrasena: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/cambiar-contrasena`,
+      {
+        token: token,
+        password: nuevaContrasena
+      },
+      { responseType: 'text' } 
+    );
+  }
 }

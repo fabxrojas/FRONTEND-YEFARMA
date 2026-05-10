@@ -1,13 +1,18 @@
-import { Component, OnInit } from '@angular/core'; 
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
+// PrimeNG
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { ButtonModule } from 'primeng/button';
+import { DialogModule } from 'primeng/dialog'; // Nuevo
+import { ToastModule } from 'primeng/toast'; // Nuevo
+import { MessageService } from 'primeng/api'; // Nuevo
 
 import { AuthService } from '../../services/auth.service';
+import { UsuarioService } from '../../services/usuario.service'; // Asegúrate de tenerlo
 
 @Component({
   selector: 'app-login',
@@ -17,74 +22,102 @@ import { AuthService } from '../../services/auth.service';
     FormsModule,
     InputTextModule,
     PasswordModule,
-    ButtonModule
+    ButtonModule,
+    DialogModule,
+    ToastModule
   ],
+  providers: [MessageService], // Proveedor local para mensajes
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-export class LoginComponent implements OnInit { // IMPORTANTE: "implements OnInit"
+export class LoginComponent implements OnInit {
   loginData = { username: '', password: '' };
   errorMessage: string = '';
 
+  // Variables para la recuperación
+  displayModal: boolean = false;
+  emailRecuperar: string = '';
+  cargandoRecuperacion: boolean = false;
+
   constructor(
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private usuarioService: UsuarioService,
+    private messageService: MessageService
   ) { }
 
-  // Se ejecuta automáticamente al cargar la página
   ngOnInit(): void {
-    // Forzamos la limpieza al entrar a la ruta
     this.loginData = { username: '', password: '' };
     this.errorMessage = '';
   }
 
-  private limpiarCampos() {
-    this.loginData = { username: '', password: '' };
-    this.errorMessage = '';
+  // Métodos de Recuperación
+  abrirDialogoRecuperar() {
+    this.displayModal = true;
+    this.emailRecuperar = '';
   }
 
-  onLogin() {
-    // 1. Extraemos los valores del formulario
-    const user = this.loginData.username;
-    const pass = this.loginData.password;
-
-    // 2. Validación corregida
-    if (!user || !pass) {
-      this.errorMessage = 'Campos incompletos. Intente completar los campos nuevamente';
+  enviarSolicitudRecuperacion() {
+    if (!this.emailRecuperar) {
+      this.messageService.add({ severity: 'warn', summary: 'Atención', detail: 'Ingrese su correo electrónico' });
       return;
     }
 
-    // 3. Enviamos el objeto loginData (que ya tiene username y password)
-    console.log('Enviando a Java:', this.loginData);
+    this.cargandoRecuperacion = true;
+
+    this.usuarioService.solicitarRecuperacion(this.emailRecuperar).subscribe({
+      next: (res: any) => {
+        this.messageService.add({ severity: 'success', summary: 'Enviado', detail: 'Revise su bandeja de entrada' });
+        this.displayModal = false;
+        this.cargandoRecuperacion = false;
+      },
+      error: (err) => {
+        this.cargandoRecuperacion = false;
+        const msg = err.status === 404 ? 'El correo no está registrado' : 'Error al conectar con el servidor';
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: msg });
+      }
+    });
+  }
+
+  onLogin() {
+    // Validamos que no envíe campos vacíos
+    if (!this.loginData.username || !this.loginData.password) {
+      this.errorMessage = 'Por favor, complete todos los campos.';
+      return;
+    }
 
     this.authService.login(this.loginData).subscribe({
       next: (res) => {
+        console.log('Objeto recibido:', res);
+
+        // Si llega aquí, es porque el servidor respondió 200 OK
         if (res && res.status === 'success') {
-          localStorage.setItem('userName', res.username);
-          localStorage.setItem('realName', res.nombre);
-          localStorage.setItem('userRole', res.rol.toString());
           localStorage.setItem('usuario', JSON.stringify(res));
 
-          // Redirección corregida (sin .html)
-          if (res.rol === 1) {
-            // USA LA RUTA EXACTA QUE DEFINISTE EN app.routes.ts
+          const rol = res.rol;
+          if (rol === 1) {
             this.router.navigate(['/dashboard-quimico']);
-          } else if (res.rol === 2) {
+          } else if (rol === 2) {
             this.router.navigate(['/dashboard-tecnico']);
+          } else {
+            this.errorMessage = 'Rol no reconocido: ' + rol;
           }
+        } else {
+          // Caso poco común: respondió 200 pero el status no es success
+          this.errorMessage = 'No se pudo iniciar sesión. Verifique sus datos.';
         }
       },
       error: (err) => {
-        console.error('Error 401 capturado:', err);
+        console.error('Detalle del error:', err);
 
-        // 1. Asignamos el mensaje específico para el 401
         if (err.status === 401) {
-          this.errorMessage = 'Usuario o contraseña incorrectos. Verifique sus datos.';
+          this.errorMessage = 'Usuario o contraseña incorrectos.';
         } else {
-          this.errorMessage = 'No se pudo conectar con el servidor de Yefarma.';
+          this.errorMessage = 'Ocurrió un error inesperado en el servidor.';
         }
 
-       this.limpiarCampos();
+        // Limpiamos la contraseña por seguridad
+        this.loginData.password = '';
       }
     });
   }

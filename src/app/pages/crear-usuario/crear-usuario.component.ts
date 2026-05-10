@@ -37,17 +37,17 @@ import { TagModule } from 'primeng/tag';
 export class CrearUsuarioComponent implements OnInit {
   usuarios: any[] = [];
 
-  // Objeto vinculado al formulario
+  // Objeto vinculado al formulario con valores iniciales limpios
   usuario: any = {
     id_usuario: null,
     nombre: '',
     apellidoP: '',
     apellidoM: '',
     correo: '',
-    contrasena: ''
+    contrasena: '',
+    id_rol: 2 // Por defecto se registran como Técnicos en esta vista
   };
 
-  // Para comparar y activar/desactivar el botón modificar
   usuarioOriginalJSON: string = '';
   botonModificarDesactivado: boolean = true;
 
@@ -59,6 +59,7 @@ export class CrearUsuarioComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+    this.limpiarFormulario(); // Forzamos limpieza al cargar
     this.cargarUsuarios();
   }
 
@@ -69,7 +70,6 @@ export class CrearUsuarioComponent implements OnInit {
     });
   }
 
-  // Al seleccionar una fila de la tabla
   seleccionarFila(u: any) {
     this.usuario = { ...u };
     this.usuarioOriginalJSON = JSON.stringify(this.usuario);
@@ -90,7 +90,7 @@ export class CrearUsuarioComponent implements OnInit {
 
     this.usuarioService.registrarUsuario(this.usuario).subscribe({
       next: () => {
-        this.mostrarMensaje('success', 'Éxito', 'Técnico registrado');
+        this.mostrarMensaje('success', 'Éxito', 'Técnico registrado correctamente');
         this.limpiarFormulario();
         this.cargarUsuarios();
       },
@@ -108,12 +108,12 @@ export class CrearUsuarioComponent implements OnInit {
       icon: 'pi pi-exclamation-triangle',
       acceptLabel: 'Sí',
       rejectLabel: 'No',
-      acceptButtonStyleClass: 'p-button-danger',
-      rejectButtonStyleClass: 'p-button-info',
+      acceptButtonStyleClass: 'p-button-info',
+      rejectButtonStyleClass: 'p-button-danger',
       accept: () => {
         this.usuarioService.actualizarUsuario(this.usuario.id_usuario, this.usuario).subscribe({
           next: () => {
-            this.mostrarMensaje('success', 'Actualizado', 'Datos modificados correctamente');
+            this.mostrarMensaje('success', 'Éxito', 'Datos modificados correctamente');
             this.limpiarFormulario();
             this.cargarUsuarios();
           },
@@ -124,52 +124,51 @@ export class CrearUsuarioComponent implements OnInit {
   }
 
   eliminarUsuario() {
+    // REGLA DE NEGOCIO: Bloquear eliminación del Químico (Admin)
+    if (this.usuario.idRol === 1) {
+      this.mostrarMensaje('error', 'Error', 'No se puede eliminar al Químico Farmacéutico.');
+      return;
+    }
+
     this.confirmationService.confirm({
-      message: `¿Está seguro de eliminar a ${this.usuario.nombre}?`,
+      message: `¿Está seguro de eliminar a ${this.usuario.nombre}? Esta acción no se puede deshacer.`,
       header: 'Confirmación de Eliminación',
       icon: 'pi pi-trash',
-
-      // Configuración de los botones
       acceptLabel: 'Sí',
       rejectLabel: 'No',
-
-      // Clases de estilo para los colores
       acceptButtonStyleClass: 'p-button-danger',
       rejectButtonStyleClass: 'p-button-info',
-
       accept: () => {
         this.usuarioService.eliminarUsuario(this.usuario.id_usuario).subscribe({
           next: () => {
-            this.messageService.add({ severity: 'success', summary: 'Eliminado', detail: 'Usuario borrado' });
+            this.mostrarMensaje('success', 'Éxito', 'Usuario borrado del sistema');
             this.limpiarFormulario();
             this.cargarUsuarios();
-          }
+          },
+          error: () => this.mostrarMensaje('error', 'Error', 'No se pudo completar la eliminación')
         });
       }
     });
   }
 
+  // Validaciones de entrada
   bloquearNumeros(event: KeyboardEvent) {
     const key = event.key;
-    // Permitimos letras, espacios y teclas de control (Borrar, Tab)
     const apenasLetras = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$/;
-
     if (!apenasLetras.test(key) && key !== 'Backspace' && key !== 'Tab') {
-      event.preventDefault(); // Cancela la pulsación de la tecla
+      event.preventDefault();
     }
   }
 
   validarLetras(event: any, campo: string) {
     const regex = /[^a-zA-ZáéíóúÁÉÍÓÚñÑ ]/g;
     const valorLimpio = event.target.value.replace(regex, '');
-
-    // Actualizamos el objeto y el valor del elemento físico
     this.usuario[campo] = valorLimpio;
     event.target.value = valorLimpio;
-
     this.detectarCambios();
   }
 
+  // LIMPIEZA PROFUNDA (Anti-autocompletado)
   limpiarFormulario() {
     this.usuario = {
       id_usuario: null,
@@ -177,10 +176,18 @@ export class CrearUsuarioComponent implements OnInit {
       apellidoP: '',
       apellidoM: '',
       correo: '',
-      contrasena: ''
+      contrasena: '',
+      id_rol: 2
     };
+
     this.botonModificarDesactivado = true;
     this.usuarioOriginalJSON = '';
+
+    // Pequeño delay para asegurar que el DOM limpie los rastros del navegador
+    setTimeout(() => {
+      this.usuario.correo = '';
+      this.usuario.contrasena = '';
+    }, 50);
   }
 
   private mostrarMensaje(severity: string, summary: string, detail: string) {

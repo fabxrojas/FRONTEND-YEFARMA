@@ -51,7 +51,6 @@ export class RegistrarProductoComponent implements OnInit {
   }
 
 
-
   obtenerDatosIniciales(): void {
     // Cargamos la lista completa de productos para la tabla
     this.productoService.listarTodos().subscribe(data => this.productos = data);
@@ -61,33 +60,26 @@ export class RegistrarProductoComponent implements OnInit {
     this.productoService.getFormas().subscribe(data => this.formas = data);
   }
 
-  // --- LÓGICA DE EDICIÓN EN FILA ---
-
   onRowEditInit(producto: any) {
     // Guardamos una copia de la fila antes de editar
     this.clonProductos[producto.id_producto] = { ...producto };
   }
 
   onRowEditSave(producto: any) {
-    // 1. Validación básica antes de enviar
     if (producto.producto && producto.producto.trim().length > 0 && producto.precio > 0) {
 
       this.productoService.registrar(producto).subscribe({
         next: (response) => {
-          // 2. Mensaje de éxito
           this.messageService.add({
             severity: 'success',
             summary: 'Éxito',
             detail: producto.id_producto ? 'Producto actualizado' : 'Producto registrado'
           });
 
-          // 3. Limpiar el clon si existía (solo para productos editados)
           if (producto.id_producto) {
             delete this.clonProductos[producto.id_producto];
           }
 
-          // 4. CRÍTICO: Recargar la lista de la base de datos
-          // Esto trae el nuevo ID y el Código (N000XX) generado por el Trigger de MySQL
           this.obtenerDatosIniciales();
         },
         error: (err) => {
@@ -100,7 +92,6 @@ export class RegistrarProductoComponent implements OnInit {
         }
       });
     } else {
-      // 5. Validación si el usuario dejó campos vacíos
       this.messageService.add({
         severity: 'warn',
         summary: 'Atención',
@@ -154,14 +145,15 @@ export class RegistrarProductoComponent implements OnInit {
       message: `¿Está seguro de que desea eliminar ${producto.producto}?`,
       header: 'Confirmar Eliminación',
       icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'Sí, eliminar',
-      rejectLabel: 'Cancelar',
+      acceptLabel: 'Sí',
+      rejectLabel: 'No',
       acceptButtonStyleClass: 'p-button-danger',
+      rejectButtonStyleClass: 'p-button-info',
       accept: () => {
         this.productoService.eliminar(producto.id_producto).subscribe({
           next: () => {
             this.productos = this.productos.filter(p => p.id_producto !== producto.id_producto);
-            this.messageService.add({ severity: 'info', summary: 'Eliminado', detail: 'Registro borrado de la base de datos' });
+            this.messageService.add({ severity: 'info', summary: 'Éxito', detail: 'Registro borrado de la base de datos' });
           }
         });
       }

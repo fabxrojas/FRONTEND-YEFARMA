@@ -1,0 +1,22 @@
+<div class="flex justify-content-center align-items-center min-h-screen bg-cyan-900">
+    <div class="surface-card p-4 shadow-2 border-round w-full lg:w-4">
+        <h2 class="text-center text-900 mb-4">Crea tu nueva contraseña</h2>
+
+        <div class="field mb-4">
+            <label class="block font-bold mb-2">Nueva Contraseña</label>
+            <p-password [(ngModel)]="nuevaContrasena" [toggleMask]="true" styleClass="w-full"
+                inputStyleClass="w-full"></p-password>
+        </div>
+
+        <div class="field mb-4">
+            <label class="block font-bold mb-2">Confirmar Contraseña</label>
+            <p-password [(ngModel)]="confirmarContrasena" [feedback]="false" [toggleMask]="true" styleClass="w-full"
+                inputStyleClass="w-full"></p-password>
+            <small class="p-error" *ngIf="confirmarContrasena && nuevaContrasena !== confirmarContrasena">
+                Las contraseñas deben ser iguales.
+            </small>
+        </div>
+
+        <button pButton label="Actualizar Contraseña" class="w-full p-3" (click)="cambiarContrasena()"></button>
+    </div>
+</div>

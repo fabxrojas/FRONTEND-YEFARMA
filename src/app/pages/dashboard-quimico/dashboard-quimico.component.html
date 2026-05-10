@@ -5,9 +5,8 @@
             <span class="brand-name">BOTICA YEFARMA</span>
         </div>
         <div class="profile-area">
-            <button #btn type="button" pButton icon="pi pi-user" 
-                    class="p-button-rounded p-button-text p-button-plain"
-                    (click)="menu.toggle($event)">
+            <button #btn type="button" pButton icon="pi pi-user" class="p-button-rounded p-button-text p-button-plain"
+                (click)="menu.toggle($event)">
                 <span class="username-label">{{ userName }}</span>
                 <i class="pi pi-chevron-down"></i>
             </button>
@@ -21,9 +20,12 @@
         </aside>
 
         <main class="main-content">
-            <div class="dashboard-container" *ngIf="router.url === '/dashboard-quimico'">
+            <div class="dashboard-container"
+                *ngIf="router.url === '/dashboard-quimico' || router.url === '/dashboard-tecnico'">
                 <header class="dashboard-header">
-                    <h1>Bienvenido, Químico Farmacéutico</h1>
+                    <h1 *ngIf="router.url === '/dashboard-quimico'">Bienvenido, Químico Farmacéutico</h1>
+                    <h1 *ngIf="router.url === '/dashboard-tecnico'">Bienvenido, Técnico Farmacéutico</h1>
+
                     <p>Resumen de estado para: <strong>{{ userName }}</strong></p>
                 </header>
 
@@ -35,7 +37,7 @@
                             <h2 class="kpi-value">12</h2>
                         </div>
                     </div>
-                    </div>
+                </div>
             </div>
 
             <router-outlet></router-outlet>

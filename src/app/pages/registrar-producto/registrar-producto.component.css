@@ -37,3 +37,16 @@
 ::ng-deep .p-button:hover {
     transform: translateY(-2px);
 }
+
+:host ::ng-deep .p-cell-editor input,
+:host ::ng-deep .p-cell-editor .p-select,
+:host ::ng-deep .p-cell-editor .p-inputnumber {
+    width: 100% !important;
+}
+
+/* Evita que el texto largo rompa la tabla si no está en modo edición */
+td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
