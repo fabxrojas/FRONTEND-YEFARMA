@@ -12,20 +12,21 @@
             [tableStyle]="{'table-layout': 'fixed', 'min-width': '100%'}">
             <ng-template pTemplate="header">
                 <tr>
-                    
+
                     <th style="width:10%; text-align: center;">Código</th>
                     <th style="width:15%">Nombre</th>
-                    <th style="width:15%">Tipo</th>
-                    <th style="width:15%">Forma Farmacéutica</th>
+                    <th style="width:12%">Tipo</th>
+                    <th style="width:12%">Forma Farmacéutica</th>
                     <th style="width:10%">Precio</th>
-                    <th style="width:15%">Registro sanitario</th>
+                    <th style="width:10%">Registro sanitario</th>
+                    <th style="width:9%">Peso Unitario</th>
                     <th style="width:10%">Acciones</th>
                 </tr>
             </ng-template>
 
             <ng-template pTemplate="body" let-prod let-editing="editing" let-ri="rowIndex">
                 <tr [pEditableRow]="prod">
-                    
+
                     <td style="text-align: center;">{{prod.codigo}}</td>
                     <td>
                         <p-cellEditor>
@@ -73,10 +74,22 @@
                         </p-cellEditor>
                     </td>
                     <td>
+                        <p-cellEditor>
+                            <ng-template pTemplate="input">
+                                <p-inputNumber [(ngModel)]="prod.pesoUnitario" mode="decimal" [minFractionDigits]="4"
+                                    [maxFractionDigits]="4" suffix=" kg" placeholder="0.0000" styleClass="w-full">
+                                </p-inputNumber>
+                            </ng-template>
+                            <ng-template pTemplate="output">
+                                {{prod.pesoUnitario ? (prod.pesoUnitario | number:'1.4-4') + ' kg' : '0.0000 kg'}}
+                            </ng-template>
+                        </p-cellEditor>
+                    </td>
+                    <td>
                         <div class="flex align-items-left justify-content-left gap-2">
                             <button *ngIf="!editing" pButton pRipple type="button" pInitEditableRow icon="pi pi-pencil"
-                                (click)="onRowEditInit(prod)" class="p-button-rounded p-button-text" pTooltip="Editar"
-                                tooltipPosition="top">
+                                (click)="onRowEditInit(prod)" class="p-button-rounded p-button-warn p-button-text"
+                                pTooltip="Editar" tooltipPosition="top">
                             </button>
 
                             <button *ngIf="editing" pButton pRipple type="button" icon="pi pi-check"

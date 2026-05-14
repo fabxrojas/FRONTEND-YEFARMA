@@ -31,7 +31,6 @@ export class ProductoService {
     return this.http.get<any[]>(`${this.marcaUrl}`);
   }
 
-  // NUEVO: Obtiene solo las marcas asociadas a un producto específico
   getMarcasPorProducto(idProducto: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/${idProducto}/marcas`);
   }

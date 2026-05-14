@@ -6,6 +6,7 @@ import { IngresarProductoComponent } from './pages/ingresar-producto/ingresar-pr
 import { RegistrarProveedorComponent } from './pages/registrar-proveedor/registrar-proveedor.component';
 import { CrearUsuarioComponent } from './pages/crear-usuario/crear-usuario.component';
 import { RestablecerContrasenaComponent } from './pages/restablecer-contrasena/restablecer-contrasena.component';
+import { CrearGuiaComponent } from './pages/crear-guia/crear-guia.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -20,7 +21,7 @@ export const routes: Routes = [
       { path: 'inventario/ingreso', component: IngresarProductoComponent },
       { path: 'inventario/stock', component: RegistrarProductoComponent },
       { path: 'reabastecimiento/proveedor', component: RegistrarProveedorComponent},
-      { path: 'reabastecimiento/crear-guia', component: RegistrarProveedorComponent},
+      { path: 'reabastecimiento/crear-guia', component: CrearGuiaComponent},
       { path: 'reabastecimiento/validar-guia', component: RegistrarProveedorComponent},
       { path: 'admin/usuarios', component: CrearUsuarioComponent}
     

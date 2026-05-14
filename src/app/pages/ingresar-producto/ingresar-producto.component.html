@@ -7,9 +7,10 @@
     <div class="field w-full mb-6 px-2">
         <label class="font-bold text-sm text-cyan-800">Buscar producto:</label>
         <p-autoComplete [(ngModel)]="productoSeleccionado" [suggestions]="resultadosBusqueda"
-            (completeMethod)="buscarProducto($event)" (onSelect)="fijarProducto($event)" field="producto"
-            placeholder="Ingresa al menos 3 caracteres del nombre" [forceSelection]="false" styleClass="w-full"
-            inputStyleClass="w-full p-inputtext-lg" emptyMessage="No se encontraron productos">
+            (completeMethod)="buscarProducto($event)" (onSelect)="fijarProducto($event)" (onClear)="limpiarBuscador()"
+            field="producto" [forceSelection]="true" placeholder="Escriba el nombre del medicamento..."
+            inputStyleClass="w-full p-inputtext-lg" styleClass="w-full" emptyMessage="No se encontraron productos"
+            appendTo="body">
         </p-autoComplete>
     </div>
 
@@ -36,6 +37,12 @@
                     <label class="font-bold text-sm text-cyan-800">Precio:</label>
                     <input pInputText
                         [value]="productoFijado.precio != null ? (productoFijado.precio | currency:'PEN':'S/. ':'1.2-2') : ''"
+                        readonly disabled class="w-full p-inputtext-lg" />
+                </div>
+                <div class="field mb-3">
+                    <label class="font-bold text-sm text-cyan-800">Peso Unitario:</label>
+                    <input pInputText
+                        [value]="productoFijado.pesoUnitario ? (productoFijado.pesoUnitario | number:'1.4-4') + ' kg' : '0.0000 kg'"
                         readonly disabled class="w-full p-inputtext-lg" />
                 </div>
                 <div class="field mb-3">
@@ -72,7 +79,7 @@
                     <div class="field mt-2">
                         <label class="font-bold text-sm text-cyan-800">Detalle(s) pendiente(s):</label>
 
-                        <div style="height: 90px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 6px;"
+                        <div style="height: 180px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 6px;"
                             class="bg-gray-50">
 
                             <div *ngIf="listaDetallesTemporales.length === 0"
@@ -191,9 +198,10 @@
     [style]="{width: '400px'}" styleClass="p-fluid">
 
     <div class="field mb-3">
-        <label class="font-bold text-cyan-800">Unidad de Medida:</label>
-        <p-select [options]="unidades" [(ngModel)]="nuevaUnidadPresentacion.unidadMedida" optionLabel="nombre"
-            placeholder="Seleccionar unidad" appendTo="body" styleClass="w-full"></p-select>
+        <label class="font-bold text-sm text-cyan-800">Unidad de Medida:</label>
+        <p-select [options]="unidadesMedida" [(ngModel)]="nuevoIngreso.unidad" optionLabel="nombre"
+            placeholder="Seleccione medida..." [filter]="true" styleClass="w-full" appendTo="body">
+        </p-select>
     </div>
 
     <div class="field mb-3">

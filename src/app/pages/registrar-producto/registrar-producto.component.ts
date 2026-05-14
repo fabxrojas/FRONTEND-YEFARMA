@@ -165,6 +165,7 @@ export class RegistrarProductoComponent implements OnInit {
     const nuevoProducto = {
       producto: '',
       precio: 0,
+      pesoUnitario: 0.00,
       tipo: null,
       formaFarmaceutica: null,
       nuevo: true // Marcador temporal para saber que es una fila nueva
@@ -179,35 +180,53 @@ export class RegistrarProductoComponent implements OnInit {
   }
 
   validarYGuardar(producto: any) {
-    // 1. Validación estricta
-    const esValido = producto.producto?.trim() &&
+    // 1. Verificamos si los campos obligatorios están presentes
+    const camposCompletos =
+      producto.producto?.trim() &&
       producto.precio > 0 &&
       producto.tipo &&
       producto.formaFarmaceutica;
 
-    if (!esValido) {
-      // Mostramos el error 
+    // 2. Verificamos la regla de negocio del peso (RN-03)
+    const pesoValido = producto.pesoUnitario > 0;
+
+    if (!camposCompletos) {
       this.messageService.add({
         severity: 'warn',
-        summary: 'Atención',
-        detail: 'Debe completar todos los campos correctamente antes de guardar.'
+        summary: 'Campos Incompletos',
+        detail: 'Por favor, complete Nombre, Precio, Tipo y Forma Farmacéutica.'
       });
-      return; // Detenemos la ejecución aquí
+      return;
     }
 
-    // 2. Si es válido, procedemos a guardar en MySQL
+    if (!pesoValido) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Peso Inválido',
+        detail: 'El peso unitario debe ser mayor a 0.00 kg.'
+      });
+      return;
+    }
+
+    // 3. Si todo es correcto, procedemos a guardar en MySQL
     this.productoService.registrar(producto).subscribe({
       next: (res) => {
-        this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Producto actualizado' });
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Éxito',
+          detail: producto.id_producto ? 'Producto actualizado' : 'Producto registrado correctamente'
+        });
 
-        // 3. Cerramos el modo edición manualmente
         this.table.cancelRowEdit(producto);
-
-        // 4. Recargamos para ver el código N000XX generado
         this.obtenerDatosIniciales();
       },
       error: (err) => {
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo conectar con el servidor' });
+        console.error(err);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'No se pudo conectar con el servidor de Yefarma'
+        });
       }
     });
   }

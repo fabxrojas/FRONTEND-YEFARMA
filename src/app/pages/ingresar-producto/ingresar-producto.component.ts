@@ -38,24 +38,27 @@ export class IngresarProductoComponent implements OnInit {
   presentaciones: any[] = []; // Para cargar las presentaciones en el selector del modal
   listaUnidadesDetalle: any[] = [];
   proveedores: any[] = [];
-  unidades: any[] = []; //  Para cargar las unidades de medida en el selector del modal
+  unidadesMedida: any[] = []; //  Para cargar las unidades de medida en el selector del modal
 
   listaunidadesdetalle: any[] = []; // para la tabla unidades_detalle
 
   productoSeleccionado: any = null;
+  productoFijado: any = null;
   resultadosBusqueda: any[] = [];
 
   // Arreglo para guardar los detalles pendientes antes de confirmar
   detallesIngreso: any[] = [];
 
-  listaDetallesTemporales: any[] = []; // Para mostrar los detalles que se han agregado temporalmente antes de confirmar el ingreso
-
-  // Objeto mapeado al formulario HTML
+  get listaDetallesTemporales(): any[] {
+    if (!this.productoSeleccionado) return [];
+    return this.detallesPorProducto.get(this.productoSeleccionado.id_producto) || [];
+  }
+  detallesPorProducto: Map<number, any[]> = new Map(); // Mapa para almacenar detalles por producto
   nuevoIngreso: any = {
     proveedor: null,
     marca: null,
     presentacion: null,
-    unidad: null, // Captura la unidad de medida
+    unidad: null,
     cantidad_ingresada: null,
     cant_por_presen: null,
     fechaFabricacion: null,
@@ -70,7 +73,7 @@ export class IngresarProductoComponent implements OnInit {
   marcaParaAsociar: any = null;
   todasLasMarcasBD: any[] = [];
   marcasDelProducto: any[] = [];
-  productoFijado: any = null;
+
 
   nuevaUnidadPresentacion: any = {
     unidadMedida: null,
@@ -88,18 +91,36 @@ export class IngresarProductoComponent implements OnInit {
   ngOnInit(): void {
     this.cargarCatalogos();
     this.cargarProveedores();
+    this.cargarMarcas();
   }
+
+  limpiarBuscador() {
+    this.productoSeleccionado = null;
+  }
+
 
   abrirModalMarca() {
     // Esta llamada debe ir a /api/marcas mediante el servicio corregido
     this.productoService.getMarcas().subscribe({
       next: (data) => {
         this.todasLasMarcasBD = data;
-        this.mostrarModalMarca = true; // Solo se abre si la petición tiene éxito
+        this.mostrarModalMarca = true;
       },
       error: (err) => {
         console.error("Error al abrir modal:", err);
         this.mostrarModalMarca = true;
+      }
+    });
+  }
+
+  cargarMarcas() {
+    this.productoService.getMarcas().subscribe({
+      next: (data) => {
+        this.marcas = data;
+        console.log('Marcas desde la BD:', data);
+      },
+      error: (err) => {
+        console.error('Error al cargar marcas:', err);
       }
     });
   }
@@ -117,15 +138,31 @@ export class IngresarProductoComponent implements OnInit {
   }
 
   fijarProducto(event: any) {
-    this.productoFijado = event.value || event;
-    // Cargar las marcas asociadas a este producto específico desde la BD
-    this.productoService.getMarcasPorProducto(this.productoFijado.id_producto).subscribe(data => {
-      this.marcasDelProducto = data;
+    // Obtenemos el producto seleccionado del evento
+    const productoData = event.value || event;
+
+    if (!productoData || !productoData.id_producto) return;
+
+    this.productoFijado = { ...productoData };
+
+    this.productoSeleccionado = this.productoFijado;
+
+    this.productoService.getMarcasPorProducto(this.productoFijado.id_producto).subscribe({
+      next: (data) => {
+        this.marcasDelProducto = data;
+      },
+      error: (err) => {
+        console.error("Error al cargar marcas:", err);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'No se pudieron cargar las marcas del producto.'
+        });
+      }
     });
   }
 
   cargarCatalogos() {
-    // 1. Marcas
     this.productoService.getMarcas().subscribe(data => this.marcas = data);
 
     // 2. Presentaciones Generales (Tabla 'presentacion')
@@ -133,9 +170,13 @@ export class IngresarProductoComponent implements OnInit {
       this.presentaciones = data;
     });
 
-    // 3. Unidades de Medida Maestras (Tabla 'unidad_medida')
-    this.productoService.getUnidadesMedida().subscribe(data => {
-      this.unidades = data;
+    this.productoService.getUnidadesMedida().subscribe({
+      next: (data) => {
+        // Asegúrate de que 'data' sea la lista de objetos de tu tabla unidad_medida
+        this.unidadesMedida = data;
+        console.log("Unidades cargadas para el combo:", data);
+      },
+      error: (err) => console.error("Error al traer unidades", err)
     });
 
     // 4. Unidades Detalle (Tabla 'unidades_detalle')
@@ -143,7 +184,6 @@ export class IngresarProductoComponent implements OnInit {
       next: (data) => {
         this.listaUnidadesDetalle = data.map(ud => ({
           ...ud,
-          // Cambiamos 'abreviatura' por 'Nombre' y añadimos el sufijo
           label: `${ud.unidadMedida.nombre} x ${ud.cantidad} unidades`
         }));
       },
@@ -226,15 +266,16 @@ export class IngresarProductoComponent implements OnInit {
   }
 
   guardarTemporalmente() {
-    // 1. Validamos que los datos necesarios existan
-    if (!this.nuevoIngreso.presentacion || !this.nuevoIngreso.marca || !this.nuevoIngreso.unidad) {
-      // Podrías poner una alerta aquí
-      return;
-    }
+    if (!this.nuevoIngreso.presentacion || !this.nuevoIngreso.marca || !this.nuevoIngreso.unidad) return;
 
-    // 2. Creamos el objeto incluyendo la 'presentacion' del card principal
-    const detalle = {
-      presentacion: this.nuevoIngreso.presentacion, // Captura el objeto seleccionado en el card
+    const idProd = this.productoSeleccionado.id_producto;
+
+    // Obtenemos la lista actual de ese producto o creamos una nueva
+    const detallesActuales = this.detallesPorProducto.get(idProd) || [];
+
+    const nuevoDetalle = {
+      producto: this.productoSeleccionado, // Guardamos referencia al producto
+      presentacion: this.nuevoIngreso.presentacion,
       marca: this.nuevoIngreso.marca,
       unidad: this.nuevoIngreso.unidad,
       cantidadRecibida: this.nuevoIngreso.cantidadRecibida,
@@ -242,22 +283,30 @@ export class IngresarProductoComponent implements OnInit {
       fechaVencimiento: this.nuevoIngreso.fechaVencimiento
     };
 
-    // 3. Insertamos en la lista
-    this.listaDetallesTemporales = [...this.listaDetallesTemporales, detalle];
+    // Actualizamos el mapa
+    this.detallesPorProducto.set(idProd, [...detallesActuales, nuevoDetalle]);
 
-    // 4. Cerramos y limpiamos solo los datos del modal
     this.mostrarModalDetalles = false;
     this.limpiarFormularioDetalle();
   }
 
   eliminarDetalleTemporal(index: number) {
-    this.listaDetallesTemporales.splice(index, 1);
-    this.listaDetallesTemporales = [...this.listaDetallesTemporales]; // Refrescar referencia
+    const idProd = this.productoSeleccionado.id_producto;
+    const detalles = this.detallesPorProducto.get(idProd);
+
+    if (detalles) {
+      detalles.splice(index, 1);
+      if (detalles.length === 0) {
+        this.detallesPorProducto.delete(idProd);
+      } else {
+        this.detallesPorProducto.set(idProd, [...detalles]);
+      }
+    }
   }
 
   limpiarFormularioDetalle() {
     this.nuevoIngreso = {
-      presentacion: null, 
+      presentacion: null,
       marca: null,
       unidad: null,
       cantidadRecibida: null,
@@ -268,29 +317,26 @@ export class IngresarProductoComponent implements OnInit {
 
   // 3. Envía TODO el arreglo a la base de datos
   confirmarIngresosBatch() {
-    if (this.detallesIngreso.length === 0) {
-      this.mostrarError('No hay detalles pendientes para registrar en el inventario.');
+    const detallesAEnviar = this.listaDetallesTemporales;
+
+    if (detallesAEnviar.length === 0) {
+      this.mostrarError('No hay detalles para el producto seleccionado.');
       return;
     }
 
-    this.ingresoProductoService.registrarIngresoBatch(this.detallesIngreso).subscribe({
+    this.ingresoProductoService.registrarIngresoBatch(detallesAEnviar).subscribe({
       next: () => {
         this.messageService.add({
           severity: 'success',
           summary: 'Éxito',
-          detail: `Se han registrado ${this.detallesIngreso.length} lote(s) en el almacén.`
+          detail: `Ingreso registrado para ${this.productoSeleccionado.producto}`
         });
 
-        // Limpiamos todo tras un guardado exitoso
+        // Limpiamos solo los detalles de este producto ya procesado
+        this.detallesPorProducto.delete(this.productoSeleccionado.id_producto);
+
+        // Opcional: limpiar selección para obligar a buscar otro
         this.cancelarIngreso();
-      },
-      error: (err: any) => {
-        console.error('Error del servidor:', err);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'No se pudo guardar el lote de ingresos en la base de datos.'
-        });
       }
     });
   }
@@ -444,4 +490,6 @@ export class IngresarProductoComponent implements OnInit {
   private mostrarError(mensaje: string) {
     this.messageService.add({ severity: 'error', summary: 'Atención', detail: mensaje });
   }
+
+
 }

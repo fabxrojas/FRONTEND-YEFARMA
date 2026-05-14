@@ -1,0 +1,198 @@
+<p-toast></p-toast>
+
+<div class="card p-fluid w-full p-4">
+    <h2 class="text-left mb-4 text-cyan-800">
+        Generar Guía de Remisión Electrónica
+    </h2>
+
+    <div class="grid align-items-stretch">
+        <div class="col-12 md:col-4 p-2">
+            <p-card header="Información del Traslado" styleClass="border-round-xl shadow-2 h-full">
+                <div class="flex flex-column justify-content-between h-full py-2" style="min-height: 450px;">
+
+                    <div class="field mb-3">
+                        <label class="font-bold text-xs text-cyan-800">PROVEEDOR (ORIGEN):</label>
+                        <p-select [options]="proveedores" [(ngModel)]="nuevaGuia.proveedor"
+                            (onChange)="onProveedorSelect($event)" optionLabel="nombre"
+                            placeholder="Seleccione el proveedor" styleClass="w-full shadow-1">
+                        </p-select>
+                    </div>
+
+                    <div class="field mb-3">
+                        <label class="font-bold text-xs text-cyan-800 uppercase">RUC PROVEEDOR:</label>
+                        <div class="p-inputgroup">
+                            <span class="p-inputgroup-addon bg-cyan-50">
+                            </span>
+                            <input pInputText [value]="nuevaGuia.proveedor?.ruc || ''" readonly
+                                class="w-full bg-gray-100 text-cyan-900" placeholder="RUC del proveedor" />
+                        </div>
+                    </div>
+
+                    <div class="field mb-3">
+                        <label class="font-bold text-xs text-cyan-800 uppercase">Punto de Partida:</label>
+                        <input pInputText [(ngModel)]="nuevaGuia.puntoPartida" readonly
+                            class="w-full bg-gray-100 font-medium" placeholder="Dirección del proveedor" />
+                    </div>
+
+                    <hr class="border-300 mb-2" />
+
+                    <div class="field mb-3">
+                        <label class="font-bold text-xs text-cyan-800 uppercase">Establecimiento Destino:</label>
+                        <div class="p-2 border-round surface-100 border-1 border-cyan-100">
+                            <div class="font-bold text-sm text-cyan-900">
+                                {{ nuevaGuia.establecimiento?.nombreComercial || 'YEFARMA' }}
+                            </div>
+                            <div class="text-gray-600">
+                                RUC: {{ nuevaGuia.establecimiento?.ruc || 'Cargando RUC...' }}
+                            </div>
+                            <div class="text-gray-500 italic mt-1">
+                                Dirección: {{ nuevaGuia.establecimiento?.direccion || 'Cargando dirección...' }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field mb-3">
+                        <label class="font-bold text-xs text-cyan-800 uppercase">Fecha Emisión:</label>
+                        <p-datepicker [(ngModel)]="nuevaGuia.fechaEmision" [showIcon]="true" dateFormat="dd/mm/yy"
+                            styleClass="w-full" appendTo="body"></p-datepicker>
+                    </div>
+
+                    <div class="grid">
+                        <div class="field col-6 mb-0">
+                            <label class="font-bold text-xs text-cyan-800 uppercase">Placa Vehículo:</label>
+                            <input pInputText [(ngModel)]="nuevaGuia.placaVehiculo" placeholder="ABC-123" maxlength="10"
+                                class="w-full" />
+                        </div>
+                        <div class="field col-6 mb-0">
+                            <label class="font-bold text-xs text-cyan-800 uppercase">Licencia:</label>
+                            <input pInputText [(ngModel)]="nuevaGuia.licenciaConductor" placeholder="Q12345678"
+                                class="w-full" />
+                        </div>
+                    </div>
+                </div>
+            </p-card>
+        </div>
+
+        <div class="col-12 md:col-8 p-2">
+            <p-card header="Detalle de Mercadería" styleClass="border-round-xl shadow-2 h-full flex flex-column">
+
+                <div class="grid p-fluid align-items-end mb-5">
+
+                    <div class="col-2 md:col-3 py-1">
+                        <label class="font-bold text-xs text-cyan-800 uppercase">Medicamento:</label>
+                        <p-autoComplete [(ngModel)]="productoSeleccionado" [suggestions]="resultadosBusqueda"
+                            (completeMethod)="buscarProducto($event)" field="producto" placeholder="Buscar..."
+                            styleClass="w-full">
+                        </p-autoComplete>
+                    </div>
+
+                    <div class="col-8 md:col-2 py-1">
+                        <label class="font-bold text-xs text-cyan-800 uppercase">Marca:</label>
+                        <p-autoComplete [(ngModel)]="marcaSeleccionada" [suggestions]="resultadosMarcas"
+                            (completeMethod)="filtrarMarcas($event)" field="nombre" [dropdown]="true" [minLength]="0"
+                            [completeOnFocus]="true" placeholder="Marca" styleClass="w-full">
+                        </p-autoComplete>
+                    </div>
+
+                    <div class="col-8 md:col-2 py-1">
+                        <label class="font-bold text-xs text-cyan-800 uppercase">Unidad de medida:</label>
+                        <p-select [options]="unidadesMedida" [(ngModel)]="unidadSeleccionada" optionLabel="abreviatura"
+                            placeholder="UND" styleClass="w-full">
+                        </p-select>
+                    </div>
+
+                    <div class="col-12 md:col-2 py-1">
+                        <label class="font-bold text-xs text-cyan-800 uppercase">Presentación:</label>
+                        <p-select [options]="listaPresentaciones" [(ngModel)]="presentacionSeleccionada"
+                            optionLabel="nombre" [filter]="true" placeholder="Caja/Blister" styleClass="w-full">
+                        </p-select>
+                    </div>
+
+                    <div class="col-6 md:col-2 py-1">
+                        <label class="font-bold text-xs text-cyan-800 uppercase">Cantidad:</label>
+                        <input pInputText type="number" [(ngModel)]="cantidadAgregar" min="1" class="w-full">
+                    </div>
+
+                    <div class="col-12 md:col-1 py-1">
+                        <p-button icon="pi pi-plus" (onClick)="agregarProductoALaGuia()"
+                            styleClass="p-button-info w-full shadow-2" tooltipPosition="bottom"
+                            pTooltip="Añadir medicamento">
+                        </p-button>
+                    </div>
+                </div>
+
+                <div class="flex-grow-1" style="height: 250px; overflow-y: auto; border-radius: 6px;">
+                    <p-table [value]="nuevaGuia.detalles" [scrollable]="true" scrollHeight="300px"
+                        styleClass="p-datatable-striped p-datatable-sm border-1 border-200 border-round">
+
+                        <ng-template pTemplate="header">
+                            <tr>
+                                <th class="text-center" style="width: 35%">Producto / Detalles</th>
+                                <th class="text-center" style="width: 25%">Marca / Presentación</th>
+                                <th class="text-center" style="width: 15%">Cantidad</th>
+                                <th class="text-center" style="width: 15%">Peso (kg)</th>
+                                <th class="text-center" style="width: 10%">Acción</th>
+                            </tr>
+                        </ng-template>
+
+                        <ng-template pTemplate="body" let-item let-ri="rowIndex">
+                            <tr>
+                                <td style="width: 35%" class="text-center">
+                                    <div class="font-bold text-cyan-900 ml-2">{{item.producto.producto}}</div>
+                                </td>
+
+                                <td class="text-center" style="width: 25%">
+                                    <div class="text-orange-600 uppercase font-bold" style="font-size: 1.0rem;">
+                                        {{item.marcaSolicitada || 'SIN MARCA'}}
+                                    </div>
+                                    <div class="text-gray-600 font-medium italic">
+                                        {{item.presentacion?.nombre}}
+                                        <span class="text-blue-600">({{item.unidadMedida?.abreviatura}})</span>
+                                    </div>
+                                </td>
+
+                                <td class="text-center font-bold" style="width: 15%">
+                                    {{item.cantidad}}
+                                </td>
+
+                                <td class="text-center text-cyan-700 font-medium" style="width: 15%">
+                                    {{item.pesoSubtotal | number:'1.4-4'}}
+                                </td>
+
+                                <td class="text-center" style="width: 10%">
+                                    <p-button icon="pi pi-trash"
+                                        styleClass="p-button-danger p-button-text p-button-sm p-0"
+                                        (onClick)="eliminarItem(ri)"></p-button>
+                                </td>
+                            </tr>
+                        </ng-template>
+
+                        <ng-template pTemplate="emptymessage">
+                            <tr>
+                                <td colspan="5" class="text-center p-8 text-gray-400 italic">
+                                    No hay productos añadidos a la guía.
+                                </td>
+                            </tr>
+                        </ng-template>
+                    </p-table>
+                </div>
+
+                <div class="mt-6 pt-5 border-top-1 border-200">
+                    <div
+                        class="flex justify-content-between align-items-center bg-cyan-50 p-3 border-round-lg border-1 border-cyan-100 mb-3">
+                        <span class="text-cyan-800 font-bold uppercase">Peso Bruto Total:</span>
+                        <span class="text-xl font-black text-cyan-900">{{pesoBrutoTotal | number:'1.4-4'}} KG</span>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <p-button label="LIMPIAR" icon="pi pi-trash" (onClick)="limpiarFormulario()"
+                            styleClass="p-button-info flex-1"></p-button>
+                        <p-button label="GENERAR GUÍA ELECTRÓNICA" icon="pi pi-check-circle"
+                            (onClick)="guardarGuiaCompleta()" styleClass="p-button-success flex-2 shadow-4"
+                            [disabled]="nuevaGuia.detalles.length === 0"></p-button>
+                    </div>
+                </div>
+            </p-card>
+        </div>
+    </div>
+</div>
