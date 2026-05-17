@@ -165,7 +165,7 @@ export class RegistrarProductoComponent implements OnInit {
     const nuevoProducto = {
       producto: '',
       precio: 0,
-      pesoUnitario: 0.00,
+      pesoUnitario: 0.00000,
       tipo: null,
       formaFarmaceutica: null,
       nuevo: true // Marcador temporal para saber que es una fila nueva
@@ -203,7 +203,7 @@ export class RegistrarProductoComponent implements OnInit {
       this.messageService.add({
         severity: 'warn',
         summary: 'Peso Inválido',
-        detail: 'El peso unitario debe ser mayor a 0.00 kg.'
+        detail: 'El peso unitario debe ser mayor a 0.00000 kg.'
       });
       return;
     }

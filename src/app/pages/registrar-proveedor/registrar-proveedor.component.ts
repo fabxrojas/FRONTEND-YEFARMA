@@ -8,7 +8,9 @@ import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { TableModule } from 'primeng/table';
-import { ToastModule } from 'primeng/toast'; // Para que el MessageService funcione en el HTML
+import { ToastModule } from 'primeng/toast';
+import { ConfirmationService } from 'primeng/api';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
 @Component({
   selector: 'app-registrar-proveedor',
@@ -21,9 +23,9 @@ import { ToastModule } from 'primeng/toast'; // Para que el MessageService funci
     ButtonModule,
     InputTextModule,
     TableModule,
-    ToastModule
+    ToastModule, ConfirmDialogModule
   ],
-  providers: [MessageService]
+  providers: [MessageService, ConfirmationService]
 })
 export class RegistrarProveedorComponent implements OnInit {
   // Lista para la tabla
@@ -37,13 +39,21 @@ export class RegistrarProveedorComponent implements OnInit {
     telefono: ''
   };
 
+  proveedorSeleccionado: any = null;
+
   constructor(
     private proveedorService: ProveedorService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private confirmationService: ConfirmationService
   ) { }
 
   ngOnInit() {
     this.cargarProveedores(); // Cargamos la lista apenas abre el componente
+  }
+
+  onRowSelect(event: any) {
+    this.nuevoProveedor = { ...event.data };
+    this.proveedorSeleccionado = event.data;
   }
 
   cargarProveedores() {
@@ -56,49 +66,84 @@ export class RegistrarProveedorComponent implements OnInit {
   }
 
   registrar() {
-    // 1. Verificación de campos vacíos
-    if (!this.nuevoProveedor.nombre || !this.nuevoProveedor.ruc ||
-      !this.nuevoProveedor.correo || !this.nuevoProveedor.telefono ||
-      !this.nuevoProveedor.direccion) {
-
-      // Mensaje de alerta global
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Atención',
-        detail: 'Debe completar todos los campos obligatorios antes de continuar.'
-      });
-      return; // Bloquea el registro
-    }
-
-    // 2. Verificación de longitud mínima (RUC y Teléfono)
-    if (this.nuevoProveedor.ruc.length < 11 || this.nuevoProveedor.telefono.length < 9) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Datos Inválidos',
-        detail: 'El RUC debe tener 11 dígitos y el teléfono 9 dígitos.'
-      });
+    if (!this.nuevoProveedor.nombre || !this.nuevoProveedor.ruc || !this.nuevoProveedor.correo) {
+      this.messageService.add({ severity: 'warn', summary: 'Atención', detail: 'Complete los campos obligatorios.' });
       return;
     }
 
-    // 3. Si todo está correcto, proceder al guardado
-    this.proveedorService.registrarProveedor(this.nuevoProveedor).subscribe({
-      next: () => {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Éxito',
-          detail: 'Proveedor registrado correctamente.'
-        });
-        this.limpiarForm();
-        this.cargarProveedores(); // Actualiza la tabla
-      },
-      error: () => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'No se pudo registrar. Verifique si el RUC ya existe.'
+    if (this.proveedorSeleccionado) {
+      this.modificarProveedor();
+    } else {
+      this.guardarNuevo();
+    }
+  }
+
+  // Lógica de Modificación con Confirmación
+  modificarProveedor() {
+    this.confirmationService.confirm({
+      message: '¿Desea guardar los cambios realizados en este proveedor?',
+      header: 'Confirmación de Modificación',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Sí',
+      rejectLabel: 'No',
+      acceptButtonStyleClass: 'p-button-info',
+      rejectButtonStyleClass: 'p-button-danger',
+      accept: () => {
+        // Usamos idProveedor (CamelCase del modelo Java)
+        const id = this.proveedorSeleccionado.idProveedor;
+
+        this.proveedorService.actualizarProveedor(id, this.nuevoProveedor).subscribe({
+          next: () => {
+            this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Datos modificados correctamente' });
+            this.finalizarAccion();
+          },
+          error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo actualizar' })
         });
       }
     });
+  }
+
+  // Lógica de Eliminación con Confirmación
+  eliminarProveedor() {
+    if (!this.proveedorSeleccionado) return;
+
+    this.confirmationService.confirm({
+      message: `¿Está seguro de eliminar a ${this.proveedorSeleccionado.nombre}?`,
+      header: 'Confirmación de Eliminación',
+      icon: 'pi pi-trash',
+      acceptLabel: 'Sí',
+      rejectLabel: 'No',
+      acceptButtonStyleClass: 'p-button-danger',
+      rejectButtonStyleClass: 'p-button-info',
+      accept: () => {
+        const id = this.proveedorSeleccionado.idProveedor;
+
+        this.proveedorService.eliminarProveedor(id).subscribe({
+          next: () => {
+            this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Proveedor borrado del sistema' });
+            this.finalizarAccion();
+          },
+          error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo completar la eliminación' })
+        });
+      }
+    });
+  }
+
+  // Método auxiliar para guardar nuevo
+  guardarNuevo() {
+    this.proveedorService.registrarProveedor(this.nuevoProveedor).subscribe({
+      next: () => {
+        this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Proveedor registrado correctamente' });
+        this.finalizarAccion();
+      },
+      error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo registrar' })
+    });
+  }
+
+  finalizarAccion() {
+    this.limpiarForm();
+    this.proveedorSeleccionado = null;
+    this.cargarProveedores();
   }
 
   limpiarForm() {

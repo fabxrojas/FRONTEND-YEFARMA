@@ -11,6 +11,7 @@ export class ProductoService {
   private urlUnidadesDetalle = 'http://localhost:8081/api/unidades-detalle';
   private urlUnidadesMedida = 'http://localhost:8081/api/unidades-medida';
   private urlProveedores = 'http://localhost:8081/api/proveedores';
+  private urlMotivos = 'http://localhost:8081/api/motivos-traslado';
 
   constructor(private http: HttpClient) { }
 
@@ -33,6 +34,10 @@ export class ProductoService {
 
   getMarcasPorProducto(idProducto: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/${idProducto}/marcas`);
+  }
+
+  getMotivosTraslado(): Observable<any[]> {
+    return this.http.get<any[]>(this.urlMotivos);
   }
 
   getPresentaciones(): Observable<any[]> {

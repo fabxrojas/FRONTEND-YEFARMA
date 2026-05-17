@@ -1,0 +1,159 @@
+<div class="p-4 max-w-7xl mx-auto animate-fadein">
+    <p-toast></p-toast>
+
+    <div class="mb-4">
+        <h1 class="text-2xl font-bold text-cyan-900 flex align-items-center gap-2">
+            <i class="pi pi-file-check text-2xl text-cyan-700"></i> Auditoría y Validación de Guías
+        </h1>
+        <p class="text-gray-500 text-sm">Ingrese el código de la guía de remisión para auditar el traslado y descargar
+            el comprobante oficial.</p>
+    </div>
+
+    <div class="grid grid-cols-12 gap-4">
+
+        <div class="col-span-12 md:col-span-4">
+            <p-card styleClass="shadow-2 border-round surface-card">
+                <div class="flex flex-col gap-3">
+                    <label class="font-bold text-cyan-900 text-sm uppercase tracking-wide">Código de Guía:</label>
+                    <div class="p-inputgroup w-full shadow-1">
+                        <span class="p-inputgroup-addon bg-gray-50 border-300"><i class="pi pi-search"></i></span>
+                        <input type="text" pInputText [(ngModel)]="codigoBusqueda" placeholder="Ej: GR-00001"
+                            class="w-full uppercase font-medium" (keyup.enter)="buscarGuia()" />
+                    </div>
+                    <div class="flex gap-2 w-full mt-2">
+                        <button pButton label="Buscar" icon="pi pi-search" class="p-button-cyan flex-grow-1"
+                            (click)="buscarGuia()"></button>
+                        <button pButton label="Limpiar" icon="pi pi-refresh"
+                            class="p-button-outlined p-button-secondary" (click)="limpiarValidacion()"></button>
+                    </div>
+                </div>
+
+                <div *ngIf="guiaEncontrada" class="mt-4 pt-4 border-t-1 border-200 text-center animate-fadein">
+                    <div class="text-xs font-bold text-gray-500 uppercase mb-2">Estado de Validación SUNAT</div>
+                    <p-tag [value]="guiaEncontrada.estado?.descripcion"
+                        [severity]="getSeverityEstado(guiaEncontrada.estado?.descripcion)"
+                        styleClass="text-sm font-bold px-4 py-2 border-round-md w-full"></p-tag>
+
+                    <div class="mt-4 flex flex-col gap-2">
+                        <button pButton label="Descargar Reporte PDF" icon="pi pi-file-pdf"
+                            class="p-button-success w-full shadow-2" (click)="descargarPDF()"></button>
+                    </div>
+                </div>
+            </p-card>
+        </div>
+
+        <div class="col-span-12 md:col-span-8">
+            <div *ngIf="!guiaEncontrada"
+                class="flex flex-col align-items-center justify-content-center border-2 border-dashed border-300 border-round-md p-8 bg-gray-50 text-gray-400 h-full min-h-[300px]">
+                <i class="pi pi-search-plus text-5xl mb-3 text-300"></i>
+                <span class="font-medium text-lg">Esperando código de verificación...</span>
+                <span class="text-sm text-gray-400">Ingrese un identificador válido para desplegar el historial.</span>
+            </div>
+
+            <div *ngIf="guiaEncontrada" class="flex flex-col gap-4 animate-fadein">
+
+                <p-card styleClass="shadow-2 border-round">
+                    <h3
+                        class="text-md font-bold text-cyan-800 uppercase mb-3 border-b-1 border-100 pb-2 flex align-items-center gap-2">
+                        <i class="pi pi-map-marker text-orange-500"></i> Ruta del Traslado
+                    </h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="col-span-2 md:col-span-1">
+                            <span class="text-xs font-bold text-gray-400 uppercase block">Proveedor Origen:</span>
+                            <span class="font-bold text-cyan-950">{{guiaEncontrada.proveedor?.nombre}}</span>
+                            <small class="block text-gray-500">RUC: {{guiaEncontrada.proveedor?.ruc}}</small>
+                        </div>
+                        <div class="col-span-2 md:col-span-1">
+                            <span class="text-xs font-bold text-gray-400 uppercase block">Establecimiento Destino
+                                (Botica):</span>
+                            <span
+                                class="font-bold text-cyan-950">{{guiaEncontrada.establecimiento?.nombreComercial}}</span>
+                            <small class="block text-gray-500">RUC: {{guiaEncontrada.establecimiento?.ruc}}</small>
+                        </div>
+                        <div class="col-span-2 md:col-span-1 bg-gray-50 p-2 border-round">
+                            <span class="text-xs font-bold text-gray-500 uppercase block">Dirección Partida:</span>
+                            <span class="text-sm font-medium text-gray-700">{{guiaEncontrada.puntoPartida}}</span>
+                        </div>
+                        <div class="col-span-2 md:col-span-1 bg-gray-50 p-2 border-round">
+                            <span class="text-xs font-bold text-gray-500 uppercase block">Dirección Llegada:</span>
+                            <span class="text-sm font-medium text-gray-700">{{guiaEncontrada.puntoLlegada}}</span>
+                        </div>
+                    </div>
+                </p-card>
+
+                <p-card styleClass="shadow-2 border-round">
+                    <h3
+                        class="text-md font-bold text-cyan-800 uppercase mb-3 border-b-1 border-100 pb-2 flex align-items-center gap-2">
+                        <i class="pi pi-truck text-cyan-600"></i> Información Logística y Vehicular
+                    </h3>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="col-span-3 md:col-span-1">
+                            <span class="text-xs font-bold text-gray-400 uppercase block">Motivo Traslado:</span>
+                            <span class="font-bold text-gray-800">{{guiaEncontrada.motivo?.nombre}}</span>
+                        </div>
+                        <div class="col-span-3 md:col-span-1">
+                            <span class="text-xs font-bold text-gray-400 uppercase block">Placa del Vehículo:</span>
+                            <span
+                                class="font-bold text-gray-800 uppercase bg-orange-50 text-orange-700 px-2 py-0.5 border-round inline-block">{{guiaEncontrada.placaVehiculo
+                                || 'N/A'}}</span>
+                        </div>
+                        <div class="col-span-3 md:col-span-1">
+                            <span class="text-xs font-bold text-gray-400 uppercase block">Licencia Conductor:</span>
+                            <span class="font-bold text-gray-800 uppercase">{{guiaEncontrada.licenciaConductor ||
+                                'N/A'}}</span>
+                        </div>
+                        <div class="col-span-3 md:col-span-1">
+                            <span class="text-xs font-bold text-gray-400 uppercase block">Fecha de Traslado:</span>
+                            <span class="font-bold text-gray-800">{{guiaEncontrada.fechaTraslado |
+                                date:'dd/MM/yyyy'}}</span>
+                        </div>
+                        <div class="col-span-3 md:col-span-2 text-right self-end">
+                            <span class="text-xs font-bold text-gray-400 uppercase block">Peso Bruto Total
+                                Consolidado:</span>
+                            <span class="text-xl font-black text-cyan-900">{{guiaEncontrada.pesoBrutoTotal |
+                                number:'1.5-5'}} KG</span>
+                        </div>
+                    </div>
+                </p-card>
+
+                <div class="shadow-2 border-round bg-white overflow-hidden border-1 border-200">
+                    <div
+                        class="bg-gray-50 px-3 py-2 border-b-1 border-200 flex align-items-center justify-content-between">
+                        <span class="font-bold text-cyan-900 text-sm uppercase"><i
+                                class="pi pi-box text-cyan-600 mr-1"></i> Mercadería Amparada en Guía</span>
+                        <p-tag severity="info" [value]="guiaEncontrada.detalles?.length + ' Items'"></p-tag>
+                    </div>
+
+                    <p-table [value]="guiaEncontrada.detalles" styleClass="p-datatable-striped p-datatable-sm"
+                        [scrollable]="true" scrollHeight="250px">
+                        <ng-template pTemplate="header">
+                            <tr>
+                                <th style="width: 45%" class="text-center">Medicamento</th>
+                                <th style="width: 25%" class="text-center">Marca / Presentación</th>
+                                <th style="width: 15%" class="text-center">Cantidad</th>
+                                <th style="width: 15%" class="text-center">Subtotal Peso</th>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="body" let-detalle>
+                            <tr>
+                                <td>
+                                    <div class="font-bold text-cyan-950 ml-2">{{detalle.producto?.producto}}</div>
+                                </td>
+                                <td class="text-center">
+                                    <span
+                                        class="text-orange-600 font-bold block text-xs">{{detalle.marcaSolicitada}}</span>
+                                    <small class="text-gray-500 italic">{{detalle.presentacion}}</small>
+                                </td>
+                                <td class="text-center font-bold text-gray-800">{{detalle.cantidad}}</td>
+                                <td class="text-center text-cyan-700 font-medium">{{detalle.pesoSubtotal |
+                                    number:'1.5-5'}} kg</td>
+                            </tr>
+                        </ng-template>
+                    </p-table>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>

@@ -47,11 +47,11 @@
 
             <div class="flex flex-wrap gap-3 mt-3 justify-content-center md:justify-content-start">
                 <p-button *ngIf="!usuario.id_usuario" label="Registrar" icon="pi pi-user-plus"
-                    (onClick)="crearUsuario()" severity="success" styleClass="p-button-raised">
+                    (onClick)="crearUsuario()" severity="info" styleClass="p-button-raised">
                 </p-button>
 
                 <p-button *ngIf="usuario.id_usuario" label="Guardar Cambios" icon="pi pi-save"
-                    [disabled]="botonModificarDesactivado" (onClick)="modificarUsuario()" severity="warn"
+                    [disabled]="botonModificarDesactivado" (onClick)="modificarUsuario()" severity="info"
                     styleClass="p-button-raised">
                 </p-button>
 
@@ -60,7 +60,7 @@
                 </p-button>
 
                 <p-button label="Limpiar / Nuevo" icon="pi pi-refresh" (onClick)="limpiarFormulario()"
-                    severity="info">
+                    severity="secondary">
                 </p-button>
             </div>
         </p-card>

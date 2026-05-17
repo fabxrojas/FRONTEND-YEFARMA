@@ -76,12 +76,12 @@
                     <td>
                         <p-cellEditor>
                             <ng-template pTemplate="input">
-                                <p-inputNumber [(ngModel)]="prod.pesoUnitario" mode="decimal" [minFractionDigits]="4"
-                                    [maxFractionDigits]="4" suffix=" kg" placeholder="0.0000" styleClass="w-full">
+                                <p-inputNumber [(ngModel)]="prod.pesoUnitario" mode="decimal" [minFractionDigits]="5"
+                                    [maxFractionDigits]="6" suffix=" kg" placeholder="0.00000" styleClass="w-full">
                                 </p-inputNumber>
                             </ng-template>
                             <ng-template pTemplate="output">
-                                {{prod.pesoUnitario ? (prod.pesoUnitario | number:'1.4-4') + ' kg' : '0.0000 kg'}}
+                                {{prod.pesoUnitario ? (prod.pesoUnitario | number:'1.5-6') + ' kg' : '0.00000 kg'}}
                             </ng-template>
                         </p-cellEditor>
                     </td>

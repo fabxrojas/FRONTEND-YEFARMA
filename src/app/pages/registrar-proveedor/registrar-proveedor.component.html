@@ -1,8 +1,8 @@
+<p-confirmDialog></p-confirmDialog>
 <p-toast></p-toast>
+
 <div class="p-3">
-    <!-- SECCIÓN DE REGISTRO CON HEADER COMPLETO -->
     <p-card styleClass="shadow-4 border-round-xl mb-4 overflow-hidden">
-        <!-- Header sin márgenes laterales -->
         <ng-template pTemplate="header">
             <div class="bg-cyan-900 p-4 flex align-items-center">
                 <i class="pi pi-truck text-black mr-2 text-xl"></i>
@@ -10,7 +10,6 @@
             </div>
         </ng-template>
 
-        <!-- Formulario Compacto y Ancho -->
         <div class="grid p-fluid mt-2">
             <div class="col-12 md:col-8 field">
                 <label class="block font-bold text-sm mb-2 text-cyan-800">
@@ -19,7 +18,7 @@
                 <div class="p-inputgroup w-full">
                     <span class="p-inputgroup-addon border-round-left-lg"></span>
                     <input pInputText [(ngModel)]="nuevoProveedor.nombre" placeholder="Ej: Laboratorios Farma S.A.C."
-                       class="p-inputtext-lg w-full border-round-right-lg py-2">
+                        class="p-inputtext-lg w-full border-round-right-lg py-2">
                 </div>
             </div>
 
@@ -61,58 +60,62 @@
                     <input pInputText [(ngModel)]="nuevoProveedor.direccion" placeholder="Av. Siempre Viva 742, Lima"
                         class="p-inputtext-lg w-full border-round-right-lg py-2">
                 </div>
+
             </div>
         </div>
 
         <div class="flex justify-content-end gap-2 mt-3">
-            <p-button label="Cancelar" icon="pi pi-times" (onClick)="limpiarForm()"
-                styleClass="p-button-danger p-button-secondary border-round-lg px-4 shadow-2"></p-button>
-            <p-button label="Guardar Registro" icon="pi pi-save" (onClick)="registrar()"
+            <p-button label="Limpiar / Nuevo" icon="pi pi-refresh" (onClick)="finalizarAccion()"
+                styleClass="p-button-secondary border-round-lg px-4 shadow-2"></p-button>
+
+            <p-button *ngIf="proveedorSeleccionado" label="Eliminar Proveedor" icon="pi pi-trash"
+                (onClick)="eliminarProveedor()" styleClass="p-button-danger border-round-lg px-4 shadow-2"></p-button>
+
+            <p-button [label]="proveedorSeleccionado ? 'Actualizar Cambios' : 'Guardar Registro'"
+                [icon]="proveedorSeleccionado ? 'pi pi-pencil' : 'pi pi-save'" (onClick)="registrar()"
                 styleClass="p-button-info border-round-lg px-4 shadow-2"></p-button>
         </div>
     </p-card>
 
-    <p-table #dt [value]="proveedores" [rows]="5" [paginator]="true" [globalFilterFields]="['nombre', 'ruc']"
-        styleClass="p-datatable-sm p-datatable-gridlines shadow-2 border-round-xl overflow-hidden">
+    <p-card styleClass="shadow-4 border-round-xl overflow-hidden mt-4">
+        <div class="p-3">
+            <p-table #dt [value]="proveedores" selectionMode="single" [(selection)]="proveedorSeleccionado"
+                (onRowSelect)="onRowSelect($event)" dataKey="idProveedor" [rows]="5" [paginator]="true"
+                [globalFilterFields]="['nombre', 'ruc']" styleClass="p-datatable-sm shadow-2">
 
-        <ng-template pTemplate="caption">
-            <div class="flex align-items-center justify-content-between">
-                <span class="text-lg font-bold text-cyan-900">Proveedores Registrados</span>
-                <span class="p-input-icon-left">
-                    <i class="pi pi-search">ㅤ</i> 
-                    <input pInputText type="text" (input)="dt.filterGlobal($any($event.target).value, 'contains')"
-                        placeholder="Buscar por nombre o RUC"
-                        class="p-inputtext-sm border-round-right-lg py-2 md:w-20rem w-full">
-                </span>
-            </div>
-        </ng-template>
+                <ng-template pTemplate="caption">
+                    <div class="flex align-items-center justify-content-between p-2">
+                        <span class="text-lg font-bold text-cyan-900">Proveedores Registrados</span>
+                        <span class="p-input-icon-right">
+                            <i class="pi pi-search"></i>
+                            <input pInputText type="text"
+                                (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+                                placeholder="Buscar por nombre o RUC"
+                                class="p-inputtext-sm border-round-lg py-2 md:w-20rem w-full">
+                        </span>
+                    </div>
+                </ng-template>
 
-        <ng-template pTemplate="header">
-            <tr>
-                <th style="width: 20%">Nombre</th>
-                <th style="width: 15%">RUC</th>
-                <th style="width: 20%">Correo</th>
-                <th style="width: 15%">Teléfono</th>
-                <th style="width: 15%">Fecha Registro</th>
-            </tr>
-        </ng-template>
+                <ng-template pTemplate="header">
+                    <tr class="bg-gray-50">
+                        <th style="width: 30%; text-align: center;">Nombre</th>
+                        <th style="width: 15%; text-align: center;">RUC</th>
+                        <th style="width: 20%; text-align: center;">Correo</th>
+                        <th style="width: 15%; text-align: center;">Teléfono</th>
+                        <th style="width: 25%; text-align: center;">Fecha Registro</th>
+                    </tr>
+                </ng-template>
 
-        <ng-template pTemplate="body" let-prov>
-            <tr>
-                <td class="font-semibold text-cyan-900">{{prov.nombre}}</td>
-                <td>{{prov.ruc}}</td>
-                <td>{{prov.correo}}</td>
-                <td>{{prov.telefono}}</td>
-                <td>{{prov.fechaCreacion | date:'dd/MM/yyyy HH:mm'}}</td>
-            </tr>
-        </ng-template>
-
-        <ng-template pTemplate="emptymessage">
-            <tr>
-                <td colspan="5" class="text-center p-4">
-                    No se encontraron proveedores que coincidan con la búsqueda.
-                </td>
-            </tr>
-        </ng-template>
-    </p-table>
+                <ng-template pTemplate="body" let-prov>
+                    <tr [pSelectableRow]="prov" class="cursor-pointer transition-colors transition-duration-200">
+                        <td class="font-semibold text-center">{{prov.nombre}}</td>
+                        <td class="text-center">{{prov.ruc}}</td>
+                        <td class="text-center">{{prov.correo}}</td>
+                        <td class="text-center">{{prov.telefono}}</td>
+                        <td class="text-center">{{prov.fechaCreacion | date:'dd/MM/yyyy HH:mm'}}</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+    </p-card>
 </div>

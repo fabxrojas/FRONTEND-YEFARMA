@@ -213,7 +213,6 @@ export class IngresarProductoComponent implements OnInit {
       this.mostrarError('Debe buscar y seleccionar un producto primero.');
       return;
     }
-    // VALIDACIÓN ESTRICTA: Exige Proveedor y Presentación
     if (!this.nuevoIngreso.proveedor || !this.nuevoIngreso.presentacion) {
       this.mostrarError('Debe seleccionar el Proveedor y la Presentación antes de ingresar los detalles.');
       return;
