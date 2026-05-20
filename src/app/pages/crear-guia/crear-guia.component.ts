@@ -225,7 +225,7 @@ export class CrearGuiaComponent implements OnInit {
 
       this.messageService.add({
         severity: 'warn',
-        summary: 'Campos Vacíos',
+        summary: 'Advertencia',
         detail: 'Todos los campos de la mercadería son obligatorios y la cantidad debe ser mayor a 0.'
       });
       return;
@@ -235,7 +235,7 @@ export class CrearGuiaComponent implements OnInit {
     if (!this.nuevaGuia.proveedor || !this.nuevaGuia.proveedor.idProveedor) {
       this.messageService.add({
         severity: 'error',
-        summary: 'Falta Proveedor',
+        summary: 'Error',
         detail: 'Debe seleccionar un proveedor en la sección de Traslado antes de añadir mercadería.'
       });
       return;
@@ -305,7 +305,7 @@ export class CrearGuiaComponent implements OnInit {
 
     this.messageService.add({
       severity: 'success',
-      summary: 'Añadido',
+      summary: 'Éxito',
       detail: 'Medicamento agregado al detalle de la guía con éxito.'
     });
   }

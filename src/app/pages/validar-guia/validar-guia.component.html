@@ -1,159 +1,158 @@
-<div class="p-4 max-w-7xl mx-auto animate-fadein">
+<div class="w-full p-2 animate-fadein" style="font-family: var(--font-family);">
     <p-toast></p-toast>
 
-    <div class="mb-4">
-        <h1 class="text-2xl font-bold text-cyan-900 flex align-items-center gap-2">
-            <i class="pi pi-file-check text-2xl text-cyan-700"></i> Auditoría y Validación de Guías
-        </h1>
-        <p class="text-gray-500 text-sm">Ingrese el código de la guía de remisión para auditar el traslado y descargar
-            el comprobante oficial.</p>
+    <div class="flex justify-content-between align-items-center mb-3 px-2">
+        <div>
+            <h1 class="text-xl font-bold text-cyan-900 m-0 flex align-items-center gap-2">
+                <i class="pi pi-file-check text-cyan-700"></i> Auditoría y Validación de Guías
+            </h1>
+            <p class="text-gray-500 m-0 text-xs mt-1">Consulte el estado logístico de los traslados y descargue el comprobante oficial.</p>
+        </div>
     </div>
 
-    <div class="grid grid-cols-12 gap-4">
+    <p-card styleClass="w-full shadow-1 border-1 border-200 mb-3" [style]="{'padding': '0.5rem'}">
+        <div class="flex flex-column md:flex-row align-items-center gap-3 w-full">
+            <span class="font-bold text-cyan-900 uppercase text-xs white-space-nowrap">Código de Guía:</span>
+            <div class="p-inputgroup flex-grow-1 shadow-1">
+                <span class="p-inputgroup-addon bg-gray-50 border-300"><i class="pi pi-search text-xs"></i></span>
+                <input type="text" pInputText [(ngModel)]="codigoBusqueda" placeholder="Ej: EG01-00000001" class="w-full uppercase font-bold text-sm text-cyan-950 px-3 py-2" (keyup.enter)="buscarGuia()"/>
+            </div>
+            <button pButton label="Buscar" icon="pi pi-search" class="p-button-cyan p-button-sm font-bold text-xs px-4" (click)="buscarGuia()"></button>
+            <button pButton label="Limpiar" icon="pi pi-refresh" class="p-button-outlined p-button-secondary p-button-sm text-xs px-4" (click)="limpiarValidacion()"></button>
+        </div>
+    </p-card>
 
-        <div class="col-span-12 md:col-span-4">
-            <p-card styleClass="shadow-2 border-round surface-card">
-                <div class="flex flex-col gap-3">
-                    <label class="font-bold text-cyan-900 text-sm uppercase tracking-wide">Código de Guía:</label>
-                    <div class="p-inputgroup w-full shadow-1">
-                        <span class="p-inputgroup-addon bg-gray-50 border-300"><i class="pi pi-search"></i></span>
-                        <input type="text" pInputText [(ngModel)]="codigoBusqueda" placeholder="Ej: GR-00001"
-                            class="w-full uppercase font-medium" (keyup.enter)="buscarGuia()" />
+    <p-card *ngIf="!guiaEncontrada" styleClass="w-full shadow-1 border-2 border-dashed border-300 bg-gray-50 mb-3 text-center">
+        <div class="py-6">
+            <i class="pi pi-search-plus text-4xl mb-3 text-300"></i>
+            <h3 class="font-bold text-sm text-cyan-900 m-0 mb-1">Esperando código de verificación...</h3>
+            <p class="text-xs text-gray-500 m-0">Ingrese un identificador alfanumérico válido arriba para desplegar el historial logístico.</p>
+        </div>
+    </p-card>
+
+    <div *ngIf="guiaEncontrada" class="flex flex-column lg:flex-row gap-3 mb-3 w-full">
+        
+        <div class="flex-grow-1" style="flex-basis: 25%;">
+            <p-card styleClass="w-full h-full shadow-1 border-1 border-200 tarjeta-igualada">
+                <ng-template pTemplate="title">
+                    <div class="text-xs font-bold text-cyan-800 uppercase flex align-items-center gap-2 border-b-1 border-100 pb-2 m-0">
+                        <i class="pi pi-shield text-cyan-600"></i> Validación SUNAT
                     </div>
-                    <div class="flex gap-2 w-full mt-2">
-                        <button pButton label="Buscar" icon="pi pi-search" class="p-button-cyan flex-grow-1"
-                            (click)="buscarGuia()"></button>
-                        <button pButton label="Limpiar" icon="pi pi-refresh"
-                            class="p-button-outlined p-button-secondary" (click)="limpiarValidacion()"></button>
-                    </div>
+                </ng-template>
+                <div class="flex flex-column align-items-center justify-content-center h-full pt-2">
+                    <span class="etiqueta-gris mb-2">Estado de Comprobante:</span>
+                    <p-tag [value]="guiaEncontrada.estado?.descripcion" [severity]="getSeverityEstado(guiaEncontrada.estado?.descripcion)" styleClass="text-xs font-bold px-4 py-2 w-full"></p-tag>
                 </div>
+                <ng-template pTemplate="footer">
+                    <button pButton label="Descargar PDF" icon="pi pi-file-pdf" class="p-button-success p-button-sm w-full font-bold shadow-1" (click)="descargarPDF()"></button>
+                </ng-template>
+            </p-card>
+        </div>
 
-                <div *ngIf="guiaEncontrada" class="mt-4 pt-4 border-t-1 border-200 text-center animate-fadein">
-                    <div class="text-xs font-bold text-gray-500 uppercase mb-2">Estado de Validación SUNAT</div>
-                    <p-tag [value]="guiaEncontrada.estado?.descripcion"
-                        [severity]="getSeverityEstado(guiaEncontrada.estado?.descripcion)"
-                        styleClass="text-sm font-bold px-4 py-2 border-round-md w-full"></p-tag>
-
-                    <div class="mt-4 flex flex-col gap-2">
-                        <button pButton label="Descargar Reporte PDF" icon="pi pi-file-pdf"
-                            class="p-button-success w-full shadow-2" (click)="descargarPDF()"></button>
+        <div class="flex-grow-1" style="flex-basis: 35%;">
+            <p-card styleClass="w-full h-full shadow-1 border-1 border-200 tarjeta-igualada">
+                <ng-template pTemplate="title">
+                    <div class="text-xs font-bold text-cyan-800 uppercase flex align-items-center gap-2 border-b-1 border-100 pb-2 m-0">
+                        <i class="pi pi-map-marker text-orange-500"></i> Ruta del Traslado
+                    </div>
+                </ng-template>
+                <div class="flex flex-column gap-2 w-full h-full">
+                    <div class="flex justify-content-between border-b-1 border-50 pb-1">
+                        <span class="etiqueta-gris">Origen:</span>
+                        <span class="valor-oscuro white-space-nowrap overflow-hidden text-overflow-ellipsis max-w-[160px]" [title]="guiaEncontrada.proveedor?.nombre">{{guiaEncontrada.proveedor?.nombre}}</span>
+                    </div>
+                    <div class="flex justify-content-between border-b-1 border-50 pb-1">
+                        <span class="etiqueta-gris">Destino:</span>
+                        <span class="valor-oscuro white-space-nowrap overflow-hidden text-overflow-ellipsis max-w-[160px]" [title]="guiaEncontrada.establecimiento?.nombreComercial">{{guiaEncontrada.establecimiento?.nombreComercial}}</span>
+                    </div>
+                    <div class="bg-gray-50 p-2 border-round border-1 border-100 mt-2 flex-grow-1">
+                        <span class="etiqueta-gris block mb-1">Dirección Partida:</span>
+                        <span class="text-gray-700 font-medium texto-micro block line-height-2 mb-2">{{guiaEncontrada.puntoPartida}}</span>
+                        
+                        <span class="etiqueta-gris block mb-1">Dirección Llegada:</span>
+                        <span class="text-gray-700 font-medium texto-micro block line-height-2">{{guiaEncontrada.puntoLlegada}}</span>
                     </div>
                 </div>
             </p-card>
         </div>
 
-        <div class="col-span-12 md:col-span-8">
-            <div *ngIf="!guiaEncontrada"
-                class="flex flex-col align-items-center justify-content-center border-2 border-dashed border-300 border-round-md p-8 bg-gray-50 text-gray-400 h-full min-h-[300px]">
-                <i class="pi pi-search-plus text-5xl mb-3 text-300"></i>
-                <span class="font-medium text-lg">Esperando código de verificación...</span>
-                <span class="text-sm text-gray-400">Ingrese un identificador válido para desplegar el historial.</span>
-            </div>
-
-            <div *ngIf="guiaEncontrada" class="flex flex-col gap-4 animate-fadein">
-
-                <p-card styleClass="shadow-2 border-round">
-                    <h3
-                        class="text-md font-bold text-cyan-800 uppercase mb-3 border-b-1 border-100 pb-2 flex align-items-center gap-2">
-                        <i class="pi pi-map-marker text-orange-500"></i> Ruta del Traslado
-                    </h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="col-span-2 md:col-span-1">
-                            <span class="text-xs font-bold text-gray-400 uppercase block">Proveedor Origen:</span>
-                            <span class="font-bold text-cyan-950">{{guiaEncontrada.proveedor?.nombre}}</span>
-                            <small class="block text-gray-500">RUC: {{guiaEncontrada.proveedor?.ruc}}</small>
+        <div class="flex-grow-1" style="flex-basis: 40%;">
+            <p-card styleClass="w-full h-full shadow-1 border-1 border-200 tarjeta-igualada">
+                <ng-template pTemplate="title">
+                    <div class="text-xs font-bold text-cyan-800 uppercase flex align-items-center gap-2 border-b-1 border-100 pb-2 m-0">
+                        <i class="pi pi-truck text-cyan-600"></i> Datos del Transporte
+                    </div>
+                </ng-template>
+                <div class="flex flex-column justify-content-between h-full w-full">
+                    <div class="grid grid-cols-2 gap-3 w-full m-0">
+                        <div class="col-span-1">
+                            <span class="etiqueta-gris block mb-1">Motivo:</span>
+                            <span class="valor-oscuro block">{{guiaEncontrada.motivo?.nombre}}</span>
                         </div>
-                        <div class="col-span-2 md:col-span-1">
-                            <span class="text-xs font-bold text-gray-400 uppercase block">Establecimiento Destino
-                                (Botica):</span>
-                            <span
-                                class="font-bold text-cyan-950">{{guiaEncontrada.establecimiento?.nombreComercial}}</span>
-                            <small class="block text-gray-500">RUC: {{guiaEncontrada.establecimiento?.ruc}}</small>
+                        <div class="col-span-1">
+                            <span class="etiqueta-gris block mb-1">Placa Vehículo:</span>
+                            <span class="text-orange-700 font-bold bg-orange-50 border-1 border-orange-200 px-2 py-1 border-round texto-micro uppercase">{{guiaEncontrada.placaVehiculo || 'N/A'}}</span>
                         </div>
-                        <div class="col-span-2 md:col-span-1 bg-gray-50 p-2 border-round">
-                            <span class="text-xs font-bold text-gray-500 uppercase block">Dirección Partida:</span>
-                            <span class="text-sm font-medium text-gray-700">{{guiaEncontrada.puntoPartida}}</span>
+                        <div class="col-span-1">
+                            <span class="etiqueta-gris block mb-1">Licencia:</span>
+                            <span class="valor-oscuro block uppercase">{{guiaEncontrada.licenciaConductor || 'N/A'}}</span>
                         </div>
-                        <div class="col-span-2 md:col-span-1 bg-gray-50 p-2 border-round">
-                            <span class="text-xs font-bold text-gray-500 uppercase block">Dirección Llegada:</span>
-                            <span class="text-sm font-medium text-gray-700">{{guiaEncontrada.puntoLlegada}}</span>
+                        <div class="col-span-1">
+                            <span class="etiqueta-gris block mb-1">F. Traslado:</span>
+                            <span class="valor-oscuro block">{{guiaEncontrada.fechaTraslado | date:'dd/MM/yyyy'}}</span>
                         </div>
                     </div>
-                </p-card>
-
-                <p-card styleClass="shadow-2 border-round">
-                    <h3
-                        class="text-md font-bold text-cyan-800 uppercase mb-3 border-b-1 border-100 pb-2 flex align-items-center gap-2">
-                        <i class="pi pi-truck text-cyan-600"></i> Información Logística y Vehicular
-                    </h3>
-                    <div class="grid grid-cols-3 gap-4">
-                        <div class="col-span-3 md:col-span-1">
-                            <span class="text-xs font-bold text-gray-400 uppercase block">Motivo Traslado:</span>
-                            <span class="font-bold text-gray-800">{{guiaEncontrada.motivo?.nombre}}</span>
-                        </div>
-                        <div class="col-span-3 md:col-span-1">
-                            <span class="text-xs font-bold text-gray-400 uppercase block">Placa del Vehículo:</span>
-                            <span
-                                class="font-bold text-gray-800 uppercase bg-orange-50 text-orange-700 px-2 py-0.5 border-round inline-block">{{guiaEncontrada.placaVehiculo
-                                || 'N/A'}}</span>
-                        </div>
-                        <div class="col-span-3 md:col-span-1">
-                            <span class="text-xs font-bold text-gray-400 uppercase block">Licencia Conductor:</span>
-                            <span class="font-bold text-gray-800 uppercase">{{guiaEncontrada.licenciaConductor ||
-                                'N/A'}}</span>
-                        </div>
-                        <div class="col-span-3 md:col-span-1">
-                            <span class="text-xs font-bold text-gray-400 uppercase block">Fecha de Traslado:</span>
-                            <span class="font-bold text-gray-800">{{guiaEncontrada.fechaTraslado |
-                                date:'dd/MM/yyyy'}}</span>
-                        </div>
-                        <div class="col-span-3 md:col-span-2 text-right self-end">
-                            <span class="text-xs font-bold text-gray-400 uppercase block">Peso Bruto Total
-                                Consolidado:</span>
-                            <span class="text-xl font-black text-cyan-900">{{guiaEncontrada.pesoBrutoTotal |
-                                number:'1.5-5'}} KG</span>
-                        </div>
+                    <div class="bg-cyan-900 text-black px-3 py-2 border-round flex align-items-center justify-content-between shadow-1 mt-3">
+                        <span class="texto-micro font-medium uppercase"><i class="pi pi-calculator mr-1"></i> Peso Total:</span>
+                        <span class="font-black text-sm">{{guiaEncontrada.pesoBrutoTotal | number:'1.5-5'}} KG</span>
                     </div>
-                </p-card>
-
-                <div class="shadow-2 border-round bg-white overflow-hidden border-1 border-200">
-                    <div
-                        class="bg-gray-50 px-3 py-2 border-b-1 border-200 flex align-items-center justify-content-between">
-                        <span class="font-bold text-cyan-900 text-sm uppercase"><i
-                                class="pi pi-box text-cyan-600 mr-1"></i> Mercadería Amparada en Guía</span>
-                        <p-tag severity="info" [value]="guiaEncontrada.detalles?.length + ' Items'"></p-tag>
-                    </div>
-
-                    <p-table [value]="guiaEncontrada.detalles" styleClass="p-datatable-striped p-datatable-sm"
-                        [scrollable]="true" scrollHeight="250px">
-                        <ng-template pTemplate="header">
-                            <tr>
-                                <th style="width: 45%" class="text-center">Medicamento</th>
-                                <th style="width: 25%" class="text-center">Marca / Presentación</th>
-                                <th style="width: 15%" class="text-center">Cantidad</th>
-                                <th style="width: 15%" class="text-center">Subtotal Peso</th>
-                            </tr>
-                        </ng-template>
-                        <ng-template pTemplate="body" let-detalle>
-                            <tr>
-                                <td>
-                                    <div class="font-bold text-cyan-950 ml-2">{{detalle.producto?.producto}}</div>
-                                </td>
-                                <td class="text-center">
-                                    <span
-                                        class="text-orange-600 font-bold block text-xs">{{detalle.marcaSolicitada}}</span>
-                                    <small class="text-gray-500 italic">{{detalle.presentacion}}</small>
-                                </td>
-                                <td class="text-center font-bold text-gray-800">{{detalle.cantidad}}</td>
-                                <td class="text-center text-cyan-700 font-medium">{{detalle.pesoSubtotal |
-                                    number:'1.5-5'}} kg</td>
-                            </tr>
-                        </ng-template>
-                    </p-table>
                 </div>
-
-            </div>
+            </p-card>
         </div>
+    </div>
 
+    <div *ngIf="guiaEncontrada" class="bg-white border-round shadow-1 border-1 border-200 overflow-hidden w-full">
+        <div class="bg-gray-50 px-3 py-2 border-b-1 border-200 flex align-items-center justify-content-between">
+            <span class="font-bold text-cyan-900 text-xs uppercase flex align-items-center gap-2">
+                <i class="pi pi-box text-cyan-700"></i> Mercadería Amparada en Guía
+            </span>
+            <p-tag severity="info" [value]="guiaEncontrada.detalles?.length + ' Items'" styleClass="font-bold texto-micro px-2"></p-tag>
+        </div>
+        
+        <p-table [value]="guiaEncontrada.detalles" styleClass="p-datatable-striped p-datatable-sm w-full">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th style="width: 40%;" class="text-left">Medicamento / Descripción</th>
+                    <th style="width: 20%;" class="text-center">Marca / Laboratorio</th>
+                    <th style="width: 20%;" class="text-center">Presentación</th>
+                    <th style="width: 10%;" class="text-center">Cant.</th>
+                    <th style="width: 10%;" class="text-center">Subtotal Peso</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-detalle>
+                <tr>
+                    <td class="font-bold text-cyan-950 text-xs pl-3">
+                        {{detalle.producto?.producto || detalle.producto?.nombre}}
+                    </td>
+                    <td class="text-center">
+                        <span class="text-orange-700 font-bold bg-orange-50 border-1 border-orange-100 px-2 py-1 border-round texto-micro uppercase">{{detalle.marcaSolicitada}}</span>
+                    </td>
+                    <td class="text-center text-gray-700 text-xs uppercase font-medium">
+                        {{detalle.presentacion?.nombre || detalle.presentacion}}
+                    </td>
+                    <td class="text-center font-black text-gray-800 text-xs bg-gray-50">
+                        <div class="flex align-items-center justify-content-center gap-1">
+                            <span>{{detalle.cantidad}}</span>
+                            <span class="text-blue-700 bg-blue-50 border-1 border-blue-200 px-1 border-round texto-micro uppercase">
+                                {{detalle.unidadMedida?.abreviatura || detalle.unidadMedida?.Abreviatura || 'UND'}}
+                            </span>
+                        </div>
+                    </td>
+                    <td class="text-center text-cyan-700 font-bold text-xs">
+                        {{detalle.pesoSubtotal | number:'1.5-5'}} kg
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
     </div>
 </div>
