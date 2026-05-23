@@ -35,12 +35,12 @@ import { ProveedorService } from '../../services/proveedor.service';
 export class IngresarProductoComponent implements OnInit {
   // Arreglos para los selectores
   marcas: any[] = [];
-  presentaciones: any[] = []; // Para cargar las presentaciones en el selector del modal
+  presentaciones: any[] = []; 
   listaUnidadesDetalle: any[] = [];
   proveedores: any[] = [];
-  unidadesMedida: any[] = []; //  Para cargar las unidades de medida en el selector del modal
+  unidadesMedida: any[] = []; 
 
-  listaunidadesdetalle: any[] = []; // para la tabla unidades_detalle
+  listaunidadesdetalle: any[] = []; 
 
   productoSeleccionado: any = null;
   productoFijado: any = null;
@@ -100,7 +100,6 @@ export class IngresarProductoComponent implements OnInit {
 
 
   abrirModalMarca() {
-    // Esta llamada debe ir a /api/marcas mediante el servicio corregido
     this.productoService.getMarcas().subscribe({
       next: (data) => {
         this.todasLasMarcasBD = data;
@@ -138,7 +137,6 @@ export class IngresarProductoComponent implements OnInit {
   }
 
   fijarProducto(event: any) {
-    // Obtenemos el producto seleccionado del evento
     const productoData = event.value || event;
 
     if (!productoData || !productoData.id_producto) return;
@@ -165,21 +163,18 @@ export class IngresarProductoComponent implements OnInit {
   cargarCatalogos() {
     this.productoService.getMarcas().subscribe(data => this.marcas = data);
 
-    // 2. Presentaciones Generales (Tabla 'presentacion')
     this.productoService.getPresentaciones().subscribe(data => {
       this.presentaciones = data;
     });
 
     this.productoService.getUnidadesMedida().subscribe({
       next: (data) => {
-        // Asegúrate de que 'data' sea la lista de objetos de tu tabla unidad_medida
         this.unidadesMedida = data;
         console.log("Unidades cargadas para el combo:", data);
       },
       error: (err) => console.error("Error al traer unidades", err)
     });
 
-    // 4. Unidades Detalle (Tabla 'unidades_detalle')
     this.productoService.getUnidadesDetalle().subscribe({
       next: (data) => {
         this.listaUnidadesDetalle = data.map(ud => ({
@@ -265,26 +260,35 @@ export class IngresarProductoComponent implements OnInit {
   }
 
   guardarTemporalmente() {
-    if (!this.nuevoIngreso.presentacion || !this.nuevoIngreso.marca || !this.nuevoIngreso.unidad) return;
+    if (!this.nuevoIngreso.presentacion || !this.nuevoIngreso.marca ||
+      !this.nuevoIngreso.unidad || !this.nuevoIngreso.cantidadRecibida ||
+      !this.nuevoIngreso.fechaFabricacion) {
+      this.mostrarError('Complete todos los campos, incluyendo la Fecha de Fabricación.');
+      return;
+    }
 
     const idProd = this.productoSeleccionado.id_producto;
-
-    // Obtenemos la lista actual de ese producto o creamos una nueva
     const detallesActuales = this.detallesPorProducto.get(idProd) || [];
 
+    console.log("El AuthService estaba devolviendo:", this.authService.getCurrentUserId());
+
+    const idUsuarioActual = this.authService.getCurrentUserId();
+
     const nuevoDetalle = {
-      producto: this.productoSeleccionado, // Guardamos referencia al producto
+      producto: this.productoSeleccionado,
+      proveedor: this.nuevoIngreso.proveedor,
       presentacion: this.nuevoIngreso.presentacion,
       marca: this.nuevoIngreso.marca,
-      unidad: this.nuevoIngreso.unidad,
-      cantidadRecibida: this.nuevoIngreso.cantidadRecibida,
+      unidad: this.nuevoIngreso.unidad.unidadMedida,
+      cant_por_presen: this.nuevoIngreso.unidad.cantidad,
+      cantidad_ingresada: this.nuevoIngreso.cantidadRecibida,
+      lote: null,
       fechaFabricacion: this.nuevoIngreso.fechaFabricacion,
-      fechaVencimiento: this.nuevoIngreso.fechaVencimiento
+      fechaVencimiento: this.nuevoIngreso.fechaVencimiento,
+      usuario: { id_usuario: idUsuarioActual }
     };
 
-    // Actualizamos el mapa
     this.detallesPorProducto.set(idProd, [...detallesActuales, nuevoDetalle]);
-
     this.mostrarModalDetalles = false;
     this.limpiarFormularioDetalle();
   }
@@ -457,6 +461,23 @@ export class IngresarProductoComponent implements OnInit {
       fechaFabricacion: null,
       fechaVencimiento: null
     };
+  }
+
+  cargarDatosDesdeGuia(guia: any) {
+    // 1. Cargamos datos generales
+    this.nuevoIngreso.proveedor = guia.proveedor;
+
+    // 2. Iteramos los detalles y los agregamos a la lista temporal
+    guia.detalles.forEach((detalle: any) => {
+      this.detallesIngreso.push({
+        producto: detalle.producto,
+        marca: detalle.marcaSolicitada,
+        presentacion: detalle.presentacion,
+        cantidad_ingresada: detalle.cantidad,
+        unidad: detalle.unidadMedida
+        // Lote y fechas se dejan vacíos para que el usuario los llene manualmente
+      });
+    });
   }
 
   // 5. Validaciones estrictas

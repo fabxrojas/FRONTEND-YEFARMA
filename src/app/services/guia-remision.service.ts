@@ -28,8 +28,13 @@ export class GuiaRemisionService {
     return this.http.get(`${this.urlGuias}/buscar/${codigo}`);
   }
 
-  // 2. Descarga binaria del flujo de OpenPDF
+  // Descarga binaria del flujo de OpenPDF
   imprimirReportePDF(idGuia: number): Observable<Blob> {
     return this.http.get(`${this.urlGuias}/${idGuia}/pdf`, { responseType: 'blob' });
+  }
+
+  // Actualizar estado a Validado (Corregido a urlGuias)
+  validarGuia(idGuia: number): Observable<any> {
+    return this.http.put(`${this.urlGuias}/${idGuia}/validar`, {});
   }
 }

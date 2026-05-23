@@ -89,27 +89,42 @@
 
                             <p-table *ngIf="listaDetallesTemporales.length > 0" [value]="listaDetallesTemporales"
                                 [autoLayout]="true" styleClass="p-datatable-sm p-datatable-striped">
+
                                 <ng-template pTemplate="header">
                                     <tr style="position: sticky; top: 0; z-index: 10; background: white;">
                                         <th class="text-center">Presentación</th>
                                         <th class="text-center">Marca</th>
-                                        <th class="text-center ">Un. x Pres.</th>
+                                        <th class="text-center">Unidad x Presentación</th>
                                         <th class="text-center">Cant. Rec.</th>
-                                        <th class="text center">F. Fab.</th>
-                                        <th class="text-center">F. Ven.</th>
+
+                                        <th class="text-center">Lote</th>
+
+                                        <th class="text-center">Fecha. Fab.</th>
+                                        <th class="text-center">Fecha. Ven.</th>
                                         <th class="text-center">Acciones</th>
                                     </tr>
                                 </ng-template>
+
                                 <ng-template pTemplate="body" let-detalle let-ri="rowIndex">
                                     <tr>
                                         <td class="text-center">{{ detalle.presentacion.nombre }}</td>
                                         <td class="text-center">{{ detalle.marca.nombre }}</td>
-                                        <td class="text-center">{{ detalle.unidad.label }}</td>
-                                        <td class="text-center">{{ detalle.cantidadRecibida }}</td>
-                                        <td class="text-center">{{ detalle.fechaFabricacion | date:'dd/MM/yy' }}
+                                        <td class="text-center">{{ detalle.unidad.nombre }} x {{ detalle.cant_por_presen
+                                            }}</td>
+                                        <td class="text-center">{{ detalle.cantidad_ingresada }}</td>
+
+                                        <td class="text-center">
+                                            <span *ngIf="detalle.lote" class="font-bold text-orange-700">{{ detalle.lote
+                                                }}</span>
+                                            <span *ngIf="!detalle.lote"
+                                                class="font-bold text-orange-400 italic text-sm">Se generará al
+                                                guardar</span>
                                         </td>
+
+                                        <td class="text-center">{{ detalle.fechaFabricacion | date:'dd/MM/yy' }}</td>
                                         <td class="text-center text-sm">{{ detalle.fechaVencimiento | date:'dd/MM/yy' }}
                                         </td>
+
                                         <td class="text-center">
                                             <p-button icon="pi pi-trash"
                                                 styleClass="p-button-danger p-button-text p-button-sm"
@@ -199,7 +214,7 @@
 
     <div class="field mb-3">
         <label class="font-bold text-sm text-cyan-800">Unidad de Medida:</label>
-        <p-select [options]="unidadesMedida" [(ngModel)]="nuevoIngreso.unidad" optionLabel="nombre"
+        <p-select [options]="unidadesMedida" [(ngModel)]="nuevaUnidadPresentacion.unidadMedida" optionLabel="nombre"
             placeholder="Seleccione medida..." [filter]="true" styleClass="w-full" appendTo="body">
         </p-select>
     </div>

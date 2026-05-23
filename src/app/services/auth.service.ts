@@ -25,26 +25,31 @@ export class AuthService {
     localStorage.clear();
   }
 
-  // Ajustado para convertir el número (1 o 2) al nombre del menú
   getUserRole(): string {
     const userJson = localStorage.getItem('usuario');
     if (userJson) {
       const userObj = JSON.parse(userJson);
-
-      // Mapeo directo según lo que vimos en tu consola (rol: 1 o 2)
       if (userObj.rol === 1) return 'QUIMICO FARMACEUTICO';
       if (userObj.rol === 2) return 'TECNICO FARMACEUTICO';
-
       return userObj.rol?.nombre || userObj.nombreRol || '';
     }
     return '';
+  }
+
+  // --- EL MÉTODO QUE FALTABA ---
+  getRolUsuario(): number {
+    const userJson = localStorage.getItem('usuario');
+    if (userJson) {
+      const userObj = JSON.parse(userJson);
+      return userObj.rol || 0;
+    }
+    return 0;
   }
 
   getCurrentUserId(): number {
     const usuarioLogueado = localStorage.getItem('usuario');
     if (usuarioLogueado) {
       const userObj = JSON.parse(usuarioLogueado);
-
       return userObj.id_usuario || userObj.idUsuario || 1;
     }
     return 1;

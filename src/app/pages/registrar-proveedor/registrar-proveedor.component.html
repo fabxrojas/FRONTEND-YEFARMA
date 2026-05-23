@@ -71,7 +71,7 @@
             <p-button *ngIf="proveedorSeleccionado" label="Eliminar Proveedor" icon="pi pi-trash"
                 (onClick)="eliminarProveedor()" styleClass="p-button-danger border-round-lg px-4 shadow-2"></p-button>
 
-            <p-button [label]="proveedorSeleccionado ? 'Actualizar Cambios' : 'Guardar Registro'"
+            <p-button [label]="proveedorSeleccionado ? 'Actualizar Cambios' : 'Registrar'"
                 [icon]="proveedorSeleccionado ? 'pi pi-pencil' : 'pi pi-save'" (onClick)="registrar()"
                 styleClass="p-button-info border-round-lg px-4 shadow-2"></p-button>
         </div>

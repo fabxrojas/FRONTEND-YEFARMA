@@ -8,6 +8,7 @@ import { CrearUsuarioComponent } from './pages/crear-usuario/crear-usuario.compo
 import { RestablecerContrasenaComponent } from './pages/restablecer-contrasena/restablecer-contrasena.component';
 import { CrearGuiaComponent } from './pages/crear-guia/crear-guia.component';
 import { ValidarGuiaComponent } from './pages/validar-guia/validar-guia.component';
+import { InventarioComponent } from './pages/inventario/inventario.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -20,7 +21,7 @@ export const routes: Routes = [
       // CAMBIA ESTO PARA QUE COINCIDA CON EL MENÚ
       { path: 'inventario/nuevo', component: RegistrarProductoComponent },
       { path: 'inventario/ingreso', component: IngresarProductoComponent },
-      { path: 'inventario/stock', component: RegistrarProductoComponent },
+      { path: 'inventario/stock', component: InventarioComponent },
       { path: 'reabastecimiento/proveedor', component: RegistrarProveedorComponent},
       { path: 'reabastecimiento/crear-guia', component: CrearGuiaComponent},
       { path: 'reabastecimiento/validar-guia', component: ValidarGuiaComponent},
@@ -33,7 +34,7 @@ export const routes: Routes = [
     component: DashboardQuimicoComponent, 
     children: [
       { path: 'inventario/ingreso', component: IngresarProductoComponent },
-      { path: 'inventario/stock', component: RegistrarProductoComponent },
+      { path: 'inventario/stock', component: InventarioComponent },
       { path: 'dispensacion', component: RegistrarProductoComponent},
       { path: 'stock', component: RegistrarProductoComponent }
 

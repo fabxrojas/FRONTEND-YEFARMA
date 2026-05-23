@@ -1,0 +1,97 @@
+<div class="card p-fluid">
+    <h2 class="text-center mb-4 text-cyan-800">Visualización de Inventario</h2>
+
+    <p-card styleClass="shadow-2 border-round-xl">
+        <div class="flex justify-content-between mb-4">
+            <span class="p-input-icon-left w-6">
+                <i class="pi pi-search">ㅤ</i>
+                <input pInputText type="text" (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+                    placeholder="Búsqueda rápida (Producto, Código, Lote...)" />
+            </span>
+            <button pButton icon="pi pi-filter" label="Filtros Avanzados" class="p-button-outlined"
+                (click)="displayFiltros = true"></button>
+        </div>
+
+        <p-table #dt [value]="productos" [paginator]="true" [rows]="10" [loading]="loading"
+            styleClass="p-datatable-sm p-datatable-striped"
+            [globalFilterFields]="['nombreProducto', 'codigo', 'lote', 'marca']">
+
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>Código</th>
+                    <th>Producto</th>
+                    <th>Marca</th>
+                    <th>Presentación</th>
+                    <th>Lote</th>
+                    <th>Stock Total</th>
+                    <th>Precio</th>
+                    <th class="text-center">Acciones</th>
+                </tr>
+            </ng-template>
+
+            <ng-template pTemplate="body" let-prod>
+                <tr>
+                    <td>{{prod.codigo}}</td>
+                    <td class="font-bold text-cyan-950">{{prod.nombreProducto}}</td>
+                    <td>{{prod.marca}}</td>
+                    <td>{{prod.presentacion}}</td>
+                    <td><span class="text-orange-700 font-semibold">{{prod.lote}}</span></td>
+                    <td><p-tag [value]="prod.stockTotal" [severity]="getSeverity(prod.stockTotal)"></p-tag></td>
+                    <td>{{prod.precioVenta | currency:'S/ '}}</td>
+
+                    <td class="text-center">
+                        <p-button *ngIf="authService.getRolUsuario() === 1" icon="pi pi-ban"
+                            styleClass="p-button-danger p-button-text p-button-sm" pTooltip="Dar de Baja a Lote"
+                            tooltipPosition="left" (onClick)="abrirModalBaja(prod)">
+                        </p-button>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </p-card>
+</div>
+
+<p-dialog header="Filtros Avanzados" [(visible)]="displayFiltros" [modal]="true" [style]="{width: '350px'}">
+    <div class="flex flex-column gap-3">
+        <label class="font-bold">Marcas</label>
+        <p-multiSelect [options]="marcasDisponibles" [(ngModel)]="selectedMarcas" placeholder="Seleccione marcas"
+            class="w-full"></p-multiSelect>
+
+        <label class="font-bold">Presentación</label>
+        <p-multiSelect [options]="presentacionesDisponibles" [(ngModel)]="selectedPresentaciones"
+            placeholder="Seleccione presentaciones" class="w-full"></p-multiSelect>
+    </div>
+    <ng-template pTemplate="footer">
+        <button pButton label="Cancelar" icon="pi pi-times" class="p-button-text" (click)="limpiarFiltros()"></button>
+        <button pButton label="Aplicar" icon="pi pi-check" (click)="aplicarFiltros()"></button>
+    </ng-template>
+</p-dialog>
+
+<p-dialog header="Registrar Baja de Lote" [(visible)]="mostrarModalBaja" [modal]="true" [style]="{width: '450px'}"
+    styleClass="p-fluid">
+    <div class="mb-4" *ngIf="loteSeleccionado">
+        <p class="m-0 text-sm">Va a retirar del inventario activo el lote:</p>
+        <p class="m-0 font-bold text-cyan-800 text-lg">{{ loteSeleccionado.lote }} - {{ loteSeleccionado.nombreProducto
+            }}</p>
+    </div>
+
+    <div class="field mb-3">
+        <label class="font-bold text-sm text-cyan-800">Motivo de la baja <span class="text-red-500">*</span></label>
+        <p-dropdown [options]="opcionesBaja" [(ngModel)]="motivoBaja" placeholder="Seleccione un motivo..."
+            appendTo="body" styleClass="w-full">
+        </p-dropdown>
+    </div>
+
+    <div class="field mb-3" *ngIf="motivoBaja === 'Otro'">
+        <label class="font-bold text-sm text-cyan-800">Especifique el motivo <span class="text-red-500">*</span></label>
+        <textarea pInputTextarea [(ngModel)]="motivoEspecifico" rows="3" class="w-full"
+            placeholder="Detalle por qué se retira este lote..."></textarea>
+    </div>
+
+    <ng-template pTemplate="footer">
+        <p-button label="Cancelar" icon="pi pi-times" styleClass="p-button-text p-button-secondary"
+            (onClick)="mostrarModalBaja = false"></p-button>
+        <p-button label="Confirmar" icon="pi pi-check" styleClass="p-button-danger"
+            (onClick)="confirmarBaja()"></p-button>
+    </ng-template>
+</p-dialog>
