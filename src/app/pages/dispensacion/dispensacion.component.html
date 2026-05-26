@@ -1,0 +1,137 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<div class="grid mt-3">
+
+    <div class="col-12 md:col-5">
+        <p-card styleClass="shadow-4 border-round-xl h-full">
+            <div class="mb-4 px-2">
+                <span class="text-xl font-bold text-cyan-900">Buscar Producto</span>
+            </div>
+
+            <div class="p-inputgroup mb-4 shadow-1 border-round-lg overflow-hidden">
+                <input type="text" pInputText placeholder="Ej: Paracetamol, código..." [(ngModel)]="textoBusqueda"
+                    (keyup.enter)="buscarProductoBackend()">
+
+                <button type="button" pButton icon="pi pi-search" class="p-button-info"
+                    (click)="buscarProductoBackend()">
+                </button>
+            </div>
+
+            <p-table [value]="productosDisponibles" selectionMode="single" [(selection)]="productoSeleccionado"
+                (onRowSelect)="seleccionarProducto($event.data)" dataKey="idProducto" [rows]="10" [paginator]="true"
+                appendTo="body" styleClass="p-datatable-sm shadow-2 mb-4 p-datatable-striped">
+
+                <ng-template pTemplate="header">
+                    <tr class="bg-gray-50">
+                        <th style="width: 30%; text-align: center;">Producto</th>
+                        <th style="width: 30%" class="text-center">Stock</th>
+                        <th style="width: 25%" class="text-center">Precio</th>
+                    </tr>
+                </ng-template>
+
+                <ng-template pTemplate="body" let-prod>
+                    <tr [pSelectableRow]="prod" class="cursor-pointer transition-colors transition-duration-200">
+
+                        <td class="font-semibold text-cyan-800 text-center">{{prod.producto}}</td>
+
+                        <td class="text-center">
+                            <p-tag [severity]="prod.stockTotal > 0 ? 'success' : 'danger'"
+                                [value]="prod.stockTotal || 0"></p-tag>
+                        </td>
+
+                        <td class="text-center">S/ {{prod.precio | number:'1.2-2'}}</td>
+                    </tr>
+                </ng-template>
+
+                <ng-template pTemplate="emptymessage">
+                    <tr>
+                        <td colspan="3" class="text-center p-4 text-500">
+                            <i class="pi pi-box text-3xl mb-2 block"></i>
+                            Realice una búsqueda.
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+
+            <div *ngIf="productoSeleccionado" class="p-3 border-round-lg bg-cyan-50 border-1 border-cyan-200 fadein">
+                <h3 class="mt-0 text-cyan-900 border-bottom-1 border-cyan-300 pb-2">{{productoSeleccionado.producto}}
+                </h3>
+                <div class="flex align-items-center justify-content-between">
+                    <div class="flex align-items-center gap-2">
+                        <label class="font-bold text-gray-700">Cantidad:</label>
+                        <p-inputNumber [(ngModel)]="cantidadAgregar" [min]="1" [max]="productoSeleccionado.stockTotal"
+                            [showButtons]="true" buttonLayout="horizontal" incrementButtonIcon="pi pi-plus"
+                            decrementButtonIcon="pi pi-minus"
+                            [inputStyle]="{'width': '3.5rem', 'text-align': 'center'}">
+                        </p-inputNumber>
+                    </div>
+                    <button pButton label="Agregar" icon="pi pi-cart-plus" severity="info" (click)="agregarAlCarrito()"
+                        styleClass="p-button-raised"></button>
+                </div>
+            </div>
+        </p-card>
+    </div>
+
+    <div class="col-12 md:col-7">
+        <p-card styleClass="shadow-4 border-round-xl h-full">
+            <div class="mb-4 px-2 flex justify-content-between align-items-center">
+                <span class="text-xl font-bold text-cyan-900">Carrito de Dispensación</span>
+                <i class="pi pi-shopping-bag text-cyan-600 text-2xl"></i>
+            </div>
+
+            <p-table [value]="carrito" styleClass="p-datatable-sm shadow-2 mb-4 p-datatable-gridlines estirar-tabla">
+                <ng-template pTemplate="header">
+                    <tr class="bg-gray-100">
+                        <th style="width: 25%; text-align: center;">Producto</th>
+                        <th style="width: 15%" class="text-center">Cantidad</th>
+                        <th style="width: 10%" class="text-right">Precio</th>
+                        <th style="width: 15%" class="text-right">Subtotal</th>
+                        <th style="width: 10%" class="text-center">Acción</th>
+                    </tr>
+                </ng-template>
+
+                <ng-template pTemplate="body" let-item let-i="rowIndex">
+                    <tr>
+                        <td class="font-semibold text-center">{{item.nombre}}</td>
+                        <td class="text-center">{{item.cantidad}}</td>
+                        <td class="text-right text-600">S/ {{item.precio | number:'1.2-2'}}</td>
+                        <td class="text-right font-bold text-cyan-700">S/ {{item.subtotal | number:'1.2-2'}}</td>
+                        <td class="text-center">
+                            <button pButton pRipple icon="pi pi-trash"
+                                class="p-button-rounded p-button-danger p-button-text"
+                                (click)="eliminarDelCarrito(i)"></button>
+                        </td>
+                    </tr>
+                </ng-template>
+
+                <ng-template pTemplate="emptymessage">
+                    <tr>
+                        <td colspan="5" class="text-center p-8 text-500 bg-gray-50">
+                            <div class="flex flex-column align-items-center justify-content-center p-5 bg-gray-50 text-500"
+                                style="min-height: 300px;">
+
+                                <i class="pi pi-shopping-cart text-6xl mb-3 text-300"></i>
+
+                                <span class="font-medium">El carrito está vacío.</span>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+
+            <div class="flex flex-column align-items-end mt-4 border-top-1 border-gray-300 pt-4">
+                <div class="text-3xl font-bold text-gray-800 mb-4">
+                    Total a Pagar: <span class="text-cyan-600 ml-2">S/ {{totalDispensacion | number:'1.2-2'}}</span>
+                </div>
+                <div class="flex gap-3 w-full justify-content-end ">
+                    <button pButton label="Cancelar" icon="pi pi-times" severity="secondary" (click)="cancelarOrden()"
+                        [disabled]="carrito.length === 0"></button>
+                    <button pButton label="Procesar" icon="pi pi-check" severity="success" styleClass="p-button-raised"
+                        (click)="procesarDispensacion()" [disabled]="carrito.length === 0"></button>
+                </div>
+            </div>
+        </p-card>
+    </div>
+
+</div>

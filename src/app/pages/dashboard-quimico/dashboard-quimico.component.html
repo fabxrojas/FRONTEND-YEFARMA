@@ -20,22 +20,54 @@
         </aside>
 
         <main class="main-content">
+
             <div class="dashboard-container"
-                *ngIf="router.url === '/dashboard-quimico' || router.url === '/dashboard-tecnico'">
+                *ngIf="router.url === '/dashboard-quimico'">
                 <header class="dashboard-header">
                     <h1 *ngIf="router.url === '/dashboard-quimico'">Bienvenido, Químico Farmacéutico</h1>
-                    <h1 *ngIf="router.url === '/dashboard-tecnico'">Bienvenido, Técnico Farmacéutico</h1>
-
-                    <p>Resumen de estado para: <strong>{{ userName }}</strong></p>
+                    <p>Resumen operativo para: <strong>{{ userName }}</strong></p>
                 </header>
 
-                <div class="grid-cards">
-                    <div class="card kpi-card stock-low">
-                        <div class="kpi-icon"><i class="pi pi-exclamation-triangle"></i></div>
-                        <div class="kpi-data">
-                            <span class="kpi-title">Stock Bajo</span>
-                            <h2 class="kpi-value">12</h2>
-                        </div>
+                <div class="grid grid-nogutter gap-3">
+                    <div class="col-12 md:col-6 lg:col-3">
+                        <p-card styleClass="kpi-card stock-low">
+                            <div class="flex align-items-center">
+                                <i class="pi pi-exclamation-triangle text-orange-500 text-3xl mr-3"></i>
+                                <div>
+                                    <span class="text-500">Stock Bajo</span>
+                                    <div class="text-2xl font-bold">{{ dashboardData?.productosConStockBajo || 0 }}
+                                    </div>
+                                </div>
+                            </div>
+                        </p-card>
+                    </div>
+
+                    <div class="col-12 md:col-6 lg:col-3">
+                        <p-card styleClass="kpi-card expiring">
+                            <div class="flex align-items-center">
+                                <i class="pi pi-calendar-times text-red-500 text-3xl mr-3"></i>
+                                <div>
+                                    <span class="text-500">Por Vencer</span>
+                                    <div class="text-2xl font-bold">{{ dashboardData?.productosPorVencer?.length || 0 }}
+                                    </div>
+                                </div>
+                            </div>
+                        </p-card>
+                    </div>
+                </div>
+
+                <div class="grid mt-4">
+                    <div class="col-12">
+                        <p-card header="Productos con Alerta de Vencimiento">
+                            <ul class="list-none p-0 m-0">
+                                <li *ngFor="let item of dashboardData?.productosPorVencer"
+                                    class="flex align-items-center py-3 border-bottom-1 surface-border">
+                                    <i class="pi pi-bell text-red-400 mr-3"></i>
+                                    <span class="font-bold mr-2">{{ item.producto }}</span>
+                                    <span class="text-500 ml-auto">{{ item.tipoAlerta }}</span>
+                                </li>
+                            </ul>
+                        </p-card>
                     </div>
                 </div>
             </div>

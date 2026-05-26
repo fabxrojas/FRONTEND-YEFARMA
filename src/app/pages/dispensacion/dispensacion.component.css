@@ -1,0 +1,24 @@
+:host ::ng-deep .p-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+:host ::ng-deep .p-card .p-card-body {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.estirar-tabla {
+    min-height: 500px; 
+    display: flex;
+    flex-direction: column;
+}
+
+.carrito-tabla-vacia {
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

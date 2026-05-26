@@ -1,37 +1,49 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterOutlet } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
+
+// PrimeNG Modules
 import { PanelMenuModule } from 'primeng/panelmenu';
 import { MenuModule } from 'primeng/menu';
 import { ButtonModule } from 'primeng/button';
-import { CardModule } from 'primeng/card'; 
-import { MenuItem } from 'primeng/api';
-import { MENU_ITEMS } from '../../core/constants/menu-config';
-import { AuthService } from '../../services/auth.service'; 
-import { DashboardService } from '../../services/dashboard.service'; 
-import { DashboardDTO } from '../../dto/dashboard.dto'; 
+import { CardModule } from 'primeng/card';
 import { TableModule } from 'primeng/table';
+import { MenuItem } from 'primeng/api';
+
+// Servicios
+import { MENU_ITEMS } from '../../core/constants/menu-config';
+import { AuthService } from '../../services/auth.service';
+import { DashboardService } from '../../services/dashboard.service';
+import { DashboardDTO } from '../../dto/dashboard.dto';
 
 @Component({
-  selector: 'app-dashboard-quimico',
+  selector: 'app-dashboard-tecnico',
   standalone: true,
-  imports: [CommonModule, PanelMenuModule, MenuModule, ButtonModule, RouterOutlet, CardModule, TableModule],
-  templateUrl: './dashboard-quimico.component.html',
-  styleUrls: ['./dashboard-quimico.component.css']
+  imports: [
+    CommonModule,
+    RouterModule,
+    PanelMenuModule,
+    MenuModule,
+    ButtonModule,
+    CardModule,
+    TableModule
+  ],
+  templateUrl: './dashboard-tecnico.component.html',
+  styleUrls: ['./dashboard-tecnico.component.css']
 })
-export class DashboardQuimicoComponent implements OnInit {
+export class DashboardTecnicoComponent implements OnInit {
+  // Variables de menú y usuario
   items: MenuItem[] = [];
   userOptions: MenuItem[] = [];
   userName: string = '';
-  
-  // Variables para los datos del dashboard
+
+  // Datos del Dashboard
   dashboardData: DashboardDTO | null = null;
-  loading: boolean = true;
 
   constructor(
     public router: Router,
     private authService: AuthService,
-    private dashboardService: DashboardService 
+    private dashboardService: DashboardService
   ) { }
 
   ngOnInit() {
@@ -43,11 +55,7 @@ export class DashboardQuimicoComponent implements OnInit {
         label: 'Perfil',
         items: [
           { label: 'Ver Perfil', icon: 'pi pi-user' },
-          {
-            label: 'Cerrar Sesión',
-            icon: 'pi pi-power-off',
-            command: () => this.logout()
-          }
+          { label: 'Cerrar Sesión', icon: 'pi pi-power-off', command: () => this.logout() }
         ]
       }
     ];
@@ -58,6 +66,7 @@ export class DashboardQuimicoComponent implements OnInit {
     if (userJson) {
       const user = JSON.parse(userJson);
       this.userName = user.username || user.NombreUser || 'Usuario';
+
       const rolNombre = this.authService.getUserRole();
       this.items = MENU_ITEMS[rolNombre] || [];
     }
@@ -65,14 +74,8 @@ export class DashboardQuimicoComponent implements OnInit {
 
   private cargarDatosDashboard() {
     this.dashboardService.getDashboardData().subscribe({
-      next: (data) => {
-        this.dashboardData = data;
-        this.loading = false;
-      },
-      error: (err) => {
-        console.error('Error al cargar datos del dashboard:', err);
-        this.loading = false;
-      }
+      next: (data) => this.dashboardData = data,
+      error: (err) => console.error('Error al cargar datos técnicos', err)
     });
   }
 

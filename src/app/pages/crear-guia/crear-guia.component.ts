@@ -241,11 +241,10 @@ export class CrearGuiaComponent implements OnInit {
       return;
     }
 
-    // C. EXTRACCIÓN DE TEXTO PARA COMPARACIÓN
     const marcaTexto = (this.marcaSeleccionada.nombre || this.marcaSeleccionada || '').toString().trim().toUpperCase();
     const presentacionTexto = (this.presentacionSeleccionada.nombre || this.presentacionSeleccionada || '').toString().trim().toUpperCase();
 
-    // D. BÚSQUEDA CRUZADA EN EL INVENTARIO CARGADO
+    // 1. BUSQUEDA DEL STOCK (Separamos la búsqueda del cálculo de peso)
     const stockEncontrado = this.listaStockProveedor.find(s => {
       const idProdStock = s.producto ? s.producto.id_producto : null;
       const marcaStock = (s.marca || '').toString().trim().toUpperCase();
@@ -256,7 +255,6 @@ export class CrearGuiaComponent implements OnInit {
         presStock === presentacionTexto;
     });
 
-    // E. VALIDACIÓN DE EXISTENCIA EN EL CATÁLOGO
     if (!stockEncontrado) {
       this.messageService.add({
         severity: 'error',
@@ -276,25 +274,28 @@ export class CrearGuiaComponent implements OnInit {
       return;
     }
 
+    // 2. CÁLCULO DEL PESO EN KG (Fuera del find, con acceso al peso del producto)
+    const pesoUnitario = this.productoSeleccionado.peso_unitario || this.productoSeleccionado.pesoUnitario || 0;
+    const pesoEnMg = this.cantidadAgregar * pesoUnitario;
+    const pesoEnKg = pesoEnMg / 1000000;
+
+    // G. CREACIÓN DEL ITEM
     const nuevoItem = {
       producto: {
         ...this.productoSeleccionado,
         producto: this.productoSeleccionado.nombre || this.productoSeleccionado.producto
       },
       marcaSolicitada: marcaTexto,
-
       presentacion: {
         ...this.presentacionSeleccionada,
         nombre: this.presentacionSeleccionada.nombre || presentacionTexto
       },
-
       unidadMedida: {
         ...this.unidadSeleccionada,
         abreviatura: this.unidadSeleccionada.Abreviatura || this.unidadSeleccionada.abreviatura || this.unidadSeleccionada.nombre
       },
-
       cantidad: this.cantidadAgregar,
-      pesoSubtotal: this.cantidadAgregar * (this.productoSeleccionado.peso_unitario || this.productoSeleccionado.pesoUnitario || 0)
+      pesoSubtotal: pesoEnKg // Ahora sí reconoce la variable calculada
     };
 
     this.nuevaGuia.detalles.push(nuevoItem);
@@ -317,7 +318,10 @@ export class CrearGuiaComponent implements OnInit {
   }
 
   calcularPesoTotalGuia() {
-    this.pesoBrutoTotal = this.nuevaGuia.detalles.reduce((sum: number, item: any) => sum + item.pesoSubtotal, 0);
+    // Definimos explícitamente los tipos para 'sum' y 'item'
+    this.pesoBrutoTotal = this.nuevaGuia.detalles.reduce((sum: number, item: any) => {
+      return sum + (item.pesoSubtotal || 0);
+    }, 0);
   }
 
   guardarGuiaCompleta() {

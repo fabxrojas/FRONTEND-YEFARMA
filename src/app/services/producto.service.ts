@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+import { ProductoConStockDTO } from '../dto/producto-con-stock.dto';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -78,7 +80,6 @@ export class ProductoService {
     return this.http.post<any>(`${this.marcaUrl}/asociar-existente`, payload);
   }
 
-  // ---------------------------------------
 
   registrar(producto: any): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/registrar`, producto);
@@ -86,5 +87,13 @@ export class ProductoService {
 
   eliminar(id: number): Observable<any> {
     return this.http.delete<any>(`${this.apiUrl}/${id}`);
+  }
+
+  listarConStock(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/listar-con-stock`);
+  }
+
+  buscarConStock(query: string): Observable<ProductoConStockDTO[]> {
+    return this.http.get<ProductoConStockDTO[]>(`${this.apiUrl}/buscar-con-stock?query=${query}`);
   }
 }

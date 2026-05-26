@@ -1,3 +1,5 @@
+<p-toast></p-toast>
+
 <div class="login-container">
     <div class="login-content">
         <h1>Sistema de Inventario para Yefarma</h1>
@@ -5,27 +7,21 @@
 
         <div class="login-card">
             <form (ngSubmit)="onLogin()" #loginForm="ngForm" autocomplete="off">
-                
+
                 <input type="text" name="prevent_autofill" style="display:none" />
 
                 <div class="field">
                     <label for="username" class="block text-700 font-bold mb-2">Usuario:</label>
-                    <input type="text" pInputText id="username" name="user-yefarma-field" 
-                           [(ngModel)]="loginData.username"
-                           required placeholder="Ingrese su usuario" 
-                           class="w-full p-3"
-                           autocomplete="off">
+                    <input type="text" pInputText id="username" name="user-yefarma-field"
+                        [(ngModel)]="loginData.username" required placeholder="Ingrese su usuario" class="w-full p-3"
+                        autocomplete="off">
                 </div>
 
                 <div class="field mb-4">
                     <label class="block text-700 font-bold mb-2">Contraseña:</label>
-                    <p-password [(ngModel)]="loginData.password" 
-                                name="pass-yefarma-field"
-                                [toggleMask]="true" 
-                                [feedback]="false" 
-                                styleClass="w-full"
-                                inputStyleClass="w-full p-3"
-                                [autocomplete]="'new-password'">
+                    <p-password [(ngModel)]="loginData.password" name="pass-yefarma-field" [toggleMask]="true"
+                        [feedback]="false" styleClass="w-full" inputStyleClass="w-full p-3"
+                        [autocomplete]="'new-password'">
                     </p-password>
                 </div>
 
@@ -50,8 +46,8 @@
     <div class="flex flex-column gap-2 mt-2">
         <p class="text-600">Se enviará un enlace de recuperación a tu correo electrónico registrado.</p>
         <label for="emailRecuperar" class="font-bold text-700">Correo Electrónico</label>
-        <input type="email" pInputText id="emailRecuperar" [(ngModel)]="emailRecuperar" 
-               placeholder="ejemplo@correo.com" class="w-full p-2" autocomplete="off">
+        <input type="email" pInputText id="emailRecuperar" [(ngModel)]="emailRecuperar" placeholder="ejemplo@correo.com"
+            class="w-full p-2" autocomplete="off">
     </div>
     <ng-template pTemplate="footer">
         <p-button label="Cancelar" icon="pi pi-times" (onClick)="displayModal=false"

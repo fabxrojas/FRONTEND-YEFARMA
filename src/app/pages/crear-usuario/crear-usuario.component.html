@@ -3,8 +3,12 @@
 
 <div class="grid p-3">
     <div class="col-12">
-        <p-card [header]="usuario.id_usuario ? 'Modificar Técnico Farmacéutico' : 'Registro de Nuevo Técnico'"
-            styleClass="shadow-2 border-round-xl mb-4 border-cyan-600">
+        <div class="flex justify-content-center align-items-center mb-4 px-2 text-center">
+            <h2 class="font-bold text-cyan-800 text-3xl m-0 flex align-items-center gap-2">
+                {{ usuario.id_usuario ? 'Modificar Técnico Farmacéutico' : 'Lista de usuarios' }}
+            </h2>
+        </div>
+        <p-card styleClass="shadow-2 border-round-xl mb-4 border-cyan-600">
 
             <div class="p-fluid grid" autocomplete="off">
 
@@ -33,12 +37,13 @@
                     <label class="font-bold text-cyan-800"><i class="pi pi-envelope mr-1"></i> Correo
                         Electrónico:</label>
                     <input pInputText name="correo-tecnico-yefarma" [(ngModel)]="usuario.correo"
-                        autocomplete="new-password" placeholder="usuario@yefarma.com" (input)="detectarCambios()" class="w-full"/>
+                        autocomplete="new-password" placeholder="usuario@yefarma.com"
+                        (ngModelChange)="detectarCambios()" class="w-full" />
                 </div>
 
                 <div class="field col-12 md:col-6">
                     <label class="font-bold text-cyan-800"><i class="pi pi-key mr-1"></i> Contraseña:</label>
-                    <p-password [(ngModel)]="usuario.contrasena" (onInput)="detectarCambios()" [feedback]="false"
+                    <p-password [(ngModel)]="usuario.contrasena" (ngModelChange)="detectarCambios()" [feedback]="false"
                         [toggleMask]="true" name="pass-tecnico-yefarma" autocomplete="new-password"
                         placeholder="********" [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}">
                     </p-password>
@@ -46,72 +51,95 @@
             </div>
 
             <div class="flex flex-wrap gap-3 mt-3 justify-content-center md:justify-content-end">
-                <p-button *ngIf="!usuario.id_usuario" label="Registrar" icon="pi pi-user-plus"
-                    (onClick)="crearUsuario()" severity="info" styleClass="p-button-raised">
-                </p-button>
 
-                <p-button *ngIf="usuario.id_usuario" label="Guardar Cambios" icon="pi pi-save"
-                    [disabled]="botonModificarDesactivado" (onClick)="modificarUsuario()" severity="info"
-                    styleClass="p-button-raised">
-                </p-button>
-
-                <p-button *ngIf="usuario.id_usuario" label="Eliminar Técnico" icon="pi pi-trash"
-                    (onClick)="eliminarUsuario()" severity="danger">
-                </p-button>
 
                 <p-button label="Limpiar / Nuevo" icon="pi pi-refresh" (onClick)="limpiarFormulario()"
                     severity="secondary">
+                </p-button>
+
+                <p-button *ngIf="usuario.idUsuario" label="Eliminar Técnico" icon="pi pi-trash"
+                    (onClick)="eliminarUsuario()" severity="danger">
+                </p-button>
+
+                <p-button *ngIf="!usuario.idUsuario" label="Registrar" icon="pi pi-user-plus" (onClick)="crearUsuario()"
+                    severity="info" styleClass="p-button-raised">
+                </p-button>
+
+                <p-button *ngIf="usuario.idUsuario" label="Guardar Cambios" icon="pi pi-save"
+                    [disabled]="botonModificarDesactivado" (onClick)="modificarUsuario()" severity="info"
+                    styleClass="p-button-raised">
                 </p-button>
             </div>
         </p-card>
     </div>
 
     <div class="col-12">
-        <p-card header="Lista de Personal Registrado" styleClass="shadow-2 border-round-xl overflow-hidden">
-            <p-table [value]="usuarios" selectionMode="single" (onRowSelect)="seleccionarFila($event.data)"
-                [paginator]="true" [rows]="5" responsiveLayout="scroll"
-                styleClass="p-datatable-gridlines p-datatable-striped">
+        <p-card styleClass="shadow-4 border-round-xl overflow-hidden mt-4">
+            <div class="p-3">
 
-                <ng-template pTemplate="header">
-                    <tr class="bg-gray-100">
-                        <th style="width:15%; text-align: center;">Usuario</th>
-                        <th style="width:30%; text-align: center;">Nombre Completo</th>
-                        <th style="width:25%; text-align: center;">Correo</th>
-                        <th style="width:10%; text-align: center;">Rol</th>
-                        <th style="width:20%; text-align: center;">Fecha Registro</th>
-                    </tr>
-                </ng-template>
+                <div class="mb-3 px-2">
+                    <span class="text-xl font-bold text-cyan-900">Lista de Personal Registrado</span>
+                </div>
 
-                <ng-template pTemplate="body" let-u>
-                    <tr [pSelectableRow]="u" class="cursor-pointer transition-colors transition-duration-200">
-                        <td style="text-align: center;" class="font-semibold text-cyan-700">
-                            {{ u.nombreUser }}
-                        </td>
-                        <td style="text-align: center;">
-                            {{ u.nombre }} {{ u.apellidoP }} {{ u.apellidoM }}
-                        </td>
-                        <td style="text-align: center;">{{ u.correo }}</td>
-                        <td style="text-align: center;">
-                            <p-tag [severity]="u.idRol === 1 ? 'info' : 'warning'"
-                                [value]="u.idRol === 1 ? 'Químico' : 'Técnico'">
-                            </p-tag>
-                        </td>
-                        <td style="text-align: center;">
-                            <i class="pi pi-calendar mr-1 text-400"></i>
-                            {{ u.fechaCreacion | date:'dd/MM/yyyy' }}
-                        </td>
-                    </tr>
-                </ng-template>
+                <p-table #dt [value]="usuarios" selectionMode="single" dataKey="idUsuario"
+                    (onRowSelect)="seleccionarFila($event.data)" (onRowUnselect)="limpiarFormulario()"
+                    [paginator]="true" [rows]="5" responsiveLayout="scroll"
+                    [globalFilterFields]="['nombreUser', 'nombre', 'apellidoP', 'apellidoM', 'correo']"
+                    styleClass="p-datatable-sm shadow-2">
 
-                <ng-template pTemplate="emptymessage">
-                    <tr>
-                        <td colspan="5" class="text-center p-5 text-500">
-                            <i class="pi pi-users text-4xl mb-3 block"></i>
-                            No hay personal registrado en el sistema.
-                        </td>
-                    </tr>
-                </ng-template>
-            </p-table>
+                    <ng-template pTemplate="caption">
+                        <div class="flex justify-content-end p-2">
+                            <span class="p-input-icon-right">
+                                <i class="pi pi-search"></i>
+                                <input pInputText type="text"
+                                    (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+                                    placeholder="Buscar personal..."
+                                    class="p-inputtext-sm border-round-lg py-2 md:w-20rem w-full">
+                            </span>
+                        </div>
+                    </ng-template>
+
+                    <ng-template pTemplate="header">
+                        <tr class="bg-gray-50">
+                            <th style="width:15%; text-align: center;">Usuario</th>
+                            <th style="width:30%; text-align: center;">Nombre Completo</th>
+                            <th style="width:25%; text-align: center;">Correo</th>
+                            <th style="width:10%; text-align: center;">Rol</th>
+                            <th style="width:20%; text-align: center;">Fecha Registro</th>
+                        </tr>
+                    </ng-template>
+
+                    <ng-template pTemplate="body" let-u>
+                        <tr [pSelectableRow]="u" class="cursor-pointer transition-colors transition-duration-200">
+                            <td style="text-align: center;" class="font-semibold text-cyan-700">
+                                {{ u.nombreUser }}
+                            </td>
+                            <td style="text-align: center;">
+                                {{ u.nombre }} {{ u.apellidoP }} {{ u.apellidoM }}
+                            </td>
+                            <td style="text-align: center;">{{ u.correo }}</td>
+                            <td style="text-align: center;">
+                                <p-tag [severity]="u.idRol === 1 ? 'info' : 'warning'"
+                                    [value]="u.idRol === 1 ? 'Químico' : 'Técnico'">
+                                </p-tag>
+                            </td>
+                            <td style="text-align: center;">
+                                <i class="pi pi-calendar mr-1 text-400"></i>
+                                {{ u.fechaCreacion | date:'dd/MM/yyyy' }}
+                            </td>
+                        </tr>
+                    </ng-template>
+
+                    <ng-template pTemplate="emptymessage">
+                        <tr>
+                            <td colspan="5" class="text-center p-5 text-500">
+                                <i class="pi pi-users text-4xl mb-3 block"></i>
+                                No hay personal registrado en el sistema.
+                            </td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </div>
         </p-card>
     </div>
 </div>

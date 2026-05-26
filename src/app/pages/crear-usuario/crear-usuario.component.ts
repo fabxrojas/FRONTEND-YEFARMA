@@ -39,13 +39,13 @@ export class CrearUsuarioComponent implements OnInit {
 
   // Objeto vinculado al formulario con valores iniciales limpios
   usuario: any = {
-    id_usuario: null,
+    idUsuario: null, // Cambiado a CamelCase
     nombre: '',
     apellidoP: '',
     apellidoM: '',
     correo: '',
     contrasena: '',
-    id_rol: 2 // Por defecto se registran como Técnicos en esta vista
+    idRol: 2
   };
 
   usuarioOriginalJSON: string = '';
@@ -77,7 +77,7 @@ export class CrearUsuarioComponent implements OnInit {
   }
 
   detectarCambios() {
-    if (this.usuario.id_usuario) {
+    if (this.usuario.idUsuario) { // Cambiado a CamelCase
       this.botonModificarDesactivado = this.usuarioOriginalJSON === JSON.stringify(this.usuario);
     }
   }
@@ -111,7 +111,8 @@ export class CrearUsuarioComponent implements OnInit {
       acceptButtonStyleClass: 'p-button-info',
       rejectButtonStyleClass: 'p-button-danger',
       accept: () => {
-        this.usuarioService.actualizarUsuario(this.usuario.id_usuario, this.usuario).subscribe({
+        // Cambiado a CamelCase
+        this.usuarioService.actualizarUsuario(this.usuario.idUsuario, this.usuario).subscribe({
           next: () => {
             this.mostrarMensaje('success', 'Éxito', 'Datos modificados correctamente');
             this.limpiarFormulario();
@@ -124,7 +125,6 @@ export class CrearUsuarioComponent implements OnInit {
   }
 
   eliminarUsuario() {
-    // REGLA DE NEGOCIO: Bloquear eliminación del Químico (Admin)
     if (this.usuario.idRol === 1) {
       this.mostrarMensaje('error', 'Error', 'No se puede eliminar al Químico Farmacéutico.');
       return;
@@ -139,7 +139,8 @@ export class CrearUsuarioComponent implements OnInit {
       acceptButtonStyleClass: 'p-button-danger',
       rejectButtonStyleClass: 'p-button-info',
       accept: () => {
-        this.usuarioService.eliminarUsuario(this.usuario.id_usuario).subscribe({
+        // Cambiado a CamelCase
+        this.usuarioService.eliminarUsuario(this.usuario.idUsuario).subscribe({
           next: () => {
             this.mostrarMensaje('success', 'Éxito', 'Usuario borrado del sistema');
             this.limpiarFormulario();
@@ -151,7 +152,6 @@ export class CrearUsuarioComponent implements OnInit {
     });
   }
 
-  // Validaciones de entrada
   bloquearNumeros(event: KeyboardEvent) {
     const key = event.key;
     const apenasLetras = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$/;
@@ -170,13 +170,13 @@ export class CrearUsuarioComponent implements OnInit {
 
   limpiarFormulario() {
     this.usuario = {
-      id_usuario: null,
+      idUsuario: null, // Cambiado a CamelCase
       nombre: '',
       apellidoP: '',
       apellidoM: '',
       correo: '',
       contrasena: '',
-      id_rol: 2
+      idRol: 2 // ¡CORREGIDO EL BUG AQUÍ!
     };
 
     this.botonModificarDesactivado = true;

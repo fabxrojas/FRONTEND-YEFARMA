@@ -50,3 +50,16 @@ td {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+::ng-deep .p-inputnumber, 
+::ng-deep .p-inputnumber-input {
+    width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+}
+
+/* Elimina márgenes extra que PrimeNG agrega */
+td .p-cell-editor {
+    display: block;
+    width: 100%;
+}

@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core'; // Añadimos OnInit para cargar la lista al iniciar
+import { Component, OnInit } from '@angular/core';
 import { ProveedorService } from '../../services/proveedor.service';
 import { MessageService } from 'primeng/api';
-import { CommonModule } from '@angular/common'; // Necesario para pipes como 'date'
-import { FormsModule } from '@angular/forms'; // Necesario para ngModel
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
@@ -31,6 +31,9 @@ export class RegistrarProveedorComponent implements OnInit {
   // Lista para la tabla
   proveedores: any[] = [];
 
+  // Nuestra bandera para habilitar/deshabilitar el botón
+  formularioModificado: boolean = false;
+
   nuevoProveedor: any = {
     nombre: '',
     ruc: '',
@@ -48,12 +51,16 @@ export class RegistrarProveedorComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.cargarProveedores(); // Cargamos la lista apenas abre el componente
+    this.cargarProveedores();
   }
 
+  // --- SE EJECUTA AL HACER CLIC EN LA TABLA ---
   onRowSelect(event: any) {
     this.nuevoProveedor = { ...event.data };
     this.proveedorSeleccionado = event.data;
+
+    // IMPORTANTISIMO: Reiniciamos la bandera porque el usuario aún no ha escrito nada nuevo
+    this.formularioModificado = false;
   }
 
   cargarProveedores() {
@@ -78,7 +85,6 @@ export class RegistrarProveedorComponent implements OnInit {
     }
   }
 
-  // Lógica de Modificación con Confirmación
   modificarProveedor() {
     this.confirmationService.confirm({
       message: '¿Desea guardar los cambios realizados en este proveedor?',
@@ -89,7 +95,6 @@ export class RegistrarProveedorComponent implements OnInit {
       acceptButtonStyleClass: 'p-button-info',
       rejectButtonStyleClass: 'p-button-danger',
       accept: () => {
-        // Usamos idProveedor (CamelCase del modelo Java)
         const id = this.proveedorSeleccionado.idProveedor;
 
         this.proveedorService.actualizarProveedor(id, this.nuevoProveedor).subscribe({
@@ -103,7 +108,6 @@ export class RegistrarProveedorComponent implements OnInit {
     });
   }
 
-  // Lógica de Eliminación con Confirmación
   eliminarProveedor() {
     if (!this.proveedorSeleccionado) return;
 
@@ -129,7 +133,6 @@ export class RegistrarProveedorComponent implements OnInit {
     });
   }
 
-  // Método auxiliar para guardar nuevo
   guardarNuevo() {
     this.proveedorService.registrarProveedor(this.nuevoProveedor).subscribe({
       next: () => {
@@ -146,13 +149,16 @@ export class RegistrarProveedorComponent implements OnInit {
     this.cargarProveedores();
   }
 
+  // --- SE EJECUTA AL LIMPIAR EL FORMULARIO ---
   limpiarForm() {
     this.nuevoProveedor = { nombre: '', ruc: '', correo: '', direccion: '', telefono: '' };
+
+    // IMPORTANTISIMO: Reiniciamos la bandera para un posible nuevo registro
+    this.formularioModificado = false;
   }
 
   soloNumeros(event: any): boolean {
     const charCode = (event.which) ? event.which : event.keyCode;
-    // Solo permite números (teclas del 0 al 9)
     if (charCode > 31 && (charCode < 48 || charCode > 57)) {
       return false;
     }

@@ -29,7 +29,7 @@ export const MENU_ITEMS: { [key: string]: MenuItem[] } = {
       label: 'Procesos de Venta',
       icon: 'pi pi-shopping-cart',
       items: [
-        { label: 'Dispensación', icon: 'pi pi-external-link', routerLink: '/inventario/dispensacion' }
+        { label: 'Dispensación', icon: 'pi pi-external-link', routerLink: '/dashboard-quimico/venta/dispensacion' }
       ]
     },
     {
@@ -44,7 +44,7 @@ export const MENU_ITEMS: { [key: string]: MenuItem[] } = {
     {
       label: 'Inicio',
       icon: 'pi pi-home',
-      routerLink: '/dashboard-tecnico' // Ambos ven el mismo resumen inicial
+      routerLink: '/dashboard-tecnico' 
     },
     {
       label: 'Inventario',
@@ -58,7 +58,7 @@ export const MENU_ITEMS: { [key: string]: MenuItem[] } = {
       label: 'Ventas',
       icon: 'pi pi-shopping-cart',
       items: [
-        { label: 'Dispensación', icon: 'pi pi-external-link', routerLink: '/inventario/dispensacion' }
+        { label: 'Dispensación', icon: 'pi pi-external-link', routerLink: '/dashboard-tecnico/venta/dispensacion' }
       ]
     }
   ]

@@ -36,6 +36,7 @@ export class RegistrarProductoComponent implements OnInit {
   productos: any[] = [];
   tipos: any[] = [];
   formas: any[] = [];
+  unidades: any[] = [];
 
   // Para revertir cambios si el usuario cancela la edición de una fila
   clonProductos: { [s: string]: any } = {};
@@ -48,6 +49,10 @@ export class RegistrarProductoComponent implements OnInit {
 
   ngOnInit(): void {
     this.obtenerDatosIniciales();
+    this.productoService.getUnidadesMedida().subscribe({
+      next: (data) => this.unidades = data,
+      error: (err) => console.error("Error al cargar unidades", err)
+    });
   }
 
 
@@ -60,9 +65,8 @@ export class RegistrarProductoComponent implements OnInit {
     this.productoService.getFormas().subscribe(data => this.formas = data);
   }
 
-  onRowEditInit(producto: any) {
-    // Guardamos una copia de la fila antes de editar
-    this.clonProductos[producto.id_producto] = { ...producto };
+  onRowEditInit(prod: any) {
+    this.clonProductos[prod.id_producto] = { ...prod };
   }
 
   onRowEditSave(producto: any) {
@@ -97,8 +101,6 @@ export class RegistrarProductoComponent implements OnInit {
         summary: 'Atención',
         detail: 'El nombre y el precio son obligatorios'
       });
-
-
 
     }
     const esValido =
@@ -138,8 +140,6 @@ export class RegistrarProductoComponent implements OnInit {
     }
   }
 
-  // --- ELIMINACIÓN CON VENTANA EMERGENTE ---
-
   confirmarEliminacion(producto: any) {
     this.confirmationService.confirm({
       message: `¿Está seguro de que desea eliminar ${producto.producto}?`,
@@ -161,17 +161,18 @@ export class RegistrarProductoComponent implements OnInit {
   }
 
   agregarNuevaFila() {
-    // Creamos el objeto nuevo
     const nuevoProducto = {
       producto: '',
       precio: 0,
-      pesoUnitario: 0.00000,
+      pesoUnitario: 0,
+      idUnidad: null,
+      unidadMedida: null,
       tipo: null,
       formaFarmaceutica: null,
-      nuevo: true // Marcador temporal para saber que es una fila nueva
+      nuevo: true
     };
 
-    // Lo agregamos al inicio del arreglo
+    // Lo agregamos
     this.productos = [...this.productos, nuevoProducto];
 
     setTimeout(() => {
@@ -180,52 +181,45 @@ export class RegistrarProductoComponent implements OnInit {
   }
 
   validarYGuardar(producto: any) {
-    // 1. Verificamos si los campos obligatorios están presentes
-    const camposCompletos =
-      producto.producto?.trim() &&
-      producto.precio > 0 &&
-      producto.tipo &&
-      producto.formaFarmaceutica;
-
-    // 2. Verificamos la regla de negocio del peso (RN-03)
-    const pesoValido = producto.pesoUnitario > 0;
-
-    if (!camposCompletos) {
+    // 1. Validaciones (Ahora sin exigir unidad de medida)
+    if (!producto.producto?.trim() || !producto.tipo || !producto.formaFarmaceutica) {
       this.messageService.add({
         severity: 'warn',
-        summary: 'Campos Incompletos',
-        detail: 'Por favor, complete Nombre, Precio, Tipo y Forma Farmacéutica.'
+        summary: 'Atención',
+        detail: 'Complete Nombre, Tipo y Forma Farmacéutica.'
       });
       return;
     }
 
-    if (!pesoValido) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Peso Inválido',
-        detail: 'El peso unitario debe ser mayor a 0.00000 kg.'
-      });
-      return;
-    }
+    // 2. Construcción limpia del objeto
+    // Nota: Como ya no usamos idUnidad, lo quitamos del objeto de envío
+    const productoParaEnviar = {
+      id_producto: producto.id_producto,
+      producto: producto.producto,
+      precio: producto.precio,
+      pesoUnitario: producto.pesoUnitario, // Este es el dato de dosificación en mg
+      registroSanitario: producto.registroSanitario,
+      tipo: { id_tipo: producto.tipo.id_tipo },
+      formaFarmaceutica: { id_forma_farma: producto.formaFarmaceutica.id_forma_farma }
+    };
 
-    // 3. Si todo es correcto, procedemos a guardar en MySQL
-    this.productoService.registrar(producto).subscribe({
-      next: (res) => {
+    // 3. Envío al servicio
+    this.productoService.registrar(productoParaEnviar).subscribe({
+      next: () => {
         this.messageService.add({
           severity: 'success',
           summary: 'Éxito',
-          detail: producto.id_producto ? 'Producto actualizado' : 'Producto registrado correctamente'
+          detail: 'Producto guardado correctamente'
         });
-
         this.table.cancelRowEdit(producto);
         this.obtenerDatosIniciales();
       },
       error: (err) => {
-        console.error(err);
+        console.error("Error servidor:", err);
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: 'No se pudo conectar con el servidor de Yefarma'
+          detail: 'No se pudo guardar el producto.'
         });
       }
     });

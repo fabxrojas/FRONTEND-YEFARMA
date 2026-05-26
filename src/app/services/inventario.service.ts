@@ -15,4 +15,8 @@ export class InventarioService {
   registrarBajaLote(payload: any): Observable<any> {
     return this.http.post<any>(`${this.url}/baja`, payload);
   }
+
+  obtenerMotivosBaja(): Observable<any[]> {
+  return this.http.get<any[]>(`${this.url}/motivos-baja`);
+}
 }

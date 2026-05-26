@@ -7,12 +7,12 @@ import { CommonModule } from '@angular/common';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { ButtonModule } from 'primeng/button';
-import { DialogModule } from 'primeng/dialog'; // Nuevo
-import { ToastModule } from 'primeng/toast'; // Nuevo
-import { MessageService } from 'primeng/api'; // Nuevo
+import { DialogModule } from 'primeng/dialog';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 
 import { AuthService } from '../../services/auth.service';
-import { UsuarioService } from '../../services/usuario.service'; // Asegúrate de tenerlo
+import { UsuarioService } from '../../services/usuario.service';
 
 @Component({
   selector: 'app-login',
@@ -26,7 +26,7 @@ import { UsuarioService } from '../../services/usuario.service'; // Asegúrate d
     DialogModule,
     ToastModule
   ],
-  providers: [MessageService], 
+  providers: [MessageService],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
@@ -66,7 +66,7 @@ export class LoginComponent implements OnInit {
     this.cargandoRecuperacion = true;
 
     this.usuarioService.solicitarRecuperacion(this.emailRecuperar).subscribe({
-      next: (res: any) => {
+      next: () => {
         this.messageService.add({ severity: 'success', summary: 'Enviado', detail: 'Revise su bandeja de entrada' });
         this.displayModal = false;
         this.cargandoRecuperacion = false;
@@ -88,12 +88,9 @@ export class LoginComponent implements OnInit {
 
     this.authService.login(this.loginData).subscribe({
       next: (res) => {
-        console.log('Objeto recibido:', res);
-
         if (res && res.status === 'success') {
-          localStorage.setItem('usuario', JSON.stringify(res));
+          const rol = this.authService.getRolUsuario();
 
-          const rol = res.rol;
           if (rol === 1) {
             this.router.navigate(['/dashboard-quimico']);
           } else if (rol === 2) {

@@ -1,0 +1,97 @@
+<div class="main-layout">
+    <header class="top-navbar">
+        <div class="logo-container">
+            <div class="logo-botica"></div>
+            <span class="brand-name">BOTICA YEFARMA</span>
+        </div>
+        <div class="profile-area">
+            <button #btn type="button" pButton icon="pi pi-user" class="p-button-rounded p-button-text p-button-plain"
+                (click)="menu.toggle($event)">
+                <span class="username-label">{{ userName }}</span>
+                <i class="pi pi-chevron-down"></i>
+            </button>
+            <p-menu #menu [model]="userOptions" [popup]="true"></p-menu>
+        </div>
+    </header>
+
+    <div class="content-wrapper">
+        <aside class="sidebar">
+            <p-panelMenu [model]="items" [style]="{'width':'100%'}"></p-panelMenu>
+        </aside>
+
+        <main class="main-content">
+            <div class="dashboard-container" *ngIf="router.url === '/dashboard-tecnico'">
+                <header class="dashboard-header">
+                    <h1>Bienvenido, Técnico Farmacéutico</h1>
+                    <p>Panel operativo para: <strong>{{ userName }}</strong></p>
+                </header>
+
+                <div class="grid">
+
+                    <div class="col-12 md:col-6 flex">
+                        <p-card styleClass="h-full w-full">
+                            <div class="flex flex-column h-full justify-content-between">
+                                <div>
+                                    <div class="flex align-items-center mb-3">
+                                        <i class="pi pi-shopping-cart text-blue-600 text-3xl mr-3"></i>
+                                        <span class="text-xl font-bold">Dispensación Rápida</span>
+                                    </div>
+                                    <p class="text-600">Gestiona la venta de medicamentos desde el mostrador.</p>
+                                </div>
+                                <button pButton label="Ir a Dispensación" icon="pi pi-arrow-right"
+                                    class="p-button-outlined p-button-info mt-3 w-full"
+                                    routerLink="/dashboard-tecnico/venta/dispensacion"></button>
+                            </div>
+                        </p-card>
+                    </div>
+
+                    <div class="col-12 md:col-6 flex">
+                        <p-card styleClass="h-full w-full border-left-3 border-orange-500">
+                            <div class="flex flex-column h-full justify-content-between">
+                                <div class="flex align-items-center mb-3">
+                                    <i class="pi pi-exclamation-triangle text-orange-500 text-3xl mr-3"></i>
+                                    <span class="text-xl font-bold">Stock Bajo</span>
+                                </div>
+                                <div class="text-center mt-auto">
+                                    <h1 class="text-orange-500 text-6xl m-0 font-bold">{{
+                                        dashboardData?.productosConStockBajo || 0 }}</h1>
+                                    <p class="text-600 mt-2">Productos que requieren reposición en vitrina.</p>
+                                </div>
+                            </div>
+                        </p-card>
+                    </div>
+
+                </div>
+
+                <div class="grid mt-4">
+                    <div class="col-12">
+                        <p-card header="Atención: Productos por Vencer">
+                            <p-table [value]="dashboardData?.productosPorVencer || []" [rows]="5" [paginator]="true"
+                                responsiveLayout="scroll" styleClass="p-datatable-sm">
+                                <ng-template pTemplate="header">
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th class="text-center">Stock Actual</th>
+                                        <th class="text-center">Estado</th>
+                                    </tr>
+                                </ng-template>
+                                <ng-template pTemplate="body" let-alerta>
+                                    <tr>
+                                        <td class="font-bold text-700">{{ alerta.producto }}</td>
+                                        <td class="text-center">{{ alerta.stockActual }}</td>
+                                        <td class="text-center">
+                                            <span class="p-badge p-badge-warning px-2 py-1">{{ alerta.tipoAlerta
+                                                }}</span>
+                                        </td>
+                                    </tr>
+                                </ng-template>
+                            </p-table>
+                        </p-card>
+                    </div>
+                </div>
+            </div>
+
+            <router-outlet></router-outlet>
+        </main>
+    </div>
+</div>

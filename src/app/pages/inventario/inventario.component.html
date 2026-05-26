@@ -1,6 +1,13 @@
 <div class="card p-fluid">
-    <h2 class="text-center mb-4 text-cyan-800">Visualización de Inventario</h2>
-
+    <div class="flex justify-content-center align-items-center mb-2 px-2">
+        <div class="flex justify-content-center align-items-center mb-2 px-2">
+            <div>
+                <h2 class="font-bold text-cyan-800 text-3xl m-0 flex align-items-center gap-2">
+                    Inventario de productos
+                </h2>
+            </div>
+        </div>
+    </div>
     <p-card styleClass="shadow-2 border-round-xl">
         <div class="flex justify-content-between mb-4">
             <span class="p-input-icon-left w-6">
@@ -18,26 +25,28 @@
 
             <ng-template pTemplate="header">
                 <tr>
-                    <th>Código</th>
-                    <th>Producto</th>
-                    <th>Marca</th>
-                    <th>Presentación</th>
-                    <th>Lote</th>
-                    <th>Stock Total</th>
-                    <th>Precio</th>
+                    <th class="text-center">Código</th>
+                    <th class="text-center">Producto</th>
+                    <th class="text-center">Marca</th>
+                    <th class="text-center">Presentación</th>
+                    <th class="text-center">Lote</th>
+                    <th class="text-center">Stock Total</th>
+                    <th class="text-center">Precio</th>
                     <th class="text-center">Acciones</th>
                 </tr>
             </ng-template>
 
             <ng-template pTemplate="body" let-prod>
                 <tr>
-                    <td>{{prod.codigo}}</td>
-                    <td class="font-bold text-cyan-950">{{prod.nombreProducto}}</td>
-                    <td>{{prod.marca}}</td>
-                    <td>{{prod.presentacion}}</td>
-                    <td><span class="text-orange-700 font-semibold">{{prod.lote}}</span></td>
-                    <td><p-tag [value]="prod.stockTotal" [severity]="getSeverity(prod.stockTotal)"></p-tag></td>
-                    <td>{{prod.precioVenta | currency:'S/ '}}</td>
+                    <td class="text-center">{{prod.codigo}}</td>
+                    <td class="font-bold text-cyan-950; text-center">{{prod.nombreProducto}}</td>
+                    <td class="text-center">{{prod.marca}}</td>
+                    <td class="text-center">{{prod.presentacion}}</td>
+                    <td class="text-center"><span class="text-orange-700 font-semibold">{{prod.lote}}</span></td>
+                    <td class="text-center">
+                        <p-tag [value]="prod.stockTotal" [severity]="getSeverity(prod.stockTotal)"></p-tag>
+                    </td>
+                    <td class="text-center">{{prod.precioVenta | currency:'S/ '}}</td>
 
                     <td class="text-center">
                         <p-button *ngIf="authService.getRolUsuario() === 1" icon="pi pi-ban"
@@ -52,14 +61,16 @@
 </div>
 
 <p-dialog header="Filtros Avanzados" [(visible)]="displayFiltros" [modal]="true" [style]="{width: '350px'}">
-    <div class="flex flex-column gap-3">
+    <div class="flex flex-column gap-3" style="min-height: 150px;">
+
         <label class="font-bold">Marcas</label>
         <p-multiSelect [options]="marcasDisponibles" [(ngModel)]="selectedMarcas" placeholder="Seleccione marcas"
-            class="w-full"></p-multiSelect>
+            class="w-full" appendTo="body"></p-multiSelect>
 
         <label class="font-bold">Presentación</label>
         <p-multiSelect [options]="presentacionesDisponibles" [(ngModel)]="selectedPresentaciones"
-            placeholder="Seleccione presentaciones" class="w-full"></p-multiSelect>
+            placeholder="Seleccione presentaciones" class="w-full" appendTo="body"></p-multiSelect>
+
     </div>
     <ng-template pTemplate="footer">
         <button pButton label="Cancelar" icon="pi pi-times" class="p-button-text" (click)="limpiarFiltros()"></button>
@@ -77,21 +88,21 @@
 
     <div class="field mb-3">
         <label class="font-bold text-sm text-cyan-800">Motivo de la baja <span class="text-red-500">*</span></label>
-        <p-dropdown [options]="opcionesBaja" [(ngModel)]="motivoBaja" placeholder="Seleccione un motivo..."
+        <p-dropdown [options]="opcionesBaja" [(ngModel)]="motivoBajaId" placeholder="Seleccione un motivo..."
             appendTo="body" styleClass="w-full">
         </p-dropdown>
     </div>
 
-    <div class="field mb-3" *ngIf="motivoBaja === 'Otro'">
+    <div class="field mb-3" *ngIf="esMotivoOtro()">
         <label class="font-bold text-sm text-cyan-800">Especifique el motivo <span class="text-red-500">*</span></label>
         <textarea pInputTextarea [(ngModel)]="motivoEspecifico" rows="3" class="w-full"
             placeholder="Detalle por qué se retira este lote..."></textarea>
     </div>
 
     <ng-template pTemplate="footer">
-        <p-button label="Cancelar" icon="pi pi-times" styleClass="p-button-text p-button-secondary"
+        <p-button label="Cancelar" icon="pi pi-times" styleClass="p-button-secondary"
             (onClick)="mostrarModalBaja = false"></p-button>
-        <p-button label="Confirmar" icon="pi pi-check" styleClass="p-button-danger"
+        <p-button label="Confirmar" icon="pi pi-check" styleClass="p-button-cyan"
             (onClick)="confirmarBaja()"></p-button>
     </ng-template>
 </p-dialog>
