@@ -103,8 +103,7 @@
                                         <th class="text-center">Marca</th>
                                         <th class="text-center">Unidad x Presentación</th>
                                         <th class="text-center">Cant. Rec.</th>
-
-                                        <th class="text-center">Lote</th>
+                              
 
                                         <th class="text-center">Fecha. Fab.</th>
                                         <th class="text-center">Fecha. Ven.</th>
@@ -118,16 +117,7 @@
                                         <td class="text-center">{{ detalle.marca.nombre }}</td>
                                         <td class="text-center">{{ detalle.unidad.nombre }} x {{ detalle.cant_por_presen
                                             }}</td>
-                                        <td class="text-center">{{ detalle.cantidad_ingresada }}</td>
-
-                                        <td class="text-center">
-                                            <span *ngIf="detalle.lote" class="font-bold text-orange-700">{{ detalle.lote
-                                                }}</span>
-                                            <span *ngIf="!detalle.lote"
-                                                class="font-bold text-orange-400 italic text-sm">Se generará al
-                                                guardar</span>
-                                        </td>
-
+                                        <td class="text-center">{{ detalle.cantidad_ingresada }}</td>                                   
                                         <td class="text-center">{{ detalle.fechaFabricacion | date:'dd/MM/yy' }}</td>
                                         <td class="text-center text-sm">{{ detalle.fechaVencimiento | date:'dd/MM/yy' }}
                                         </td>

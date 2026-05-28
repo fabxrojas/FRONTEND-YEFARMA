@@ -47,12 +47,10 @@ export class ProductoService {
   }
 
   getUnidadesMedida(): Observable<any[]> {
-    // Prueba quitando el guion o verificando el plural según tu Controller
     return this.http.get<any[]>(this.urlUnidadesMedida);
   }
 
   getUnidadesDetalle(): Observable<any[]> {
-    // La URL debe coincidir exactamente con el @RequestMapping del controlador
     return this.http.get<any[]>('http://localhost:8081/api/unidades-detalle');
   }
 
@@ -66,7 +64,6 @@ export class ProductoService {
 
   // MÉTODOS PARA EL MODAL DE MARCAS 
 
-  // Crea una marca nueva y la asocia al producto en la tabla producto_marca
   guardarYAsociarMarca(payload: { nombreMarca: string, idProducto: number }): Observable<any> {
     return this.http.post<any>(`${this.marcaUrl}/guardar-y-asociar`, payload);
   }

@@ -91,8 +91,7 @@ export class ValidarGuiaComponent implements OnInit {
     });
   }
 
-  validarComprobante() {
-    // CORRECCIÓN: Capturamos el ID de forma segura
+  validarGuia() {
     const id = this.guiaEncontrada?.id_guia || this.guiaEncontrada?.idGuia;
 
     if (!id) {
@@ -103,7 +102,6 @@ export class ValidarGuiaComponent implements OnInit {
 
     this.guiaService.validarGuia(id).subscribe({
       next: (guiaActualizada) => {
-        // Forzamos a Angular a repintar el cambio
         this.guiaEncontrada = {
           ...this.guiaEncontrada,
           estado: guiaActualizada.estado

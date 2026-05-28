@@ -79,6 +79,17 @@ export class DashboardTecnicoComponent implements OnInit {
     });
   }
 
+  getSeverity(alerta: string): string {
+    if (!alerta) return 'info';
+    const text = alerta.toLowerCase();
+    // Si contiene la palabra vencido, hoy o crítico, será rojo (danger)
+    if (text.includes('vencid') || text.includes('hoy') || text.includes('crítico')) {
+      return 'danger';
+    }
+    // Si no, será amarillo (warning)
+    return 'warning';
+  }
+
   logout() {
     this.authService.logout();
     this.router.navigate(['/login']);

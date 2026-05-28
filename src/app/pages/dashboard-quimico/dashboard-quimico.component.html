@@ -12,6 +12,8 @@
             </button>
             <p-menu #menu [model]="userOptions" [popup]="true"></p-menu>
         </div>
+
+
     </header>
 
     <div class="content-wrapper">
@@ -21,16 +23,23 @@
 
         <main class="main-content">
 
-            <div class="dashboard-container"
-                *ngIf="router.url === '/dashboard-quimico'">
-                <header class="dashboard-header">
-                    <h1 *ngIf="router.url === '/dashboard-quimico'">Bienvenido, Químico Farmacéutico</h1>
-                    <p>Resumen operativo para: <strong>{{ userName }}</strong></p>
+            <div class="dashboard-container" *ngIf="router.url === '/dashboard-quimico'">
+                <header class="dashboard-header flex justify-content-between align-items-center">
+                    <div>
+                        <h1 *ngIf="router.url === '/dashboard-quimico'">Bienvenido, Químico Farmacéutico</h1>
+                        <p>Resumen operativo para: <strong>{{ userName }}</strong></p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button pButton icon="pi pi-file-excel" label="Exportar Excel" class="p-button-success"
+                            (click)="exportarDashboardExcel()">
+                        </button>
+                    </div>
                 </header>
 
                 <div class="grid grid-nogutter gap-3">
                     <div class="col-12 md:col-6 lg:col-3">
-                        <p-card styleClass="kpi-card stock-low">
+                        <p-card styleClass="kpi-card stock-low cursor-pointer hover:shadow-4 transition-all"
+                            (click)="mostrarDetalleStockBajo()">
                             <div class="flex align-items-center">
                                 <i class="pi pi-exclamation-triangle text-orange-500 text-3xl mr-3"></i>
                                 <div>
@@ -43,7 +52,8 @@
                     </div>
 
                     <div class="col-12 md:col-6 lg:col-3">
-                        <p-card styleClass="kpi-card expiring">
+                        <p-card styleClass="kpi-card expiring cursor-pointer hover:shadow-4 transition-all"
+                            (click)="mostrarDetalleCaducidad()">
                             <div class="flex align-items-center">
                                 <i class="pi pi-calendar-times text-red-500 text-3xl mr-3"></i>
                                 <div>
@@ -57,22 +67,210 @@
                 </div>
 
                 <div class="grid mt-4">
-                    <div class="col-12">
-                        <p-card header="Productos con Alerta de Vencimiento">
-                            <ul class="list-none p-0 m-0">
-                                <li *ngFor="let item of dashboardData?.productosPorVencer"
-                                    class="flex align-items-center py-3 border-bottom-1 surface-border">
-                                    <i class="pi pi-bell text-red-400 mr-3"></i>
-                                    <span class="font-bold mr-2">{{ item.producto }}</span>
-                                    <span class="text-500 ml-auto">{{ item.tipoAlerta }}</span>
+
+                    <div class="col-12 xl:col-6">
+                        <p-card styleClass="h-full shadow-2">
+                            <ng-template pTemplate="header">
+                                <div class="flex justify-content-between align-items-center px-4 pt-3">
+                                    <span class="font-bold text-xl">Top 5: Medicamentos Más Dispensados</span>
+                                    <button pButton icon="pi pi-users"
+                                        class="p-button-rounded p-button-text p-button-secondary"
+                                        pTooltip="Ver Rendimiento del Personal" (click)="displaySidebarStaff = true">
+                                    </button>
+                                </div>
+                            </ng-template>
+                            <p-chart type="bar" [data]="chartData" [options]="chartOptions" height="300px"></p-chart>
+                        </p-card>
+                    </div>
+
+                    <div class="col-12 lg:col-6">
+                        <p-card header="Alertas de Vencimiento y Stock" styleClass="h-full shadow-2">
+
+                            <div *ngIf="!dashboardData?.productosPorVencer?.length"
+                                class="text-center text-500 py-4 font-bold">
+                                <i class="pi pi-check-circle text-green-500 text-3xl mb-2 block"></i>
+                                No hay alertas de vencimiento en los próximos 30 días.
+                            </div>
+
+                            <ul class="list-none p-0 m-0" style="max-height: 300px; overflow-y: auto;">
+                                <li *ngFor="let item of dashboardData?.productosPorVencer" class="mb-3">
+                                    <div class="border-round p-3 flex align-items-center shadow-1" [ngClass]="{
+                                            'bg-red-50 border-1 border-red-200': getSeverity(item.tipoAlerta) === 'danger', 
+                                            'bg-yellow-50 border-1 border-yellow-200': getSeverity(item.tipoAlerta) === 'warning'
+                                         }">
+
+                                        <i class="text-3xl mr-4" [ngClass]="{
+                                            'pi pi-exclamation-circle text-red-500': getSeverity(item.tipoAlerta) === 'danger', 
+                                            'pi pi-exclamation-triangle text-yellow-600': getSeverity(item.tipoAlerta) === 'warning'
+                                           }"></i>
+
+                                        <div class="flex-1">
+                                            <div class="font-bold text-xl mb-1"
+                                                [ngClass]="{'text-red-700': getSeverity(item.tipoAlerta) === 'danger', 'text-yellow-800': getSeverity(item.tipoAlerta) === 'warning'}">
+                                                {{ item.producto }}
+                                            </div>
+                                            <div class="font-medium text-sm"
+                                                [ngClass]="{'text-red-600': getSeverity(item.tipoAlerta) === 'danger', 'text-yellow-700': getSeverity(item.tipoAlerta) === 'warning'}">
+                                                {{ item.tipoAlerta }} <span class="ml-2 opacity-80">(Stock Físico: {{
+                                                    item.stockActual }})</span>
+                                            </div>
+                                        </div>
+
+                                    </div>
                                 </li>
                             </ul>
                         </p-card>
                     </div>
+
                 </div>
+
+                <div class="grid mt-4">
+
+                    <div class="col-12 xl:col-6">
+                        <p-card header="Tendencia de Dispensaciones (Anual)" styleClass="h-full shadow-2">
+                            <p-chart type="line" [data]="chartDataMensual" [options]="chartOptionsMensual"
+                                height="300px"></p-chart>
+                        </p-card>
+                    </div>
+
+                    <div class="col-12 xl:col-6">
+                        <p-card header="Volumen de Dispensación (Últimos 7 días)" styleClass="h-full shadow-2">
+                            <p-chart type="bar" [data]="chartDataDiaria" [options]="chartOptionsDiaria"
+                                height="300px"></p-chart>
+                        </p-card>
+                    </div>
+
+                </div>
+
+                <div class="grid mt-4">
+                    <div class="col-12">
+                        <p-card header="Distribución de Dispensaciones por Laboratorio / Proveedor"
+                            styleClass="shadow-2">
+                            <p-chart type="bar" [data]="chartDataProveedor" [options]="chartOptionsProveedor"
+                                height="250px"></p-chart>
+                        </p-card>
+                    </div>
+                </div>
+
             </div>
 
             <router-outlet></router-outlet>
         </main>
     </div>
 </div>
+
+<p-dialog header="📋 Reporte Crítico: Medicamentos con Stock Bajo (< 10 unidades)" [(visible)]="displayModalStock"
+    [modal]="true" [style]="{width: '55vw'}" [draggable]="false" [resizable]="false" styleClass="p-fluid shadow-4">
+
+    <p-table [value]="listaStockBajo" [paginator]="true" [rows]="5" [loading]="loadingModal"
+        styleClass="p-datatable-striped p-datatable-sm mt-2">
+        <ng-template pTemplate="header">
+            <tr>
+                <th style="width: 50%">Medicamento</th>
+                <th style="width: 25%" class="text-center">Código</th>
+                <th style="width: 25%" class="text-center">Stock Actual</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-prod>
+            <tr>
+                <td class="font-bold text-cyan-900">{{ prod.producto }}</td>
+                <td class="text-center text-gray-600">{{ prod.codigo }}</td>
+                <td class="text-center">
+                    <span class="p-badge p-badge-danger font-bold px-3 py-1 text-sm shadow-1">
+                        {{ prod.stockTotal }} UND
+                    </span>
+                </td>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+            <tr>
+                <td colspan="3" class="text-center py-4 text-gray-500 font-medium">
+                    ¡Excelente! No hay productos con stock menor a 10 unidades.
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</p-dialog>
+
+<p-dialog header="📅 Reporte de Caducidad Completo (Próximos 30 días)" [(visible)]="displayModalCaducidad"
+    [modal]="true" [style]="{width: '60vw'}" [draggable]="false" [resizable]="false" styleClass="p-fluid shadow-4">
+
+    <p-table [value]="dashboardData?.productosPorVencer || []" [paginator]="true" [rows]="5"
+        styleClass="p-datatable-striped p-datatable-sm mt-2">
+        <ng-template pTemplate="header">
+            <tr>
+                <th style="width: 45%">Medicamento</th>
+                <th style="width: 30%" class="text-center">Estado de Alerta</th>
+                <th style="width: 25%" class="text-center">Stock en Almacén</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-item>
+            <tr>
+                <td class="font-bold text-cyan-900">{{ item.producto }}</td>
+                <td class="text-center">
+                    <span class="font-bold text-sm" [ngClass]="{
+                        'text-red-600': getSeverity(item.tipoAlerta) === 'danger',
+                        'text-yellow-600': getSeverity(item.tipoAlerta) === 'warning'
+                    }">
+                        <i class="mr-1" [ngClass]="{
+                            'pi pi-exclamation-circle': getSeverity(item.tipoAlerta) === 'danger',
+                            'pi pi-exclamation-triangle': getSeverity(item.tipoAlerta) === 'warning'
+                        }"></i>
+                        {{ item.tipoAlerta }}
+                    </span>
+                </td>
+                <td class="text-center">
+                    <span class="p-badge font-bold px-3 py-1 text-sm shadow-1" [ngClass]="{
+                        'p-badge-danger': getSeverity(item.tipoAlerta) === 'danger',
+                        'p-badge-warning': getSeverity(item.tipoAlerta) === 'warning'
+                    }">
+                        {{ item.stockActual }} UND
+                    </span>
+                </td>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+            <tr>
+                <td colspan="3" class="text-center py-4 text-gray-500 font-medium">
+                    No hay medicamentos registrados en riesgo de vencimiento.
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</p-dialog>
+
+<p-sidebar [(visible)]="displaySidebarStaff" position="right" styleClass="w-30rem">
+    <div class="p-3">
+        <h2 class="text-2xl font-bold mb-2"><i class="pi pi-users mr-2 text-blue-500"></i>Rendimiento del Personal</h2>
+        <p class="text-500 mb-4">Dispensaciones realizadas por usuario (Turno de Hoy)</p>
+
+        <div *ngIf="dashboardData?.rendimientoPersonal?.length; else emptyStaff"
+            class="surface-card p-4 border-round shadow-1 text-center">
+            <p-chart type="doughnut" [data]="chartDataStaff" [options]="chartOptionsStaff" height="300px"></p-chart>
+
+            <div class="mt-4 text-left">
+                <div *ngFor="let item of dashboardData?.rendimientoPersonal"
+                    class="flex justify-content-between py-2 border-bottom-1 surface-border">
+                    <span class="font-medium">{{ item.etiqueta }}</span>
+                    <span class="font-bold text-blue-600">{{ item.valor }} vent.</span>
+                </div>
+            </div>
+        </div>
+
+        <ng-template #emptyStaff>
+            <div class="surface-card p-5 border-round shadow-1 text-center">
+                <i class="pi pi-inbox text-500 text-6xl mb-3"></i>
+                <h3 class="text-700 m-0 mb-2">Aún no hay registros</h3>
+                <p class="text-500 m-0">No se han realizado dispensaciones en el turno de hoy.</p>
+            </div>
+        </ng-template>
+
+        <div class="mt-4 p-3 bg-blue-50 border-round">
+            <p class="text-blue-800 text-sm line-height-3 m-0">
+                <i class="pi pi-info-circle mr-2"></i>
+                Este gráfico ayuda a monitorear la carga de trabajo y productividad de los técnicos farmacéuticos en
+                tiempo real.
+            </p>
+        </div>
+    </div>
+</p-sidebar>

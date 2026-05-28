@@ -66,12 +66,12 @@
                 <ng-template pTemplate="footer">
                     <div class="flex flex-column gap-2">
 
-                        <button pButton label="Descargar PDF" icon="pi pi-file-pdf"
-                            class="p-button-info p-button-sm w-full font-bold shadow-1" (click)="descargarPDF()">
-                        </button>
+                        <p-button label="Descargar PDF" icon="pi pi-file-pdf" styleClass="p-button-info w-full"
+                            [disabled]="guiaEncontrada.estado?.descripcion !== 'VALIDADO'" (onClick)="descargarPDF()">
+                        </p-button>
                         <button *ngIf="guiaEncontrada.estado?.descripcion === 'PENDIENTE'" pButton
                             label="Validar Guía de Remisión" icon="pi pi-check-circle"
-                            class="p-button-info p-button-sm w-full font-bold shadow-1" (click)="validarComprobante()">
+                            class="p-button-info p-button-sm w-full font-bold shadow-1" (click)="validarGuia()">
                         </button>
 
                     </div>

@@ -20,7 +20,7 @@ export class ProveedorService {
     );
   }
 
-  // --- MÉTODOS EXISTENTES DE PROVEEDORES ---
+
 
   getProveedores(): Observable<any[]> {
     return this.http.get<any[]>(this.apiUrl).pipe(

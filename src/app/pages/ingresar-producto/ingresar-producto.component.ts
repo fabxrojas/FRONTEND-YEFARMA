@@ -35,12 +35,12 @@ import { ProveedorService } from '../../services/proveedor.service';
 export class IngresarProductoComponent implements OnInit {
   // Arreglos para los selectores
   marcas: any[] = [];
-  presentaciones: any[] = []; 
+  presentaciones: any[] = [];
   listaUnidadesDetalle: any[] = [];
   proveedores: any[] = [];
-  unidadesMedida: any[] = []; 
+  unidadesMedida: any[] = [];
 
-  listaunidadesdetalle: any[] = []; 
+  listaunidadesdetalle: any[] = [];
 
   productoSeleccionado: any = null;
   productoFijado: any = null;
@@ -232,7 +232,7 @@ export class IngresarProductoComponent implements OnInit {
       marca: this.nuevoIngreso.marca,
       presentacion: this.nuevoIngreso.presentacion,
       unidad: this.nuevoIngreso.unidad,
-      usuario: { id_usuario: idUsuarioActual },
+      usuario: { idUsuario: idUsuarioActual },
       cantidad_ingresada: this.nuevoIngreso.cantidad_ingresada,
       cant_por_presen: this.nuevoIngreso.cant_por_presen,
       fechaFabricacion: this.nuevoIngreso.fechaFabricacion,
@@ -260,10 +260,7 @@ export class IngresarProductoComponent implements OnInit {
   }
 
   guardarTemporalmente() {
-    if (!this.nuevoIngreso.presentacion || !this.nuevoIngreso.marca ||
-      !this.nuevoIngreso.unidad || !this.nuevoIngreso.cantidadRecibida ||
-      !this.nuevoIngreso.fechaFabricacion) {
-      this.mostrarError('Complete todos los campos, incluyendo la Fecha de Fabricación.');
+    if (!this.validarDatos()) {
       return;
     }
 
@@ -285,7 +282,7 @@ export class IngresarProductoComponent implements OnInit {
       lote: null,
       fechaFabricacion: this.nuevoIngreso.fechaFabricacion,
       fechaVencimiento: this.nuevoIngreso.fechaVencimiento,
-      usuario: { id_usuario: idUsuarioActual }
+      usuario: { idUsuario: idUsuarioActual }
     };
 
     this.detallesPorProducto.set(idProd, [...detallesActuales, nuevoDetalle]);
@@ -347,7 +344,7 @@ export class IngresarProductoComponent implements OnInit {
   cargarMarcasDelProducto(idProducto: number) {
     this.productoService.getMarcasPorProducto(idProducto).subscribe({
       next: (data) => {
-        this.marcasDelProducto = data; // Actualiza el combo principal
+        this.marcasDelProducto = data;
       },
       error: (err) => {
         console.error('Error al cargar marcas del producto:', err);
@@ -438,7 +435,6 @@ export class IngresarProductoComponent implements OnInit {
   // Método auxiliar para refrescar el combo de presentaciones
   cargarPresentaciones() {
     this.productoService.getPresentaciones().subscribe(data => {
-      // Mapeamos para crear el 'label' que se ve en el HTML (ej: "CAJA x 10.00")
       this.presentaciones = data.map(p => ({
         ...p,
         label: `${p.unidadMedida.nombre} x ${p.cantidad}`
@@ -475,7 +471,6 @@ export class IngresarProductoComponent implements OnInit {
         presentacion: detalle.presentacion,
         cantidad_ingresada: detalle.cantidad,
         unidad: detalle.unidadMedida
-        // Lote y fechas se dejan vacíos para que el usuario los llene manualmente
       });
     });
   }
@@ -486,29 +481,32 @@ export class IngresarProductoComponent implements OnInit {
       this.mostrarError('Debe buscar y seleccionar un medicamento.');
       return false;
     }
-    // Validamos que la unidad también esté seleccionada
-    if (!this.nuevoIngreso.proveedor || !this.nuevoIngreso.marca || !this.nuevoIngreso.presentacion || !this.nuevoIngreso.unidad) {
-      this.mostrarError('Por favor, complete el Proveedor, Marca, Presentación y Unidad de Medida.');
+
+    if (!this.nuevoIngreso.proveedor || !this.nuevoIngreso.marca ||
+      !this.nuevoIngreso.presentacion || !this.nuevoIngreso.unidad) {
+      this.mostrarError('Complete Proveedor, Marca, Presentación y Unidad.');
       return false;
     }
-    if (!this.nuevoIngreso.cantidad_ingresada || this.nuevoIngreso.cantidad_ingresada <= 0 ||
-      !this.nuevoIngreso.cant_por_presen || this.nuevoIngreso.cant_por_presen <= 0) {
-      this.mostrarError('Las cantidades deben ser mayores a cero.');
+
+    if (!this.nuevoIngreso.cantidadRecibida || this.nuevoIngreso.cantidadRecibida <= 0 ||
+      !this.nuevoIngreso.unidad.cantidad || this.nuevoIngreso.unidad.cantidad <= 0) {
+      this.mostrarError('Las cantidades y las unidades por presentación deben ser mayores a cero.');
       return false;
     }
-    if (!this.nuevoIngreso.fechaFabricacion || !this.nuevoIngreso.fechaVencimiento) {
-      this.mostrarError('Debe ingresar las fechas de fabricación y vencimiento.');
-      return false;
-    }
-    if (this.nuevoIngreso.fechaVencimiento <= this.nuevoIngreso.fechaFabricacion) {
+
+    const fab = new Date(this.nuevoIngreso.fechaFabricacion).getTime();
+    const ven = new Date(this.nuevoIngreso.fechaVencimiento).getTime();
+
+    if (ven <= fab) {
       this.mostrarError('La fecha de vencimiento debe ser posterior a la de fabricación.');
       return false;
     }
+
     return true;
   }
 
   private mostrarError(mensaje: string) {
-    this.messageService.add({ severity: 'error', summary: 'Atención', detail: mensaje });
+    this.messageService.add({ severity: 'error', summary: 'Error  ', detail: mensaje });
   }
 
 
