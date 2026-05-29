@@ -193,20 +193,26 @@
 </p-dialog>
 
 <p-dialog header="📅 Reporte de Caducidad Completo (Próximos 30 días)" [(visible)]="displayModalCaducidad"
-    [modal]="true" [style]="{width: '60vw'}" [draggable]="false" [resizable]="false" styleClass="p-fluid shadow-4">
+    [modal]="true" [style]="{width: '65vw'}" [draggable]="false" [resizable]="false" styleClass="p-fluid shadow-4">
 
     <p-table [value]="dashboardData?.productosPorVencer || []" [paginator]="true" [rows]="5"
         styleClass="p-datatable-striped p-datatable-sm mt-2">
         <ng-template pTemplate="header">
             <tr>
-                <th style="width: 45%">Medicamento</th>
-                <th style="width: 30%" class="text-center">Estado de Alerta</th>
+                <th style="width: 35%">Medicamento</th>
+                <th style="width: 15%" class="text-center">Lote</th>
+                <th style="width: 25%" class="text-center">Estado de Alerta</th>
                 <th style="width: 25%" class="text-center">Stock en Almacén</th>
             </tr>
         </ng-template>
         <ng-template pTemplate="body" let-item>
             <tr>
                 <td class="font-bold text-cyan-900">{{ item.producto }}</td>
+                <td class="text-center">
+                    <span class="bg-blue-50 text-blue-700 font-bold px-2 py-1 border-round text-sm">
+                        {{ item.lote || 'N/A' }}
+                    </span>
+                </td>
                 <td class="text-center">
                     <span class="font-bold text-sm" [ngClass]="{
                         'text-red-600': getSeverity(item.tipoAlerta) === 'danger',
@@ -231,7 +237,7 @@
         </ng-template>
         <ng-template pTemplate="emptymessage">
             <tr>
-                <td colspan="3" class="text-center py-4 text-gray-500 font-medium">
+                <td colspan="4" class="text-center py-4 text-gray-500 font-medium">
                     No hay medicamentos registrados en riesgo de vencimiento.
                 </td>
             </tr>
@@ -242,17 +248,18 @@
 <p-sidebar [(visible)]="displaySidebarStaff" position="right" styleClass="w-30rem">
     <div class="p-3">
         <h2 class="text-2xl font-bold mb-2"><i class="pi pi-users mr-2 text-blue-500"></i>Rendimiento del Personal</h2>
-        <p class="text-500 mb-4">Dispensaciones realizadas por usuario (Turno de Hoy)</p>
 
-        <div *ngIf="dashboardData?.rendimientoPersonal?.length; else emptyStaff"
+        <div *ngIf="dashboardData?.rendimientoPersonal && dashboardData!.rendimientoPersonal!.length > 0; else emptyStaff"
             class="surface-card p-4 border-round shadow-1 text-center">
-            <p-chart type="doughnut" [data]="chartDataStaff" [options]="chartOptionsStaff" height="300px"></p-chart>
+
+            <p-chart *ngIf="chartDataStaff" type="doughnut" [data]="chartDataStaff" [options]="chartOptionsStaff"
+                height="300px"></p-chart>
 
             <div class="mt-4 text-left">
                 <div *ngFor="let item of dashboardData?.rendimientoPersonal"
                     class="flex justify-content-between py-2 border-bottom-1 surface-border">
-                    <span class="font-medium">{{ item.etiqueta }}</span>
-                    <span class="font-bold text-blue-600">{{ item.valor }} vent.</span>
+                    <span class="font-medium">{{ item?.etiqueta }}</span>
+                    <span class="font-bold text-blue-600">{{ item?.valor }} vent.</span>
                 </div>
             </div>
         </div>
@@ -264,13 +271,40 @@
                 <p class="text-500 m-0">No se han realizado dispensaciones en el turno de hoy.</p>
             </div>
         </ng-template>
+    </div>
 
-        <div class="mt-4 p-3 bg-blue-50 border-round">
-            <p class="text-blue-800 text-sm line-height-3 m-0">
-                <i class="pi pi-info-circle mr-2"></i>
-                Este gráfico ayuda a monitorear la carga de trabajo y productividad de los técnicos farmacéuticos en
-                tiempo real.
-            </p>
-        </div>
+    <div class="mt-4 p-3 bg-blue-50 border-round">
+        <p class="text-blue-800 text-sm line-height-3 m-0">
+            <i class="pi pi-info-circle mr-2"></i>
+            Este gráfico ayuda a monitorear la carga de trabajo y productividad de los técnicos farmacéuticos en
+            tiempo real.
+        </p>
     </div>
 </p-sidebar>
+
+<p-dialog header="Mi Perfil" [(visible)]="displayModalPerfil" [modal]="true" [style]="{width: '400px'}">
+    <div class="flex flex-column align-items-center p-3">
+        <div class="w-6rem h-6rem border-circle bg-blue-100 flex align-items-center justify-content-center mb-3">
+            <i class="pi pi-user text-4xl text-blue-500"></i>
+        </div>
+        <h2 class="m-0">{{ usuarioPerfil.nombre }} {{ usuarioPerfil.apellidoP }}</h2>
+        <span class="text-500 font-medium mb-4">Químico Farmacéutico</span>
+
+        <div class="w-full">
+            <div class="flex justify-content-between py-2 border-bottom-1 surface-border">
+                <span class="text-500">Usuario</span>
+                <span class="font-bold">{{ usuarioPerfil.nombreUser }}</span>
+            </div>
+            <div class="flex justify-content-between py-2 border-bottom-1 surface-border">
+                <span class="text-500">Correo</span>
+                <span class="font-bold">{{ usuarioPerfil.correo }}</span>
+            </div>
+            <div class="flex justify-content-between py-2">
+                <span class="text-500">Apellidos</span>
+                <span class="font-bold">{{ usuarioPerfil.apellidoP }} {{ usuarioPerfil.apellidoM }}</span>
+            </div>
+        </div>
+
+        <button pButton label="Cerrar" icon="pi pi-times" class="mt-4" (click)="displayModalPerfil = false"></button>
+    </div>
+</p-dialog>

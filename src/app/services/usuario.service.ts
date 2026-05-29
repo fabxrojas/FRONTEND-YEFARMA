@@ -44,4 +44,8 @@ export class UsuarioService {
       { responseType: 'text' } 
     );
   }
+
+  obtenerPerfil(nombreUser: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/perfil/${nombreUser}`);
+  }
 }

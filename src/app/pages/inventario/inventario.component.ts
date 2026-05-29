@@ -114,7 +114,8 @@ export class InventarioComponent implements OnInit {
 
   abrirModalBaja(lote: any) {
     this.loteSeleccionado = lote;
-    this.motivoBajaId = null; // Reseteamos el ID
+    this.motivoBajaId = null;
+    console.log("Datos del lote seleccionado:", lote);
     this.motivoEspecifico = '';
     this.mostrarModalBaja = true;
   }
@@ -126,28 +127,30 @@ export class InventarioComponent implements OnInit {
   }
 
   confirmarBaja() {
-    // Validamos usando el nuevo ID y la función de ayuda
     if (!this.motivoBajaId || (this.esMotivoOtro() && !this.motivoEspecifico)) {
       alert("Por favor, seleccione un motivo y/o especifique los detalles.");
       return;
     }
 
+    // Asegúrate de usar los nombres que tu controlador Java espera en el .get()
     const payload = {
-      idIngreso: this.loteSeleccionado.id_ingreso,
+      idIngreso: this.loteSeleccionado.idIngreso || this.loteSeleccionado.id_ingreso,
       idUsuario: this.authService.getCurrentUserId(),
-      idMotivo: this.motivoBajaId, // Enviamos la llave foránea a MySQL
-      detalle: this.esMotivoOtro() ? this.motivoEspecifico : null // Si no es "Otro", enviamos null
+      idMotivo: this.motivoBajaId,
+      detalle: this.esMotivoOtro() ? this.motivoEspecifico : null
     };
+
+    console.log("Enviando al backend:", payload); // <-- MIRA LA CONSOLA (F12)
 
     this.inventarioService.registrarBajaLote(payload).subscribe({
       next: (res: any) => {
-        console.log(res.mensaje);
+        alert("Baja exitosa");
         this.mostrarModalBaja = false;
         this.cargarInventario();
       },
       error: (err: any) => {
-        console.error("Error", err);
-        alert("Ocurrió un error al intentar dar de baja el lote.");
+        console.error("Error completo:", err);
+        alert("Ocurrió un error. Revisa la consola (F12) para más detalles.");
       }
     });
   }

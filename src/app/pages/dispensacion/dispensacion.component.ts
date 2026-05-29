@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { DispensacionService } from '../../services/dispensacion.service';
 
 import { ProductoService } from '../../services/producto.service';
+import { RefreshService } from '../../services/refresh.service';
 
 // Importaciones de PrimeNG
 import { CardModule } from 'primeng/card';
@@ -15,6 +16,8 @@ import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { TagModule } from 'primeng/tag';
+import { TooltipModule } from 'primeng/tooltip';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-dispensacion',
@@ -29,7 +32,7 @@ import { TagModule } from 'primeng/tag';
     ConfirmDialogModule,
     ToastModule,
     InputNumberModule,
-    TagModule
+    TagModule, TooltipModule
   ],
   providers: [ConfirmationService, MessageService],
   templateUrl: './dispensacion.component.html',
@@ -51,7 +54,9 @@ export class DispensacionComponent implements OnInit {
     private dispensacionService: DispensacionService,
     private productoService: ProductoService,
     private confirmationService: ConfirmationService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private refreshService: RefreshService,
+    private authService: AuthService
   ) { }
 
   ngOnInit() {
@@ -147,7 +152,6 @@ export class DispensacionComponent implements OnInit {
     this.totalDispensacion = this.carrito.reduce((acc, item) => acc + item.subtotal, 0);
   }
 
-  // --- PROCESAR LA ORDEN HACIA SPRING BOOT ---
   procesarDispensacion() {
     this.confirmationService.confirm({
       message: `¿Desea confirmar esta dispensación por un total de S/ ${this.totalDispensacion.toFixed(2)}?`,
@@ -161,7 +165,7 @@ export class DispensacionComponent implements OnInit {
 
         // Estructura exacta que espera nuestro DispensacionRequest.java
         const request = {
-          idUsuario: 1, // TODO: Aquí deberías poner el ID del usuario que inició sesión
+          idUsuario: this.authService.getCurrentUserId(),
           total: this.totalDispensacion,
           detalles: this.carrito.map(item => ({
             idProducto: item.idProducto,
@@ -172,13 +176,14 @@ export class DispensacionComponent implements OnInit {
 
         this.dispensacionService.procesarDispensacion(request).subscribe({
           next: (res) => {
-            this.mostrarMensaje('success', 'Dispensación Exitosa', 'El stock ha sido actualizado (FEFO).');
+            this.mostrarMensaje('success', 'Dispensación Exitosa', 'El stock ha sido actualizado.');
             this.cancelarOrden(); // Limpiamos el carrito
             this.cargarProductos(); // Recargamos para ver el nuevo stock
+            this.refreshService.triggerRefresh(); // Notificamos a otros componentes que deben refrescar datos
           },
           error: (err) => {
             console.error(err);
-            this.mostrarMensaje('error', 'Error del Servidor', 'No se pudo procesar la dispensación.');
+            this.mostrarMensaje('error', 'Error', 'No se pudo procesar la dispensación.');
           }
         });
       }

@@ -27,7 +27,6 @@
                 </header>
 
                 <div class="grid">
-
                     <div class="col-12 md:col-6 flex">
                         <p-card styleClass="h-full w-full">
                             <div class="flex flex-column h-full justify-content-between">
@@ -46,21 +45,23 @@
                     </div>
 
                     <div class="col-12 md:col-6 flex">
-                        <p-card styleClass="h-full w-full border-left-3 border-orange-500">
+                        <p-card
+                            styleClass="h-full w-full border-left-3 border-orange-500 cursor-pointer hover:shadow-4 transition-all"
+                            (click)="mostrarDetalleStockBajo()">
                             <div class="flex flex-column h-full justify-content-between">
                                 <div class="flex align-items-center mb-3">
                                     <i class="pi pi-exclamation-triangle text-orange-500 text-3xl mr-3"></i>
                                     <span class="text-xl font-bold">Stock Bajo</span>
                                 </div>
                                 <div class="text-center mt-auto">
-                                    <h1 class="text-orange-500 text-6xl m-0 font-bold">{{
-                                        dashboardData?.productosConStockBajo || 0 }}</h1>
-                                    <p class="text-600 mt-2">Productos que requieren reposición en vitrina.</p>
+                                    <h1 class="text-orange-500 text-6xl m-0 font-bold">
+                                        {{ dashboardData?.productosConStockBajo || 0 }}
+                                    </h1>
+                                    <p class="text-600 mt-2">Clic para ver detalle de reposición.</p>
                                 </div>
                             </div>
                         </p-card>
                     </div>
-
                 </div>
 
                 <div class="grid mt-4">
@@ -95,3 +96,50 @@
         </main>
     </div>
 </div>
+
+<p-dialog header="Mi Perfil" [(visible)]="displayModalPerfil" [modal]="true" [style]="{width: '400px'}">
+    <div class="flex flex-column align-items-center p-3">
+        <div class="w-6rem h-6rem border-circle bg-blue-100 flex align-items-center justify-content-center mb-3">
+            <i class="pi pi-user text-4xl text-blue-500"></i>
+        </div>
+        <h2 class="m-0">{{ usuarioPerfil.nombre }} {{ usuarioPerfil.apellidoP }}</h2>
+        <span class="text-500 font-medium mb-4">Técnico Farmacéutico</span>
+
+        <div class="w-full">
+            <div class="flex justify-content-between py-2 border-bottom-1 surface-border">
+                <span class="text-500">Usuario</span>
+                <span class="font-bold">{{ usuarioPerfil.nombreUser }}</span>
+            </div>
+            <div class="flex justify-content-between py-2 border-bottom-1 surface-border">
+                <span class="text-500">Correo</span>
+                <span class="font-bold">{{ usuarioPerfil.correo }}</span>
+            </div>
+            <div class="flex justify-content-between py-2">
+                <span class="text-500">Apellidos</span>
+                <span class="font-bold">{{ usuarioPerfil.apellidoP }} {{ usuarioPerfil.apellidoM }}</span>
+            </div>
+        </div>
+
+        <button pButton label="Cerrar" icon="pi pi-times" class="mt-4" (click)="displayModalPerfil = false"></button>
+    </div>
+</p-dialog>
+
+<p-dialog header="Productos con Stock Bajo" [(visible)]="displayModalStock" [modal]="true" [style]="{width: '600px'}">
+    <p-table [value]="listaStockBajo" [paginator]="true" [rows]="5" styleClass="p-datatable-sm">
+        <ng-template pTemplate="header">
+            <tr>
+                <th>Producto</th>
+                <th class="text-center">Stock Actual</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-prod>
+            <tr>
+                <td>{{ prod.producto }}</td>
+                <td class="text-center">{{ prod.stockTotal }}</td>
+            </tr>
+        </ng-template>
+    </p-table>
+    <div class="flex justify-content-end mt-3">
+        <button pButton label="Cerrar" class="p-button-text" (click)="displayModalStock = false"></button>
+    </div>
+</p-dialog>

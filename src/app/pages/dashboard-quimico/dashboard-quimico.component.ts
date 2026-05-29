@@ -12,6 +12,9 @@ import { DashboardService } from '../../services/dashboard.service';
 import { DashboardDTO } from '../../dto/dashboard.dto';
 import { TableModule } from 'primeng/table';
 import { DialogModule } from 'primeng/dialog';
+import { UsuarioService } from '../../services/usuario.service';
+import { RefreshService } from '../../services/refresh.service';
+import { TooltipModule } from 'primeng/tooltip';
 
 import { SidebarModule } from 'primeng/sidebar';
 
@@ -21,7 +24,7 @@ import { ChartModule } from 'primeng/chart';
   selector: 'app-dashboard-quimico',
   standalone: true,
   imports: [CommonModule, PanelMenuModule, MenuModule, ButtonModule, RouterOutlet,
-    CardModule, TableModule, DialogModule, ChartModule, SidebarModule],
+    CardModule, TableModule, DialogModule, ChartModule, SidebarModule, TooltipModule],
   templateUrl: './dashboard-quimico.component.html',
   styleUrls: ['./dashboard-quimico.component.css']
 })
@@ -55,30 +58,46 @@ export class DashboardQuimicoComponent implements OnInit {
   chartDataStaff: any;
   chartOptionsStaff: any;
 
+  displayModalPerfil: boolean = false;
+  usuarioPerfil: any = {};
+
   constructor(
     public router: Router,
     private authService: AuthService,
-    private dashboardService: DashboardService
+    private dashboardService: DashboardService,
+    private usuarioService: UsuarioService,
+    private refreshService: RefreshService
   ) { }
 
   ngOnInit() {
     this.cargarUsuario();
     this.cargarDatosDashboard();
 
+    this.refreshService.refresh$.subscribe(() => {
+      this.cargarDatosDashboard();
+    });
+
     this.userOptions = [
       {
         label: 'Perfil',
         items: [
-          { label: 'Ver Perfil', icon: 'pi pi-user' },
-          {
-            label: 'Cerrar Sesión',
-            icon: 'pi pi-power-off',
-            command: () => this.logout()
-          }
+          { label: 'Ver Perfil', icon: 'pi pi-user', command: () => this.cargarPerfil() }, // Conexión aquí
+          { label: 'Cerrar Sesión', icon: 'pi pi-power-off', command: () => this.logout() }
         ]
       }
     ];
   }
+
+  cargarPerfil() {
+    this.usuarioService.obtenerPerfil(this.userName).subscribe({
+      next: (data) => {
+        this.usuarioPerfil = data;
+        this.displayModalPerfil = true;
+      },
+      error: (err) => console.error('Error al cargar perfil', err)
+    });
+  }
+
 
   private cargarUsuario() {
     const userJson = localStorage.getItem('usuario');
@@ -91,13 +110,18 @@ export class DashboardQuimicoComponent implements OnInit {
   }
 
   private cargarDatosDashboard() {
-    this.dashboardService.getDashboardData().subscribe({
+    this.loading = true;
+
+    const idUsuario = this.authService.getCurrentUserId();
+
+    this.dashboardService.getDashboardData(idUsuario).subscribe({
       next: (data) => {
         this.dashboardData = data;
         this.loading = false;
-        
-        // Configuramos todos los gráficos
-        this.configurarGraficoBarras(); 
+
+        console.log("Data completa recibida:", data);
+
+        this.configurarGraficoBarras();
         this.configurarGraficosAvanzados();
         this.configurarRendimientoPersonal();
       },
@@ -118,19 +142,19 @@ export class DashboardQuimicoComponent implements OnInit {
     const textColorSecondary = documentStyle.getPropertyValue('--text-color-secondary');
     const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
 
-    // 1. Extraemos los nombres y cantidades de tu DTO
+    // 1. Extraemos los nombres y cantidades
     const topNombres = this.dashboardData?.topProductos?.map(p => p.producto) || [];
     const topCantidades = this.dashboardData?.topProductos?.map(p => p.cantidadVendida) || [];
 
     // 2. Llenamos la data del gráfico
     this.chartData = {
-      labels: topNombres, // Eje X: Nombres de los medicamentos
+      labels: topNombres,
       datasets: [
         {
           label: 'Unidades Dispensadas',
-          backgroundColor: documentStyle.getPropertyValue('--blue-500'), // Color de la barra
-          borderColor: documentStyle.getPropertyValue('--blue-500'),
-          data: topCantidades, 
+          backgroundColor: documentStyle.getPropertyValue('--cyan-500'), // Color de la barra
+          borderColor: documentStyle.getPropertyValue('--cyan-500'),
+          data: topCantidades,
           borderRadius: 4 // Bordes redondeados para que se vea moderno
         }
       ]
@@ -168,46 +192,46 @@ export class DashboardQuimicoComponent implements OnInit {
     const valoresProveedor = this.dashboardData?.dispensacionesPorProveedor?.map((g: any) => g.valor) || [];
 
     this.chartDataMensual = {
-        labels: etiquetasMensual,
-        datasets: [
-            {
-                label: 'Dispensaciones Mensuales',
-                data: valoresMensual,
-                fill: true, // Esto hace el efecto de área sombreada bajo la línea
-                borderColor: documentStyle.getPropertyValue('--indigo-500'),
-                backgroundColor: 'rgba(99, 102, 241, 0.2)', // Indigo transparente
-                tension: 0.4 // Esto hace que la línea sea curva y elegante
-            }
-        ]
+      labels: etiquetasMensual,
+      datasets: [
+        {
+          label: 'Dispensaciones Mensuales',
+          data: valoresMensual,
+          fill: true, // Esto hace el efecto de área sombreada bajo la línea
+          borderColor: documentStyle.getPropertyValue('--indigo-500'),
+          backgroundColor: 'rgba(99, 102, 241, 0.2)',
+          tension: 0.4
+        }
+      ]
     };
 
     this.chartOptionsMensual = {
-        plugins: { legend: { labels: { color: textColor } } },
-        scales: {
-            x: { ticks: { color: textColorSecondary }, grid: { color: surfaceBorder } },
-            y: { ticks: { color: textColorSecondary }, grid: { color: surfaceBorder } }
-        }
+      plugins: { legend: { labels: { color: textColor } } },
+      scales: {
+        x: { ticks: { color: textColorSecondary }, grid: { color: surfaceBorder } },
+        y: { ticks: { color: textColorSecondary }, grid: { color: surfaceBorder } }
+      }
     };
 
     this.chartDataProveedor = {
-        labels: etiquetasProveedor,
-        datasets: [
-            {
-                label: 'Unidades Vendidas',
-                data: valoresProveedor,
-                backgroundColor: documentStyle.getPropertyValue('--orange-500'), // Color naranja corporativo
-                borderRadius: 4
-            }
-        ]
+      labels: etiquetasProveedor,
+      datasets: [
+        {
+          label: 'Unidades Vendidas',
+          data: valoresProveedor,
+          backgroundColor: documentStyle.getPropertyValue('--orange-500'), // Color naranja corporativo
+          borderRadius: 4
+        }
+      ]
     };
 
     this.chartOptionsProveedor = {
-        indexAxis: 'y', 
-        plugins: { legend: { labels: { color: textColor } } },
-        scales: {
-            x: { ticks: { color: textColorSecondary }, grid: { color: surfaceBorder } },
-            y: { ticks: { color: textColorSecondary }, grid: { display: false } }
-        }
+      indexAxis: 'y',
+      plugins: { legend: { labels: { color: textColor } } },
+      scales: {
+        x: { ticks: { color: textColorSecondary }, grid: { color: surfaceBorder } },
+        y: { ticks: { color: textColorSecondary }, grid: { display: false } }
+      }
     };
 
     // 2. GRÁFICO ÚLTIMOS 7 DÍAS (BARRAS)
@@ -215,57 +239,62 @@ export class DashboardQuimicoComponent implements OnInit {
     const valoresDiarias = this.dashboardData?.dispensacionesDiarias?.map((g: any) => g.valor) || [];
 
     this.chartDataDiaria = {
-        labels: etiquetasDiarias,
-        datasets: [
-            {
-                label: 'Últimos 7 Días',
-                data: valoresDiarias,
-                backgroundColor: documentStyle.getPropertyValue('--teal-500'), // Color verde azulado
-                borderRadius: 4
-            }
-        ]
-    };
-
-    this.chartOptionsDiaria = {
-        plugins: { legend: { labels: { color: textColor } } },
-        scales: {
-            x: { ticks: { color: textColorSecondary }, grid: { display: false } },
-            y: { ticks: { color: textColorSecondary }, grid: { color: surfaceBorder } }
-        }
-    };
-  }
-
-  configurarRendimientoPersonal() {
-    const documentStyle = getComputedStyle(document.documentElement);
-    
-    const etiquetas = this.dashboardData?.rendimientoPersonal?.map(g => g.etiqueta) || [];
-    const valores = this.dashboardData?.rendimientoPersonal?.map(g => g.valor) || [];
-
-    this.chartDataStaff = {
-      labels: etiquetas,
+      labels: etiquetasDiarias,
       datasets: [
         {
-          data: valores,
-          backgroundColor: [
-            documentStyle.getPropertyValue('--blue-500'),
-            documentStyle.getPropertyValue('--yellow-500'),
-            documentStyle.getPropertyValue('--green-500'),
-            documentStyle.getPropertyValue('--pink-500')
-          ],
-          hoverBackgroundColor: [
-            documentStyle.getPropertyValue('--blue-400'),
-            documentStyle.getPropertyValue('--yellow-400'),
-            documentStyle.getPropertyValue('--green-400'),
-            documentStyle.getPropertyValue('--pink-400')
-          ]
+          label: 'Últimos 7 Días',
+          data: valoresDiarias,
+          backgroundColor: documentStyle.getPropertyValue('--teal-500'), // Color verde azulado
+          borderRadius: 4
         }
       ]
     };
 
+    this.chartOptionsDiaria = {
+      plugins: { legend: { labels: { color: textColor } } },
+      scales: {
+        x: { ticks: { color: textColorSecondary }, grid: { display: false } },
+        y: { ticks: { color: textColorSecondary }, grid: { color: surfaceBorder } }
+      }
+    };
+  }
+
+  configurarRendimientoPersonal() {
+    if (!this.dashboardData?.rendimientoPersonal || this.dashboardData.rendimientoPersonal.length === 0) {
+      console.warn("Rendimiento del personal vacío");
+      return;
+    }
+
+    const etiquetas = this.dashboardData.rendimientoPersonal.map(g => g.etiqueta);
+    const valores = this.dashboardData.rendimientoPersonal.map(g => g.valor);
+
+    // Generar colores dinámicos basados en la cantidad de técnicos
+    // Usamos colores de la paleta CSS de PrimeNG o colores predefinidos
+    const dynamicColors = [
+      '#42A5F5', '#FFCA28', '#66BB6A', '#EC407A',
+      '#AB47BC', '#26A69A', '#78909C', '#FF7043'
+    ];
+
+    // Si hay más técnicos que colores, repetimos o reciclamos la paleta
+    const backgroundColors = etiquetas.map((_, i) => dynamicColors[i % dynamicColors.length]);
+    const hoverColors = backgroundColors.map(color => color + 'AA'); // Un toque más oscuro al pasar el mouse
+
+    this.chartDataStaff = {
+      labels: etiquetas,
+      datasets: [{
+        data: valores,
+        backgroundColor: backgroundColors,
+        hoverBackgroundColor: hoverColors
+      }]
+    };
+
     this.chartOptionsStaff = {
-      cutout: '60%', // Hace que sea una dona y no un pastel completo
+      cutout: '60%',
       plugins: {
-        legend: { position: 'bottom' }
+        legend: {
+          position: 'bottom',
+          labels: { usePointStyle: true } // Mejora visual en la leyenda
+        }
       }
     };
   }
@@ -299,13 +328,13 @@ export class DashboardQuimicoComponent implements OnInit {
   exportarDashboardExcel() {
     // 1. Preparamos los datos básicos
     const data = [
-        { Concepto: 'Productos con Stock Bajo', Valor: this.dashboardData?.productosConStockBajo },
-        { Concepto: 'Productos por Vencer', Valor: this.dashboardData?.productosPorVencer?.length },
+      { Concepto: 'Productos con Stock Bajo', Valor: this.dashboardData?.productosConStockBajo },
+      { Concepto: 'Productos por Vencer', Valor: this.dashboardData?.productosPorVencer?.length },
     ];
 
     // 2. Convertimos a formato CSV
     const csvContent = this.convertToCSV(data);
-    
+
     // 3. Descargamos el archivo
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
@@ -314,22 +343,22 @@ export class DashboardQuimicoComponent implements OnInit {
     link.setAttribute("download", `Reporte_Yefarma_${new Date().toLocaleDateString()}.csv`);
     document.body.appendChild(link);
     link.click();
-}
+  }
 
-// Función auxiliar para convertir JSON a CSV
-convertToCSV(objArray: any[]) {
+  // Función auxiliar para convertir JSON a CSV
+  convertToCSV(objArray: any[]) {
     const array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
     let str = Object.keys(array[0]).join(",") + "\r\n";
-    
+
     for (let i = 0; i < array.length; i++) {
-        let line = '';
-        for (let index in array[i]) {
-            line += array[i][index] + ',';
-        }
-        str += line.slice(0, -1) + '\r\n';
+      let line = '';
+      for (let index in array[i]) {
+        line += array[i][index] + ',';
+      }
+      str += line.slice(0, -1) + '\r\n';
     }
     return str;
-}
+  }
 
   logout() {
     this.authService.logout();

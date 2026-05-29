@@ -13,9 +13,12 @@ export class AuthService {
 
   login(loginData: any): Observable<any> {
     return this.http.post<any>(this.apiUrl, loginData).pipe(
-      tap(user => {
-        if (user && user.status === 'success') {
-          localStorage.setItem('usuario', JSON.stringify(user));
+      tap(res => { // Cambiamos 'user' por 'res' para evitar confusiones
+        console.log("Respuesta completa del servidor:", res);
+
+        if (res && res.status === 'success') {
+          // Guardamos 'res' directamente, que es el objeto completo de la respuesta
+          localStorage.setItem('usuario', JSON.stringify(res));
         }
       })
     );
@@ -50,9 +53,11 @@ export class AuthService {
     const usuarioLogueado = localStorage.getItem('usuario');
     if (usuarioLogueado) {
       const userObj = JSON.parse(usuarioLogueado);
-      return userObj.id_usuario || userObj.idUsuario || 1;
+      console.log("Estructura completa del usuario en localStorage:", userObj); // <--- MIRA ESTO EN LA CONSOLA
+
+      return userObj.id_usuario || userObj.idUsuario || userObj.id || 0;
     }
-    return 1;
+    return 0;
   }
 
   isLoggedIn(): boolean {
