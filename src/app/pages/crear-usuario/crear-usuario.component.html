@@ -57,7 +57,7 @@
                     severity="secondary">
                 </p-button>
 
-                <p-button *ngIf="usuario.idUsuario" label="Eliminar Técnico" icon="pi pi-trash"
+                <p-button *ngIf="usuario.idUsuario" label="Eliminar" icon="pi pi-trash"
                     (onClick)="eliminarUsuario()" severity="danger">
                 </p-button>
 
@@ -124,7 +124,6 @@
                                 </p-tag>
                             </td>
                             <td style="text-align: center;">
-                                <i class="pi pi-calendar mr-1 text-400"></i>
                                 {{ u.fechaCreacion | date:'dd/MM/yyyy' }}
                             </td>
                         </tr>

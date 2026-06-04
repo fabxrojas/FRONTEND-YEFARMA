@@ -31,9 +31,9 @@ export class UsuarioService {
     return this.http.delete(`${this.apiUrl}/eliminar/${id}`);
   }
 
-  solicitarRecuperacion(email: string) {
-    return this.http.post(`${this.apiUrl}/recuperar-contrasena`, { correo: email });
-  }
+  solicitarRecuperacion(datos: { correo: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/recuperar-contrasena`, datos);
+}
 
   cambiarContrasena(token: string, nuevaContrasena: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/cambiar-contrasena`,

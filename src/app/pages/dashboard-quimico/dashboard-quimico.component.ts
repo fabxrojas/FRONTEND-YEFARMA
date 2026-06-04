@@ -268,16 +268,13 @@ export class DashboardQuimicoComponent implements OnInit {
     const etiquetas = this.dashboardData.rendimientoPersonal.map(g => g.etiqueta);
     const valores = this.dashboardData.rendimientoPersonal.map(g => g.valor);
 
-    // Generar colores dinámicos basados en la cantidad de técnicos
-    // Usamos colores de la paleta CSS de PrimeNG o colores predefinidos
     const dynamicColors = [
       '#42A5F5', '#FFCA28', '#66BB6A', '#EC407A',
       '#AB47BC', '#26A69A', '#78909C', '#FF7043'
     ];
 
-    // Si hay más técnicos que colores, repetimos o reciclamos la paleta
     const backgroundColors = etiquetas.map((_, i) => dynamicColors[i % dynamicColors.length]);
-    const hoverColors = backgroundColors.map(color => color + 'AA'); // Un toque más oscuro al pasar el mouse
+    const hoverColors = backgroundColors.map(color => color + 'AA'); 
 
     this.chartDataStaff = {
       labels: etiquetas,
@@ -293,7 +290,7 @@ export class DashboardQuimicoComponent implements OnInit {
       plugins: {
         legend: {
           position: 'bottom',
-          labels: { usePointStyle: true } // Mejora visual en la leyenda
+          labels: { usePointStyle: true }
         }
       }
     };

@@ -1,86 +1,116 @@
-/* Contenedor principal que ocupa toda la pantalla */
-.login-container {
+/* Contenedor principal con gradiente suave */
+.split-login-container {
+    display: flex;
     height: 100vh;
     width: 100vw;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    /* Usamos la misma lógica que te funcionó en el dashboard */
-    background-image: url('../../../assets/img/fondo_botica.jpg'); 
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    position: fixed; /* Asegura que cubra todo sin scroll */
-    top: 0;
-    left: 0;
+    background: linear-gradient(135deg, #f0f4f8 0%, #ffffff 100%);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.login-container::before {
-    content: "";
+/* --- LADO IZQUIERDO: Branding (Imagen con profundidad) --- */
+.login-left {
+    flex: 1;
+    background: url('../../../assets/img/fondo_botica.jpg') center/cover no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 60px;
+}
+
+.overlay {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 123, 143, 0.2); 
-    z-index: 1;
+    /* Gradiente con más profundidad */
+    background: linear-gradient(160deg, rgba(0, 123, 143, 0.9), rgba(0, 70, 80, 0.7));
 }
 
-.login-content {
+.welcome-content {
     position: relative;
     z-index: 2;
-    width: 100%;
-    max-width: 400px;
     text-align: center;
-}
-
-h1 {
     color: white;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-    margin-bottom: 0.5rem;
+    max-width: 85%;
+    /* Animación de entrada */
+    animation: fadeIn 1s ease-out;
 }
 
-h3 {
-    color: #e0f7fa;
-    margin-bottom: 2rem;
+.welcome-content h1 {
+    font-size: 3.8rem;
+    font-weight: 900;
+    margin-bottom: 20px;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: -1px;
+}
+
+.welcome-content p {
+    font-size: 1.5rem;
+    font-weight: 300;
+    opacity: 0.95;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.4);
+}
+
+/* --- LADO DERECHO: Formulario (Efecto Glassmorphism ligero) --- */
+.login-right {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(230, 246, 247, 0.952);
 }
 
 .login-card {
-    background: rgba(255, 255, 255, 0.95);
-    padding: 2.5rem;
-    border-radius: 15px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-}
-
-.field {
-    margin-bottom: 1.5rem;
-    text-align: left;
-}
-
-.field label {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: #007b8f;
-    font-weight: bold;
-}
-
-input[pInputText], p-password {
-    width: 100% !important;
-}
-
-::ng-deep .p-password input {
-    width: 100% !important;
-}
-
-button[pButton] {
     width: 100%;
-    background-color: #007b8f;
-    border: none;
-    padding: 0.8rem;
-    font-size: 1.1rem;
-    margin-top: 1rem;
+    max-width: 440px;
+    padding: 3.5rem;
+    background: #ffffff;
+    border-radius: 24px;
+    box-shadow: 0 25px 50px -12px rgba(0, 123, 143, 0.15);
+    border: 1px solid rgba(0, 123, 143, 0.08);
 }
 
-:host ::ng-deep .p-password, /* Asegurar que los inputs de contraseña ocupen todo el ancho */
-:host ::ng-deep .p-password input {
-    width: 100% !important;
+.login-card h2 {
+    color: #007b8f;
+    font-size: 2.2rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
 }
+
+.login-card .subtitle {
+    color: #64748b;
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 0.95rem;
+}
+
+/* Botón con gradiente y elevación */
+button[pButton] {
+    background: linear-gradient(90deg, #007b8f 0%, #00a89d 100%) !important;
+    border: none;
+    font-weight: 600;
+    padding: 1rem !important;
+    border-radius: 12px !important;
+    transition: all 0.3s ease;
+}
+
+button[pButton]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0, 123, 143, 0.3);
+}
+
+/* Animación */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .login-left { display: none; }
+    .login-card { box-shadow: none; border-radius: 0; }
+}
+

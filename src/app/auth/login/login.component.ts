@@ -65,15 +65,17 @@ export class LoginComponent implements OnInit {
 
     this.cargandoRecuperacion = true;
 
-    this.usuarioService.solicitarRecuperacion(this.emailRecuperar).subscribe({
-      next: () => {
-        this.messageService.add({ severity: 'success', summary: 'Enviado', detail: 'Revise su bandeja de entrada' });
+    // Asegúrate de enviar el objeto con la clave 'correo' que espera el Backend
+    this.usuarioService.solicitarRecuperacion({ correo: this.emailRecuperar }).subscribe({
+      next: (res: any) => {
+        this.messageService.add({ severity: 'success', summary: 'Éxito', detail: res.message }); // Usamos res.message
         this.displayModal = false;
         this.cargandoRecuperacion = false;
       },
       error: (err) => {
         this.cargandoRecuperacion = false;
-        const msg = err.status === 404 ? 'El correo no está registrado' : 'Error al conectar con el servidor';
+        // Ahora leemos el mensaje que viene del backend en el body
+        const msg = err.error?.message || 'Error al conectar con el servidor';
         this.messageService.add({ severity: 'error', summary: 'Error', detail: msg });
       }
     });

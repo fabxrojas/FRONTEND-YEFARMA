@@ -31,7 +31,6 @@ export class RegistrarProveedorComponent implements OnInit {
   // Lista para la tabla
   proveedores: any[] = [];
 
-  // Nuestra bandera para habilitar/deshabilitar el botón
   formularioModificado: boolean = false;
 
   nuevoProveedor: any = {
@@ -43,6 +42,7 @@ export class RegistrarProveedorComponent implements OnInit {
   };
 
   proveedorSeleccionado: any = null;
+  proveedorOriginal: any = null;
 
   constructor(
     private proveedorService: ProveedorService,
@@ -58,9 +58,14 @@ export class RegistrarProveedorComponent implements OnInit {
   onRowSelect(event: any) {
     this.nuevoProveedor = { ...event.data };
     this.proveedorSeleccionado = event.data;
+    this.proveedorOriginal = { ...event.data };
+    this.formularioModificado = false; this.formularioModificado = false;
+  }
 
-    // IMPORTANTISIMO: Reiniciamos la bandera porque el usuario aún no ha escrito nada nuevo
-    this.formularioModificado = false;
+  esFormularioValido(): boolean {
+    if (!this.proveedorSeleccionado) return false;
+
+    return JSON.stringify(this.nuevoProveedor) !== JSON.stringify(this.proveedorOriginal);
   }
 
   cargarProveedores() {
@@ -149,11 +154,10 @@ export class RegistrarProveedorComponent implements OnInit {
     this.cargarProveedores();
   }
 
-  // --- SE EJECUTA AL LIMPIAR EL FORMULARIO ---
   limpiarForm() {
     this.nuevoProveedor = { nombre: '', ruc: '', correo: '', direccion: '', telefono: '' };
-
-    // IMPORTANTISIMO: Reiniciamos la bandera para un posible nuevo registro
+    this.proveedorSeleccionado = null;
+    this.proveedorOriginal = null; 
     this.formularioModificado = false;
   }
 

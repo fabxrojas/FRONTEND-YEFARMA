@@ -16,7 +16,7 @@ export const appConfig: ApplicationConfig = {
       theme: {
         preset: Lara,   
         options: {
-          darkModeSelector: '.app-dark' // opcional
+          darkModeSelector: '.app-dark' 
         }
       }
     })
