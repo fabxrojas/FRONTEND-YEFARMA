@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class DispensacionService {
 
-  private apiUrl = 'http://localhost:8081/api/dispensacion'; 
+  private apiUrl = 'http://localhost:8081/api/dispensacion';
 
   constructor(private http: HttpClient) { }
 
@@ -17,5 +17,8 @@ export class DispensacionService {
 
   listarConStock(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/listar-con-stock`);
-}
+  }
+  obtenerTicketPdf(id: number): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/ticket/${id}`, { responseType: 'blob' });
+  }
 }

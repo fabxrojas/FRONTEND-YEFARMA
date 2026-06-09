@@ -103,7 +103,10 @@ export class DashboardQuimicoComponent implements OnInit {
     const userJson = localStorage.getItem('usuario');
     if (userJson) {
       const user = JSON.parse(userJson);
-      this.userName = user.username || user.NombreUser || 'Usuario';
+      
+      // LA CORRECCIÓN ESTÁ EN ESTA LÍNEA: Agregamos user.nombre al inicio
+      this.userName = user.nombre || user.username || user.NombreUser || 'Usuario';
+      
       const rolNombre = this.authService.getUserRole();
       this.items = MENU_ITEMS[rolNombre] || [];
     }

@@ -153,6 +153,14 @@ export class DispensacionComponent implements OnInit {
   }
 
   procesarDispensacion() {
+
+    const idUsuario = this.authService.getCurrentUserId();
+    console.log("ID recuperado:", idUsuario); // <-- ¿Qué número sale aquí exactamente?
+
+    if (idUsuario === 0) {
+      this.mostrarMensaje('error', 'Error', 'Usuario no identificado. Inicie sesión nuevamente.');
+      return;
+    }
     this.confirmationService.confirm({
       message: `¿Desea confirmar esta dispensación por un total de S/ ${this.totalDispensacion.toFixed(2)}?`,
       header: 'Confirmar Orden',
@@ -176,16 +184,41 @@ export class DispensacionComponent implements OnInit {
 
         this.dispensacionService.procesarDispensacion(request).subscribe({
           next: (res) => {
-            this.mostrarMensaje('success', 'Dispensación Exitosa', 'El stock ha sido actualizado.');
+            console.log("Respuesta del Backend:", res);
+            this.mostrarMensaje('success', 'Éxito', 'Dispensación procesada correctamente.');
+
+            if (res && res.idDispensacion) {
+              this.descargarTicket(res.idDispensacion);
+            }
             this.cancelarOrden(); // Limpiamos el carrito
             this.cargarProductos(); // Recargamos para ver el nuevo stock
             this.refreshService.triggerRefresh(); // Notificamos a otros componentes que deben refrescar datos
+
           },
           error: (err) => {
             console.error(err);
             this.mostrarMensaje('error', 'Error', 'No se pudo procesar la dispensación.');
           }
         });
+      }
+    });
+  }
+
+  // Método para manejar la descarga del PDF
+  private descargarTicket(id: number) {
+    this.dispensacionService.obtenerTicketPdf(id).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `ticket_dispensacion_${id}.pdf`;
+        document.body.appendChild(a); // Necesario para algunos navegadores
+        a.click();
+        document.body.removeChild(a); // Limpieza
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        this.mostrarMensaje('error', 'Error', 'No se pudo descargar el ticket.');
       }
     });
   }
@@ -200,4 +233,6 @@ export class DispensacionComponent implements OnInit {
   private mostrarMensaje(severity: string, summary: string, detail: string) {
     this.messageService.add({ severity, summary, detail });
   }
+
+
 }

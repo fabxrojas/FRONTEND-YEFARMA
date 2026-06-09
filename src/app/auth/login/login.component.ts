@@ -31,8 +31,9 @@ import { UsuarioService } from '../../services/usuario.service';
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements OnInit {
-  loginData = { username: '', password: '' };
+  loginData = { username: '', password: '', codigo: '' };
   errorMessage: string = '';
+  paso: number = 1; // Para controlar el paso del login
 
   // Variables para la recuperación
   displayModal: boolean = false;
@@ -47,7 +48,7 @@ export class LoginComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.loginData = { username: '', password: '' };
+    this.loginData = { username: '', password: '', codigo: '' };
     this.errorMessage = '';
   }
 
@@ -81,7 +82,52 @@ export class LoginComponent implements OnInit {
     });
   }
 
-  onLogin() {
+  enviarPaso1() {
+    if (!this.loginData.username || !this.loginData.password) {
+      this.errorMessage = 'Complete los campos.';
+      return;
+    }
+
+    // Llamamos al nuevo método del servicio que apunta a /login-paso1
+    this.authService.loginPaso1({
+      username: this.loginData.username,
+      password: this.loginData.password
+    }).subscribe({
+      next: (res) => {
+        this.paso = 2; // Todo bien, pedimos el código
+        this.errorMessage = '';
+        this.messageService.add({ severity: 'info', summary: 'Código enviado', detail: 'Revise su correo' });
+      },
+      error: (err) => {
+        this.errorMessage = 'Usuario o contraseña incorrectos.';
+        this.loginData.password = '';
+      }
+    });
+  }
+
+  // PASO 2: Validar código 2FA
+  enviarPaso2() {
+    if (!this.loginData.codigo) {
+      this.errorMessage = 'Ingrese el código de 6 dígitos.';
+      return;
+    }
+
+    this.authService.loginPaso2({
+      username: this.loginData.username,
+      codigo: this.loginData.codigo
+    }).subscribe({
+      next: (res) => {
+
+        if (res.rol === 1) this.router.navigate(['/dashboard-quimico']);
+        else if (res.rol === 2) this.router.navigate(['/dashboard-tecnico']);
+      },
+      error: (err) => {
+        this.errorMessage = 'Código incorrecto o expirado.';
+      }
+    });
+  }
+
+  /*onLogin() {
     // Validamos que no envíe campos vacíos
     if (!this.loginData.username || !this.loginData.password) {
       this.errorMessage = 'Por favor, complete todos los campos.';
@@ -117,5 +163,5 @@ export class LoginComponent implements OnInit {
         this.loginData.password = '';
       }
     });
-  }
+  }*/
 }

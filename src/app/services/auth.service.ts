@@ -13,11 +13,10 @@ export class AuthService {
 
   login(loginData: any): Observable<any> {
     return this.http.post<any>(this.apiUrl, loginData).pipe(
-      tap(res => { // Cambiamos 'user' por 'res' para evitar confusiones
+      tap(res => {
         console.log("Respuesta completa del servidor:", res);
 
         if (res && res.status === 'success') {
-          // Guardamos 'res' directamente, que es el objeto completo de la respuesta
           localStorage.setItem('usuario', JSON.stringify(res));
         }
       })
@@ -39,7 +38,6 @@ export class AuthService {
     return '';
   }
 
-  // --- EL MÉTODO QUE FALTABA ---
   getRolUsuario(): number {
     const userJson = localStorage.getItem('usuario');
     if (userJson) {
@@ -53,7 +51,7 @@ export class AuthService {
     const usuarioLogueado = localStorage.getItem('usuario');
     if (usuarioLogueado) {
       const userObj = JSON.parse(usuarioLogueado);
-      console.log("Estructura completa del usuario en localStorage:", userObj); // <--- MIRA ESTO EN LA CONSOLA
+      console.log("Estructura completa del usuario en localStorage:", userObj);
 
       return userObj.id_usuario || userObj.idUsuario || userObj.id || 0;
     }
@@ -62,5 +60,29 @@ export class AuthService {
 
   isLoggedIn(): boolean {
     return !!localStorage.getItem('usuario');
+  }
+
+  loginPaso1(credenciales: { username: string, password: string }): Observable<any> {
+    return this.http.post('http://localhost:8081/api/auth/login-paso1', credenciales);
+  }
+
+  loginPaso2(datos: { username: string, codigo: string }): Observable<any> {
+    return this.http.post<any>('http://localhost:8081/api/auth/login-paso2', datos).pipe(
+      tap(res => {
+        if (res && res.status === 'success') {
+          const usuarioGuardar = {
+            token: res.token,
+            rol: res.rol,
+            idUsuario: res.idUsuario,
+
+            // CAMBIA ESTA LÍNEA: Usamos datos.username que viene directo de tu pantalla de login
+            nombre: res.nombre || datos.username
+          };
+
+          localStorage.removeItem('usuario');
+          localStorage.setItem('usuario', JSON.stringify(usuarioGuardar));
+        }
+      })
+    );
   }
 }
