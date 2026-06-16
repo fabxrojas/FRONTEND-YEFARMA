@@ -83,16 +83,17 @@ export class DashboardTecnicoComponent implements OnInit {
 
   mostrarDetalleStockBajo() {
     this.dashboardService.getStockBajoDetalle().subscribe(data => {
-    this.listaStockBajo = data;
-    this.displayModalStock = true; 
-  });
+      this.listaStockBajo = data;
+      this.displayModalStock = true;
+    });
   }
 
   private cargarUsuario() {
     const userJson = localStorage.getItem('usuario');
     if (userJson) {
       const user = JSON.parse(userJson);
-      this.userName = user.username || user.NombreUser || 'Usuario';
+
+      this.userName = user.nombre || user.username || user.NombreUser || 'Usuario';
 
       const rolNombre = this.authService.getUserRole();
       this.items = MENU_ITEMS[rolNombre] || [];

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -33,7 +33,7 @@ import { ProveedorService } from '../../services/proveedor.service';
   templateUrl: './crear-guia.component.html',
   styleUrls: ['./crear-guia.component.css']
 })
-export class CrearGuiaComponent implements OnInit {
+export class CrearGuiaComponent implements OnInit, OnDestroy {
   // Catálogos
   proveedores: any[] = [];
   establecimientos: any[] = [];
@@ -91,6 +91,11 @@ export class CrearGuiaComponent implements OnInit {
     //this.recuperarDatosGuardados();
     this.cargarMarcas();
     this.cargarProveedores();
+    this.recuperarBorrador();
+  }
+
+  ngOnDestroy(): void {
+    this.guardarBorrador();
   }
 
   cargarMarcas() {
@@ -385,6 +390,9 @@ export class CrearGuiaComponent implements OnInit {
     });
   }
   limpiarFormulario() {
+
+    sessionStorage.removeItem('borrador_guia');
+    
     this.nuevaGuia = {
       proveedor: null,
       puntoPartida: '',
@@ -422,5 +430,33 @@ export class CrearGuiaComponent implements OnInit {
       return fecha.toISOString().split('T')[0];
     }
     return fecha;
+  }
+
+  guardarBorrador() {
+    const borrador = {
+      nuevaGuia: this.nuevaGuia,
+      pesoBrutoTotal: this.pesoBrutoTotal,
+      listaStockProveedor: this.listaStockProveedor
+    };
+    sessionStorage.setItem('borrador_guia', JSON.stringify(borrador));
+  }
+
+  recuperarBorrador() {
+    const borradorStr = sessionStorage.getItem('borrador_guia');
+    if (borradorStr) {
+      const borrador = JSON.parse(borradorStr);
+      this.nuevaGuia = borrador.nuevaGuia;
+      
+      // Re-instanciar las fechas
+      if (this.nuevaGuia.fechaEmision) {
+        this.nuevaGuia.fechaEmision = new Date(this.nuevaGuia.fechaEmision);
+      }
+      if (this.nuevaGuia.fechaTraslado) {
+        this.nuevaGuia.fechaTraslado = new Date(this.nuevaGuia.fechaTraslado);
+      }
+      
+      this.pesoBrutoTotal = borrador.pesoBrutoTotal;
+      this.listaStockProveedor = borrador.listaStockProveedor || [];
+    }
   }
 }
