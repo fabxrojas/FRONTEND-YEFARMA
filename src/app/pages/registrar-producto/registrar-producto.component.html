@@ -10,7 +10,7 @@
 
         <div class="flex justify-content-end mb-3">
             <button pButton label="Agregar producto" icon="pi pi-plus" class="p-button-info"
-                (click)="agregarNuevaFila()"></button>
+                (click)="agregarNuevaFila()" [disabled]="isEditingRow"></button>
         </div>
 
         <p-table #dt [value]="productos" dataKey="id_producto" editMode="row" [paginator]="true" [rows]="10"
@@ -102,7 +102,7 @@
                         <div class="flex align-items-center justify-content-center gap-2">
                             <button *ngIf="!editing" pButton pRipple type="button" pInitEditableRow icon="pi pi-pencil"
                                 (click)="onRowEditInit(prod)" class="p-button-rounded p-button-warn p-button-text"
-                                pTooltip="Editar"></button>
+                                pTooltip="Editar" [disabled]="isEditingRow"></button>
 
                             <button *ngIf="editing" pButton pRipple type="button" icon="pi pi-check"
                                 (click)="validarYGuardar(prod)" class="p-button-rounded p-button-text p-button-success"
@@ -114,7 +114,8 @@
 
                             <button *ngIf="!editing" pButton pRipple type="button" icon="pi pi-trash"
                                 (click)="confirmarEliminacion(prod)"
-                                class="p-button-rounded p-button-text p-button-danger" pTooltip="Eliminar"></button>
+                                class="p-button-rounded p-button-text p-button-danger" pTooltip="Eliminar"
+                                [disabled]="isEditingRow"></button>
                         </div>
                     </td>
                 </tr>

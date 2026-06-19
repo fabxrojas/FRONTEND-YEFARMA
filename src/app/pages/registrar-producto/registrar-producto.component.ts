@@ -38,6 +38,8 @@ export class RegistrarProductoComponent implements OnInit {
   formas: any[] = [];
   unidades: any[] = [];
 
+  isEditingRow: boolean = false;
+
   // Para revertir cambios si el usuario cancela la edición de una fila
   clonProductos: { [s: string]: any } = {};
 
@@ -66,6 +68,7 @@ export class RegistrarProductoComponent implements OnInit {
   }
 
   onRowEditInit(prod: any) {
+    this.isEditingRow = true;
     this.clonProductos[prod.id_producto] = { ...prod };
   }
 
@@ -132,9 +135,13 @@ export class RegistrarProductoComponent implements OnInit {
   }
 
   onRowEditCancel(producto: any, index: number) {
+    this.isEditingRow = false;
+
     if (producto.nuevo) {
-      this.productos = this.productos.filter((p, i) => i !== index); // Si es una fila nueva sin guardar, la eliminamos completamente 
+      // Destruimos la fila buscando su ID temporal en lugar del index
+      this.productos = this.productos.filter(p => p.id_producto !== 'TEMP');
     } else {
+      // Restauramos la fila si era una edición de producto existente
       this.productos[index] = this.clonProductos[producto.id_producto];
       delete this.clonProductos[producto.id_producto];
     }
@@ -161,7 +168,20 @@ export class RegistrarProductoComponent implements OnInit {
   }
 
   agregarNuevaFila() {
+    // 1. Evitar que se presione varias veces usando la bandera isEditingRow
+    if (this.isEditingRow || this.productos.some(p => p.nuevo)) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Atención',
+        detail: 'Ya estás agregando/editando un producto. Termina o cancela esa fila primero.'
+      });
+      return;
+    }
+
+    this.isEditingRow = true; // <--- ¡AÑADIR ESTO! Bloquea los botones
+
     const nuevoProducto = {
+      id_producto: 'TEMP',
       producto: '',
       precio: 0,
       pesoUnitario: 0,
@@ -172,16 +192,16 @@ export class RegistrarProductoComponent implements OnInit {
       nuevo: true
     };
 
-    // Lo agregamos
-    this.productos = [...this.productos, nuevoProducto];
+    // 2. Lo agregamos AL INICIO de la lista para que se vea arriba
+    this.productos = [nuevoProducto, ...this.productos];
 
     setTimeout(() => {
       this.table.initRowEdit(nuevoProducto);
-    }, 1);
+    }, 10);
   }
 
   validarYGuardar(producto: any) {
-    // 1. Validaciones (Ahora sin exigir unidad de medida)
+    // 1. Validación de campos obligatorios en blanco
     if (!producto.producto?.trim() || !producto.tipo || !producto.formaFarmaceutica) {
       this.messageService.add({
         severity: 'warn',
@@ -191,21 +211,43 @@ export class RegistrarProductoComponent implements OnInit {
       return;
     }
 
-    // 2. Construcción limpia del objeto
-    // Nota: Como ya no usamos idUnidad, lo quitamos del objeto de envío
+    // 2. NUEVA VALIDACIÓN: Evitar el "Clon Exacto" (Duplicidad extrema)
+    const nombreAInsertar = producto.producto.trim().toLowerCase();
+    const idFormaAInsertar = producto.formaFarmaceutica.id_forma_farma;
+    const precioAInsertar = producto.precio;
+
+    // Buscamos en la tabla si algún producto cumple con las 3 condiciones a la vez
+    const existeDuplicado = this.productos.some(p =>
+      p.id_producto !== producto.id_producto && // Evita que se compare consigo mismo si solo estamos editando un producto antiguo
+      p.producto?.trim().toLowerCase() === nombreAInsertar &&
+      p.formaFarmaceutica?.id_forma_farma === idFormaAInsertar &&
+      p.precio === precioAInsertar
+    );
+
+    if (existeDuplicado) {
+      this.messageService.add({
+        severity: 'error', // Mensaje rojo bloqueante
+        summary: 'Error',
+        detail: 'Ya existe en el catálogo un producto con ese mismo Nombre, Forma Farmacéutica y Precio exacto.'
+      });
+      return; 
+    }
+
+    // 3. Si pasó las validaciones, construimos el objeto limpio para Spring Boot
     const productoParaEnviar = {
-      id_producto: producto.id_producto,
+      id_producto: producto.nuevo ? null : producto.id_producto,
       producto: producto.producto,
       precio: producto.precio,
-      pesoUnitario: producto.pesoUnitario, // Este es el dato de dosificación en mg
+      pesoUnitario: producto.pesoUnitario,
       registroSanitario: producto.registroSanitario,
       tipo: { id_tipo: producto.tipo.id_tipo },
       formaFarmaceutica: { id_forma_farma: producto.formaFarmaceutica.id_forma_farma }
     };
 
-    // 3. Envío al servicio
+    // 4. Envío al servicio
     this.productoService.registrar(productoParaEnviar).subscribe({
       next: () => {
+        this.isEditingRow = false;
         this.messageService.add({
           severity: 'success',
           summary: 'Éxito',
@@ -215,6 +257,7 @@ export class RegistrarProductoComponent implements OnInit {
         this.obtenerDatosIniciales();
       },
       error: (err) => {
+        this.isEditingRow = false;
         console.error("Error servidor:", err);
         this.messageService.add({
           severity: 'error',
