@@ -94,7 +94,7 @@ export class LoginComponent implements OnInit {
       password: this.loginData.password
     }).subscribe({
       next: (res) => {
-        this.paso = 2; // Todo bien, pedimos el código
+        this.paso = 2; 
         this.errorMessage = '';
         this.messageService.add({ severity: 'info', summary: 'Código enviado', detail: 'Revise su correo' });
       },
@@ -126,7 +126,7 @@ export class LoginComponent implements OnInit {
       }
     });
   }
-
+ 
   /*onLogin() {
     // Validamos que no envíe campos vacíos
     if (!this.loginData.username || !this.loginData.password) {

@@ -74,8 +74,6 @@ export class AuthService {
             token: res.token,
             rol: res.rol,
             idUsuario: res.idUsuario,
-
-            // CAMBIA ESTA LÍNEA: Usamos datos.username que viene directo de tu pantalla de login
             nombre: res.nombre || datos.username
           };
 
