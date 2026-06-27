@@ -36,34 +36,78 @@
                     </div>
                 </header>
 
-                <div class="grid grid-nogutter gap-3">
+               <div class="grid mt-2">
+                    
                     <div class="col-12 md:col-6 lg:col-3">
-                        <p-card styleClass="kpi-card stock-low cursor-pointer hover:shadow-4 transition-all"
-                            (click)="mostrarDetalleStockBajo()">
-                            <div class="flex align-items-center">
-                                <i class="pi pi-exclamation-triangle text-orange-500 text-3xl mr-3"></i>
+                        <p-card styleClass="shadow-2 border-left-3 border-green-500 bg-white h-full">
+                            <div class="flex justify-content-between mb-3">
                                 <div>
-                                    <span class="text-500">Stock Bajo</span>
-                                    <div class="text-2xl font-bold">{{ dashboardData?.productosConStockBajo || 0 }}
+                                    <span class="block text-500 font-bold mb-2 uppercase text-xs">Ingresos de Hoy</span>
+                                    <div class="text-900 font-black text-3xl">
+                                        {{ (dashboardData?.totalVentasHoy || 0) | currency:'PEN':'S/. ':'1.2-2' }}
                                     </div>
                                 </div>
+                                <div class="flex align-items-center justify-content-center bg-green-100 border-round" style="width:3rem;height:3rem">
+                                    <i class="pi pi-wallet text-green-600 text-xl"></i>
+                                </div>
                             </div>
+                            <span class="text-green-500 font-medium text-sm"><i class="pi pi-arrow-up text-xs"></i> Caja Actualizada</span>
                         </p-card>
                     </div>
 
                     <div class="col-12 md:col-6 lg:col-3">
-                        <p-card styleClass="kpi-card expiring cursor-pointer hover:shadow-4 transition-all"
-                            (click)="mostrarDetalleCaducidad()">
-                            <div class="flex align-items-center">
-                                <i class="pi pi-calendar-times text-red-500 text-3xl mr-3"></i>
+                        <p-card styleClass="shadow-2 border-left-3 border-blue-500 bg-white h-full">
+                            <div class="flex justify-content-between mb-3">
                                 <div>
-                                    <span class="text-500">Por Vencer</span>
-                                    <div class="text-2xl font-bold">{{ dashboardData?.productosPorVencer?.length || 0 }}
+                                    <span class="block text-500 font-bold mb-2 uppercase text-xs">Tickets Emitidos Hoy</span>
+                                    <div class="text-900 font-black text-3xl">
+                                        {{ dashboardData?.totalDispensacionesHoy || 0 }}
                                     </div>
                                 </div>
+                                <div class="flex align-items-center justify-content-center bg-blue-100 border-round" style="width:3rem;height:3rem">
+                                    <i class="pi pi-receipt text-blue-600 text-xl"></i>
+                                </div>
                             </div>
+                            <span class="text-blue-500 font-medium text-sm">Dispensaciones procesadas</span>
                         </p-card>
                     </div>
+
+                    <div class="col-12 md:col-6 lg:col-3">
+                        <p-card styleClass="shadow-2 border-left-3 border-orange-500 bg-white h-full cursor-pointer hover:shadow-4 transition-all transition-duration-200" 
+                                (click)="mostrarDetalleStockBajo()" pTooltip="Clic para ver lista de reposición">
+                            <div class="flex justify-content-between mb-3">
+                                <div>
+                                    <span class="block text-500 font-bold mb-2 uppercase text-xs">Stock Crítico (< 10)</span>
+                                    <div class="text-900 font-black text-3xl">
+                                        {{ dashboardData?.productosConStockBajo || 0 }}
+                                    </div>
+                                </div>
+                                <div class="flex align-items-center justify-content-center bg-orange-100 border-round" style="width:3rem;height:3rem">
+                                    <i class="pi pi-exclamation-triangle text-orange-600 text-xl"></i>
+                                </div>
+                            </div>
+                            <span class="text-orange-500 font-medium text-sm">Requiere Orden de Compra</span>
+                        </p-card>
+                    </div>
+
+                    <div class="col-12 md:col-6 lg:col-3">
+                        <p-card styleClass="shadow-2 border-left-3 border-red-500 bg-white h-full cursor-pointer hover:shadow-4 transition-all transition-duration-200" 
+                                (click)="mostrarDetalleCaducidad()" pTooltip="Clic para ver auditoría de lotes">
+                            <div class="flex justify-content-between mb-3">
+                                <div>
+                                    <span class="block text-500 font-bold mb-2 uppercase text-xs">Riesgo Vencimiento</span>
+                                    <div class="text-900 font-black text-3xl">
+                                        {{ dashboardData?.productosPorVencer?.length || 0 }}
+                                    </div>
+                                </div>
+                                <div class="flex align-items-center justify-content-center bg-red-100 border-round" style="width:3rem;height:3rem">
+                                    <i class="pi pi-calendar-times text-red-600 text-xl"></i>
+                                </div>
+                            </div>
+                            <span class="text-red-500 font-medium text-sm">Producto a vencer en los próximos 30 días</span>
+                        </p-card>
+                    </div>
+
                 </div>
 
                 <div class="grid mt-4">
@@ -127,14 +171,14 @@
                 <div class="grid mt-4">
 
                     <div class="col-12 xl:col-6">
-                        <p-card header="Tendencia de Dispensaciones (Anual)" styleClass="h-full shadow-2">
+                        <p-card header="Ingresos Mensuales del Año Actual (S/.)" styleClass="h-full shadow-2">
                             <p-chart type="line" [data]="chartDataMensual" [options]="chartOptionsMensual"
                                 height="300px"></p-chart>
                         </p-card>
                     </div>
 
                     <div class="col-12 xl:col-6">
-                        <p-card header="Volumen de Dispensación (Últimos 7 días)" styleClass="h-full shadow-2">
+                        <p-card header="Ingresos de los Últimos 7 Días (S/.)" styleClass="h-full shadow-2">
                             <p-chart type="bar" [data]="chartDataDiaria" [options]="chartOptionsDiaria"
                                 height="300px"></p-chart>
                         </p-card>

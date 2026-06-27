@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ValidarGuiaComponent } from './validar-guia.component';
+import { CrearGuiaComponent } from './emitir-guia.component';
 
-describe('ValidarGuiaComponent', () => {
-  let component: ValidarGuiaComponent;
-  let fixture: ComponentFixture<ValidarGuiaComponent>;
+describe('CrearGuiaComponent', () => {
+  let component: CrearGuiaComponent;
+  let fixture: ComponentFixture<CrearGuiaComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ValidarGuiaComponent]
+      imports: [CrearGuiaComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ValidarGuiaComponent);
+    fixture = TestBed.createComponent(CrearGuiaComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

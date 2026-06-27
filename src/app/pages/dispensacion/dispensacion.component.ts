@@ -45,6 +45,7 @@ export class DispensacionComponent implements OnInit {
   productosDisponibles: any[] = [];
   productoSeleccionado: any = null;
   cantidadAgregar: number = 1;
+  searchTimer: any;
 
   // Variables del Carrito de Dispensación
   carrito: any[] = [];
@@ -95,52 +96,54 @@ export class DispensacionComponent implements OnInit {
   }
 
   // --- LÓGICA DEL CARRITO ---
-  agregarAlCarrito() {
-    if (!this.productoSeleccionado) {
-      this.mostrarMensaje('warn', 'Atención', 'Seleccione un producto de la tabla.');
-      return;
-    }
-
-    if (this.cantidadAgregar <= 0) {
+  agregarAlCarrito(prod: any, cantidadInput: number = 1) {
+    if (cantidadInput <= 0) {
       this.mostrarMensaje('warn', 'Atención', 'La cantidad debe ser al menos 1.');
       return;
     }
 
-    if (this.cantidadAgregar > this.productoSeleccionado.stockTotal) {
-      this.mostrarMensaje('error', 'Stock Insuficiente', 'No hay suficientes unidades en el inventario.');
+    if (cantidadInput > prod.stockTotal) {
+      this.mostrarMensaje('error', 'Error', `Solo quedan ${prod.stockTotal} unidades.`);
       return;
     }
 
-    const subtotal = this.productoSeleccionado.precio * this.cantidadAgregar;
+    const subtotal = prod.precio * cantidadInput;
 
-    // Buscamos si el producto ya está en el carrito
-    const index = this.carrito.findIndex(item => item.idProducto === this.productoSeleccionado.idProducto);
+    const index = this.carrito.findIndex(item => item.idProducto === prod.idProducto);
 
     if (index !== -1) {
-      // Si ya está, verificamos que la suma no supere el stock global
-      if ((this.carrito[index].cantidad + this.cantidadAgregar) > this.productoSeleccionado.stockTotal) {
-        this.mostrarMensaje('error', 'Stock Excedido', 'La suma en el carrito supera el stock disponible.');
+      if ((this.carrito[index].cantidad + cantidadInput) > prod.stockTotal) {
+        this.mostrarMensaje('error', 'Error', 'La suma en el carrito supera el stock disponible.');
         return;
       }
-      this.carrito[index].cantidad += this.cantidadAgregar;
+      this.carrito[index].cantidad += cantidadInput;
       this.carrito[index].subtotal += subtotal;
     } else {
-      // Si es nuevo, lo agregamos como nueva fila
       this.carrito.push({
-        idProducto: this.productoSeleccionado.idProducto,
-        nombre: this.productoSeleccionado.producto,
-        precio: this.productoSeleccionado.precio,
-        cantidad: this.cantidadAgregar,
-        subtotal: subtotal
+        idProducto: prod.idProducto,
+        nombre: prod.producto,
+        precio: prod.precio,
+        cantidad: cantidadInput,
+        subtotal: subtotal,
+        stockMaximo: prod.stockTotal
       });
     }
 
     this.calcularTotal();
-    this.mostrarMensaje('success', 'Éxito', `${this.cantidadAgregar}x ${this.productoSeleccionado.producto} al carrito.`);
+    this.mostrarMensaje('success', 'Agregado', `Se añadió ${prod.producto} al carrito.`);
 
-    // Limpiamos la selección para seguir buscando
-    this.productoSeleccionado = null;
-    this.cantidadAgregar = 1;
+    // Limpiamos la búsqueda para el siguiente cliente si es necesario
+    // this.textoBusqueda = '';
+    // this.productosDisponibles = [];
+  }
+
+  actualizarSubtotalCarrito(item: any) {
+    if (item.cantidad > item.stockMaximo) {
+      item.cantidad = item.stockMaximo;
+      this.mostrarMensaje('warn', 'Atención', 'No hay más stock disponible.');
+    }
+    item.subtotal = item.precio * item.cantidad;
+    this.calcularTotal();
   }
 
   eliminarDelCarrito(index: number) {
@@ -219,6 +222,34 @@ export class DispensacionComponent implements OnInit {
       },
       error: (err) => {
         this.mostrarMensaje('error', 'Error', 'No se pudo descargar el ticket.');
+      }
+    });
+  }
+
+  buscarEnTiempoReal() {
+    // Si el usuario sigue escribiendo rápido, cancelamos la búsqueda anterior
+    if (this.searchTimer) {
+      clearTimeout(this.searchTimer);
+    }
+
+    // Esperamos 300 milisegundos (0.3 seg) después de que deje de teclear para ir al Backend
+    this.searchTimer = setTimeout(() => {
+      this.ejecutarBusqueda();
+    }, 300);
+  }
+
+  private ejecutarBusqueda() {
+    if (!this.textoBusqueda || this.textoBusqueda.trim() === '') {
+      this.cargarProductos();
+      return;
+    }
+
+    this.productoService.buscarConStock(this.textoBusqueda).subscribe({
+      next: (res) => {
+        this.productosDisponibles = res;
+      },
+      error: (err) => {
+        this.mostrarMensaje('error', 'Error', 'Fallo en la búsqueda.');
       }
     });
   }

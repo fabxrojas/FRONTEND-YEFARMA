@@ -103,26 +103,24 @@ export class DashboardQuimicoComponent implements OnInit {
     const userJson = localStorage.getItem('usuario');
     if (userJson) {
       const user = JSON.parse(userJson);
-      
+
       // LA CORRECCIÓN ESTÁ EN ESTA LÍNEA: Agregamos user.nombre al inicio
       this.userName = user.nombre || user.username || user.NombreUser || 'Usuario';
-      
+
       const rolNombre = this.authService.getUserRole();
       this.items = MENU_ITEMS[rolNombre] || [];
     }
   }
 
-  private cargarDatosDashboard() {
+ private cargarDatosDashboard() {
     this.loading = true;
 
-    const idUsuario = this.authService.getCurrentUserId();
-
-    this.dashboardService.getDashboardData(idUsuario).subscribe({
+    this.dashboardService.getDashboardData().subscribe({
       next: (data) => {
         this.dashboardData = data;
         this.loading = false;
 
-        console.log("Data completa recibida:", data);
+        console.log("Data completa global recibida:", data);
 
         this.configurarGraficoBarras();
         this.configurarGraficosAvanzados();
@@ -187,20 +185,17 @@ export class DashboardQuimicoComponent implements OnInit {
     const textColorSecondary = documentStyle.getPropertyValue('--text-color-secondary');
     const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
 
-    // 1. GRÁFICO MENSUAL (LÍNEAS CON ÁREA SOMBREADA)
+    // 1. GRÁFICO MENSUAL (Dinero por mes)
     const etiquetasMensual = this.dashboardData?.dispensacionesMensuales?.map((g: any) => g.etiqueta) || [];
     const valoresMensual = this.dashboardData?.dispensacionesMensuales?.map((g: any) => g.valor) || [];
-
-    const etiquetasProveedor = this.dashboardData?.dispensacionesPorProveedor?.map((g: any) => g.etiqueta) || [];
-    const valoresProveedor = this.dashboardData?.dispensacionesPorProveedor?.map((g: any) => g.valor) || [];
 
     this.chartDataMensual = {
       labels: etiquetasMensual,
       datasets: [
         {
-          label: 'Dispensaciones Mensuales',
+          label: 'Ingresos Mensuales (S/.)', // Etiqueta corregida
           data: valoresMensual,
-          fill: true, // Esto hace el efecto de área sombreada bajo la línea
+          fill: true,
           borderColor: documentStyle.getPropertyValue('--indigo-500'),
           backgroundColor: 'rgba(99, 102, 241, 0.2)',
           tension: 0.4
@@ -216,28 +211,7 @@ export class DashboardQuimicoComponent implements OnInit {
       }
     };
 
-    this.chartDataProveedor = {
-      labels: etiquetasProveedor,
-      datasets: [
-        {
-          label: 'Unidades Vendidas',
-          data: valoresProveedor,
-          backgroundColor: documentStyle.getPropertyValue('--orange-500'), // Color naranja corporativo
-          borderRadius: 4
-        }
-      ]
-    };
-
-    this.chartOptionsProveedor = {
-      indexAxis: 'y',
-      plugins: { legend: { labels: { color: textColor } } },
-      scales: {
-        x: { ticks: { color: textColorSecondary }, grid: { color: surfaceBorder } },
-        y: { ticks: { color: textColorSecondary }, grid: { display: false } }
-      }
-    };
-
-    // 2. GRÁFICO ÚLTIMOS 7 DÍAS (BARRAS)
+    // 2. GRÁFICO ÚLTIMOS 7 DÍAS (Dinero por día)
     const etiquetasDiarias = this.dashboardData?.dispensacionesDiarias?.map((g: any) => g.etiqueta) || [];
     const valoresDiarias = this.dashboardData?.dispensacionesDiarias?.map((g: any) => g.valor) || [];
 
@@ -245,9 +219,9 @@ export class DashboardQuimicoComponent implements OnInit {
       labels: etiquetasDiarias,
       datasets: [
         {
-          label: 'Últimos 7 Días',
+          label: 'Ingresos Diarios (S/.)', // Etiqueta corregida
           data: valoresDiarias,
-          backgroundColor: documentStyle.getPropertyValue('--teal-500'), // Color verde azulado
+          backgroundColor: documentStyle.getPropertyValue('--teal-500'),
           borderRadius: 4
         }
       ]
@@ -258,6 +232,28 @@ export class DashboardQuimicoComponent implements OnInit {
       scales: {
         x: { ticks: { color: textColorSecondary }, grid: { display: false } },
         y: { ticks: { color: textColorSecondary }, grid: { color: surfaceBorder } }
+      }
+    };
+
+    // 3. GRÁFICO PROVEEDORES
+    const etiquetasProveedor = this.dashboardData?.dispensacionesPorProveedor?.map((g: any) => g.etiqueta) || [];
+    const valoresProveedor = this.dashboardData?.dispensacionesPorProveedor?.map((g: any) => g.valor) || [];
+
+    this.chartDataProveedor = {
+      labels: etiquetasProveedor,
+      datasets: [{
+        label: 'Unidades Vendidas',
+        data: valoresProveedor,
+        backgroundColor: documentStyle.getPropertyValue('--orange-500'),
+        borderRadius: 4
+      }]
+    };
+    this.chartOptionsProveedor = {
+      indexAxis: 'y',
+      plugins: { legend: { labels: { color: textColor } } },
+      scales: {
+        x: { ticks: { color: textColorSecondary }, grid: { color: surfaceBorder } },
+        y: { ticks: { color: textColorSecondary }, grid: { display: false } }
       }
     };
   }
@@ -277,7 +273,7 @@ export class DashboardQuimicoComponent implements OnInit {
     ];
 
     const backgroundColors = etiquetas.map((_, i) => dynamicColors[i % dynamicColors.length]);
-    const hoverColors = backgroundColors.map(color => color + 'AA'); 
+    const hoverColors = backgroundColors.map(color => color + 'AA');
 
     this.chartDataStaff = {
       labels: etiquetas,
@@ -326,16 +322,32 @@ export class DashboardQuimicoComponent implements OnInit {
   }
 
   exportarDashboardExcel() {
-    // 1. Preparamos los datos básicos
-    const data = [
-      { Concepto: 'Productos con Stock Bajo', Valor: this.dashboardData?.productosConStockBajo },
-      { Concepto: 'Productos por Vencer', Valor: this.dashboardData?.productosPorVencer?.length },
-    ];
+    // Reporte detallado para Excel
+    let csvContent = "REPORTE GERENCIAL - BOTICA YEFARMA\r\n\r\n";
 
-    // 2. Convertimos a formato CSV
-    const csvContent = this.convertToCSV(data);
+    // KPIs Principales
+    csvContent += "RESUMEN DEL DIA\r\n";
+    csvContent += `Ingresos de Hoy (S/.):,${this.dashboardData?.totalVentasHoy || 0}\r\n`;
+    csvContent += `Tickets Emitidos:,${this.dashboardData?.totalDispensacionesHoy || 0}\r\n`;
+    csvContent += `Productos con Stock Critico:,${this.dashboardData?.productosConStockBajo || 0}\r\n`;
+    csvContent += `Productos por Vencer:,${this.dashboardData?.productosPorVencer?.length || 0}\r\n\r\n`;
 
-    // 3. Descargamos el archivo
+    // Top Productos
+    csvContent += "TOP 5 MEDICAMENTOS MAS VENDIDOS\r\n";
+    csvContent += "Medicamento,Cantidad Vendida\r\n";
+    this.dashboardData?.topProductos?.forEach(p => {
+      csvContent += `${p.producto},${p.cantidadVendida}\r\n`;
+    });
+    csvContent += "\r\n";
+
+    // Ingresos Mensuales
+    csvContent += "INGRESOS MENSUALES (S/.)\r\n";
+    csvContent += "Mes,Monto\r\n";
+    this.dashboardData?.dispensacionesMensuales?.forEach(g => {
+      csvContent += `${g.etiqueta},${g.valor}\r\n`;
+    });
+
+    // Descarga del archivo
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
@@ -343,6 +355,7 @@ export class DashboardQuimicoComponent implements OnInit {
     link.setAttribute("download", `Reporte_Yefarma_${new Date().toLocaleDateString()}.csv`);
     document.body.appendChild(link);
     link.click();
+    document.body.removeChild(link);
   }
 
   // Función auxiliar para convertir JSON a CSV

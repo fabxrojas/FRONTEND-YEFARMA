@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CrearGuiaComponent } from './crear-guia.component';
+import { OrdenCompraComponent } from './orden-compra.component';
 
-describe('CrearGuiaComponent', () => {
-  let component: CrearGuiaComponent;
-  let fixture: ComponentFixture<CrearGuiaComponent>;
+describe('OrdenCompraComponent', () => {
+  let component: OrdenCompraComponent;
+  let fixture: ComponentFixture<OrdenCompraComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CrearGuiaComponent]
+      imports: [OrdenCompraComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(CrearGuiaComponent);
+    fixture = TestBed.createComponent(OrdenCompraComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

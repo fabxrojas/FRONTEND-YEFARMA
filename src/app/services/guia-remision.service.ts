@@ -25,7 +25,7 @@ export class GuiaRemisionService {
   }
 
   buscarPorCodigo(codigo: string): Observable<any> {
-    return this.http.get(`${this.urlGuias}/buscar/${codigo}`);
+    return this.http.get(`${this.urlGuias}/codigo/${codigo}`);
   }
 
   imprimirReportePDF(idGuia: number): Observable<Blob> {
@@ -34,5 +34,13 @@ export class GuiaRemisionService {
 
   validarGuia(idGuia: number): Observable<any> {
     return this.http.put(`${this.urlGuias}/${idGuia}/validar`, {});
+  }
+
+  anularGuia(id: number): Observable<any> {
+    return this.http.put(`${this.urlGuias}/${id}/anular`, {});
+  }
+
+  listarGuias(): Observable<any[]> {
+    return this.http.get<any[]>(this.urlGuias);
   }
 }

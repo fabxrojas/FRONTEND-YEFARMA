@@ -6,13 +6,17 @@ import { DashboardQuimicoComponent } from './pages/dashboard-quimico/dashboard-q
 import { DashboardTecnicoComponent } from './pages/dashboard-tecnico/dashboard-tecnico.component';
 
 import { RegistrarProductoComponent } from './pages/registrar-producto/registrar-producto.component';
-import { IngresarProductoComponent } from './pages/ingresar-producto/ingresar-producto.component';
+import { RecepcionMercaderiaComponent } from './pages/recepcion-mercaderia/recepcion-mercaderia.component';
 import { InventarioComponent } from './pages/inventario/inventario.component';
 import { RegistrarProveedorComponent } from './pages/registrar-proveedor/registrar-proveedor.component';
-import { CrearGuiaComponent } from './pages/crear-guia/crear-guia.component';
-import { ValidarGuiaComponent } from './pages/validar-guia/validar-guia.component';
+import { EmitirGuiaComponent } from './pages/emitir-guia/emitir-guia.component';
+import { HistorialGuiaComponent } from './pages/historial-guia/historial-guia.component';
+import { HistorialRecepcionComponent } from './pages/historial-recepcion/historial-recepcion.component';
 import { DispensacionComponent } from './pages/dispensacion/dispensacion.component';
 import { CrearUsuarioComponent } from './pages/crear-usuario/crear-usuario.component';
+import { RegistrarClienteComponent } from './pages/registrar-cliente/registrar-cliente.component';
+import { OrdenCompraComponent } from './pages/orden-compra/orden-compra.component';
+import { HistorialOrdenesComponent } from './pages/historial-ordenes/historial-ordenes.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -24,14 +28,21 @@ export const routes: Routes = [
     path: 'dashboard-quimico',
     component: DashboardQuimicoComponent, 
     children: [
-      { path: 'inventario/nuevo', component: RegistrarProductoComponent },
-      { path: 'inventario/ingreso', component: IngresarProductoComponent },
+      { path: 'inventario/producto', component: RegistrarProductoComponent },
       { path: 'inventario/stock', component: InventarioComponent },
-      { path: 'reabastecimiento/proveedor', component: RegistrarProveedorComponent },
-      { path: 'reabastecimiento/crear-guia', component: CrearGuiaComponent },
-      { path: 'reabastecimiento/validar-guia', component: ValidarGuiaComponent },
-      { path: 'venta/dispensacion', component: DispensacionComponent },
-      { path: 'admin/usuarios', component: CrearUsuarioComponent }
+
+      { path: 'compras/proveedor', component: RegistrarProveedorComponent },
+      { path: 'compras/orden-compra', component: OrdenCompraComponent },
+      { path: 'compras/historial-ordenes', component: HistorialOrdenesComponent },
+
+      { path: 'distribucion/emitir-guia', component: EmitirGuiaComponent },
+      { path: 'distribucion/cliente', component: RegistrarClienteComponent },
+      { path: 'distribucion/historial-guia', component: HistorialGuiaComponent },
+
+      { path: 'almacen/recepcion', component: RecepcionMercaderiaComponent },
+      { path: 'almacen/historial-recepcion', component: HistorialRecepcionComponent },
+
+      { path: 'admin/usuarios', component: CrearUsuarioComponent }   
     ]
   },
 
@@ -39,7 +50,8 @@ export const routes: Routes = [
     path: 'dashboard-tecnico',
     component: DashboardTecnicoComponent, 
     children: [
-      { path: 'inventario/ingreso', component: IngresarProductoComponent },
+      { path: 'almacen/recepcion', component: RecepcionMercaderiaComponent },
+      { path: 'inventario/producto', component: RegistrarProductoComponent },
       { path: 'inventario/stock', component: InventarioComponent },
       { path: 'venta/dispensacion', component: DispensacionComponent }
     ]

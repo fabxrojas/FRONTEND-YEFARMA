@@ -6,7 +6,7 @@
         <div class="flex justify-content-center align-items-center mb-3 px-2">
             <div>
                 <h2 class="font-bold text-cyan-800 text-3xl m-0 flex align-items-center gap-2">
-                    Registro de proveedor(es)
+                    Registro de cliente(s)
                 </h2>
             </div>
         </div>
@@ -15,11 +15,11 @@
         <div class="grid p-fluid mt-2">
             <div class="col-12 md:col-8 field">
                 <label class="block font-bold text-sm mb-2 text-cyan-800">
-                    <i class="pi pi-building"></i>Razón Social:
+                    <i class="pi pi-user"></i> Razón Social:
                 </label>
                 <div class="p-inputgroup w-full">
                     <span class="p-inputgroup-addon border-round-left-lg"></span>
-                    <input pInputText [(ngModel)]="nuevoProveedor.nombre" placeholder="Ej: Laboratorios Farma S.A.C."
+                    <input pInputText [(ngModel)]="nuevoCliente.nombre" placeholder="Ej: Botica San Pedro S.A.C."
                         class="p-inputtext-lg w-full border-round-right-lg py-2">
                 </div>
             </div>
@@ -28,9 +28,8 @@
                 <label class="block font-bold text-sm mb-2 text-cyan-800"><i class="pi pi-id-card"></i> RUC:</label>
                 <div class="p-inputgroup w-full">
                     <span class="p-inputgroup-addon border-round-left-lg"></span>
-                    <input pInputText [(ngModel)]="nuevoProveedor.ruc" #ruc="ngModel" maxlength="11"
-                        (keypress)="soloNumeros($event)" placeholder="20123456789"
-                        class="p-inputtext-lg w-full border-round-right-lg py-2">
+                    <input pInputText [(ngModel)]="nuevoCliente.ruc" maxlength="11" (keypress)="soloNumeros($event)"
+                        placeholder="20123456789" class="p-inputtext-lg w-full border-round-right-lg py-2">
                 </div>
             </div>
 
@@ -39,7 +38,7 @@
                     Electrónico:</label>
                 <div class="p-inputgroup w-full">
                     <span class="p-inputgroup-addon border-round-left-lg"></span>
-                    <input pInputText [(ngModel)]="nuevoProveedor.correo" placeholder="ejemplo@contacto.com"
+                    <input pInputText [(ngModel)]="nuevoCliente.correo" placeholder="ejemplo@contacto.com"
                         class="p-inputtext-lg w-full border-round-right-lg py-2">
                 </div>
             </div>
@@ -48,9 +47,8 @@
                 <label class="block font-bold text-sm mb-2 text-cyan-800"><i class="pi pi-phone"></i> Teléfono:</label>
                 <div class="p-inputgroup w-full">
                     <span class="p-inputgroup-addon border-round-left-lg"></span>
-                    <input pInputText [(ngModel)]="nuevoProveedor.telefono" maxlength="9"
-                        (keypress)="soloNumeros($event)" placeholder="900654000"
-                        class="p-inputtext-lg w-full border-round-right-lg py-2">
+                    <input pInputText [(ngModel)]="nuevoCliente.telefono" maxlength="9" (keypress)="soloNumeros($event)"
+                        placeholder="900654000" class="p-inputtext-lg w-full border-round-right-lg py-2">
                 </div>
             </div>
 
@@ -59,10 +57,9 @@
                     Dirección:</label>
                 <div class="p-inputgroup w-full">
                     <span class="p-inputgroup-addon border-round-left-lg"></span>
-                    <input pInputText [(ngModel)]="nuevoProveedor.direccion" placeholder="Av. Siempre Viva 742, Lima"
+                    <input pInputText [(ngModel)]="nuevoCliente.direccion" placeholder="Av. Siempre Viva 742, Lima"
                         class="p-inputtext-lg w-full border-round-right-lg py-2">
                 </div>
-
             </div>
         </div>
 
@@ -70,12 +67,12 @@
             <p-button label="Limpiar" icon="pi pi-refresh" (onClick)="finalizarAccion()"
                 styleClass="p-button-secondary border-round-lg px-4 shadow-2"></p-button>
 
-            <p-button *ngIf="proveedorSeleccionado" label="Eliminar" icon="pi pi-trash" (onClick)="eliminarProveedor()"
+            <p-button *ngIf="clienteSeleccionado" label="Eliminar" icon="pi pi-trash" (onClick)="eliminarCliente()"
                 styleClass="p-button-danger border-round-lg px-4 shadow-2"></p-button>
 
-            <p-button [label]="proveedorSeleccionado ? 'Guardar Cambios' : 'Registrar'"
-                [icon]="proveedorSeleccionado ? 'pi pi-pencil' : 'pi pi-save'" (onClick)="registrar()"
-                [disabled]="proveedorSeleccionado && !esFormularioValido()"
+            <p-button [label]="clienteSeleccionado ? 'Guardar Cambios' : 'Registrar'"
+                [icon]="clienteSeleccionado ? 'pi pi-pencil' : 'pi pi-save'" (onClick)="registrar()"
+                [disabled]="clienteSeleccionado && !esFormularioValido()"
                 styleClass="p-button-info border-round-lg px-4 shadow-2">
             </p-button>
         </div>
@@ -83,13 +80,12 @@
 
     <p-card styleClass="shadow-4 border-round-xl overflow-hidden mt-4">
         <div class="p-3">
-
             <div class="mb-3 px-2">
-                <span class="text-xl font-bold text-cyan-900">Proveedores Registrados</span>
+                <span class="text-xl font-bold text-cyan-900">Clientes Registrados</span>
             </div>
 
-            <p-table #dt [value]="proveedores" selectionMode="single" [(selection)]="proveedorSeleccionado"
-                (onRowSelect)="onRowSelect($event)" dataKey="idProveedor" [rows]="5" [paginator]="true"
+            <p-table #dt [value]="clientes" selectionMode="single" [(selection)]="clienteSeleccionado"
+                (onRowSelect)="onRowSelect($event)" dataKey="idCliente" [rows]="5" [paginator]="true"
                 (onRowUnselect)="limpiarFormulario()" [globalFilterFields]="['nombre', 'ruc']"
                 styleClass="p-datatable-sm shadow-2">
 
@@ -107,7 +103,7 @@
 
                 <ng-template pTemplate="header">
                     <tr class="bg-gray-50">
-                        <th style="width: 30%; text-align: center;">Nombre</th>
+                        <th style="width: 30%; text-align: center;">Razón Social</th>
                         <th style="width: 15%; text-align: center;">RUC</th>
                         <th style="width: 20%; text-align: center;">Correo</th>
                         <th style="width: 15%; text-align: center;">Teléfono</th>
@@ -115,17 +111,16 @@
                     </tr>
                 </ng-template>
 
-                <ng-template pTemplate="body" let-prov>
-                    <tr [pSelectableRow]="prov" class="cursor-pointer transition-colors transition-duration-200">
-                        <td class="font-semibold text-center">{{prov.nombre}}</td>
-                        <td class="text-center">{{prov.ruc}}</td>
-                        <td class="text-center">{{prov.correo}}</td>
-                        <td class="text-center">{{prov.telefono}}</td>
-                        <td class="text-center">{{prov.fechaCreacion | date:'dd/MM/yyyy'}}</td>
+                <ng-template pTemplate="body" let-cli>
+                    <tr [pSelectableRow]="cli" class="cursor-pointer transition-colors transition-duration-200">
+                        <td class="font-semibold text-center">{{cli.nombre}}</td>
+                        <td class="text-center">{{cli.ruc}}</td>
+                        <td class="text-center">{{cli.correo}}</td>
+                        <td class="text-center">{{cli.telefono}}</td>
+                        <td class="text-center">{{cli.fechaCreacion | date:'dd/MM/yyyy'}}</td>
                     </tr>
                 </ng-template>
             </p-table>
-
         </div>
     </p-card>
 </div>

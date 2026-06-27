@@ -21,77 +21,109 @@
 
         <main class="main-content">
             <div class="dashboard-container" *ngIf="router.url === '/dashboard-tecnico'">
-                <header class="dashboard-header">
-                    <h1>Bienvenido, Técnico Farmacéutico</h1>
-                    <p>Panel operativo para: <strong>{{ userName }}</strong></p>
+                
+                <header class="dashboard-header mb-4">
+                    <h1 class="text-3xl text-cyan-900 m-0">Mi Turno Actual</h1>
+                    <p class="text-gray-500 mt-1">Panel operativo personal de: <strong>{{ userName }}</strong></p>
                 </header>
 
-                <div class="grid">
-                    <div class="col-12 md:col-6 flex">
-                        <p-card styleClass="h-full w-full">
-                            <div class="flex flex-column h-full justify-content-between">
+                <div class="grid mb-4">
+                    <div class="col-12 md:col-6 lg:col-4">
+                        <p-card styleClass="shadow-2 border-left-3 border-green-500 bg-white h-full">
+                            <div class="flex justify-content-between mb-3">
                                 <div>
-                                    <div class="flex align-items-center mb-3">
-                                        <i class="pi pi-shopping-cart text-blue-600 text-3xl mr-3"></i>
-                                        <span class="text-xl font-bold">Dispensación Rápida</span>
+                                    <span class="block text-500 font-bold mb-2 uppercase text-xs">Mis Ventas Hoy</span>
+                                    <div class="text-900 font-black text-4xl text-green-600">
+                                        {{ (dashboardData?.totalVentasHoy || 0) | currency:'PEN':'S/. ':'1.2-2' }}
                                     </div>
-                                    <p class="text-600">Gestiona la venta de medicamentos desde el mostrador.</p>
                                 </div>
-                                <button pButton label="Ir a Dispensación" icon="pi pi-arrow-right"
-                                    class="p-button-outlined p-button-info mt-3 w-full"
-                                    routerLink="/dashboard-tecnico/venta/dispensacion"></button>
+                                <div class="flex align-items-center justify-content-center bg-green-100 border-round" style="width:3rem;height:3rem">
+                                    <i class="pi pi-wallet text-green-600 text-xl"></i>
+                                </div>
                             </div>
+                            <span class="text-green-500 font-medium text-sm">Dinero cobrado en mi caja</span>
                         </p-card>
                     </div>
 
-                    <div class="col-12 md:col-6 flex">
-                        <p-card
-                            styleClass="h-full w-full border-left-3 border-orange-500 cursor-pointer hover:shadow-4 transition-all"
-                            (click)="mostrarDetalleStockBajo()">
-                            <div class="flex flex-column h-full justify-content-between">
-                                <div class="flex align-items-center mb-3">
-                                    <i class="pi pi-exclamation-triangle text-orange-500 text-3xl mr-3"></i>
-                                    <span class="text-xl font-bold">Stock Bajo</span>
+                    <div class="col-12 md:col-6 lg:col-4">
+                        <p-card styleClass="shadow-2 border-left-3 border-blue-500 bg-white h-full">
+                            <div class="flex justify-content-between mb-3">
+                                <div>
+                                    <span class="block text-500 font-bold mb-2 uppercase text-xs">Mis Tickets Emitidos</span>
+                                    <div class="text-900 font-black text-4xl text-blue-600">
+                                        {{ dashboardData?.totalDispensacionesHoy || 0 }}
+                                    </div>
                                 </div>
-                                <div class="text-center mt-auto">
-                                    <h1 class="text-orange-500 text-6xl m-0 font-bold">
-                                        {{ dashboardData?.productosConStockBajo || 0 }}
-                                    </h1>
-                                    <p class="text-600 mt-2">Clic para ver detalle de reposición.</p>
+                                <div class="flex align-items-center justify-content-center bg-blue-100 border-round" style="width:3rem;height:3rem">
+                                    <i class="pi pi-receipt text-blue-600 text-xl"></i>
                                 </div>
                             </div>
+                            <span class="text-blue-500 font-medium text-sm">Clientes atendidos hoy</span>
                         </p-card>
                     </div>
                 </div>
 
-                <div class="grid mt-4">
-                    <div class="col-12">
-                        <p-card header="Atención: Productos por Vencer">
-                            <p-table [value]="dashboardData?.productosPorVencer || []" [rows]="5" [paginator]="true"
-                                responsiveLayout="scroll" styleClass="p-datatable-sm">
+                <div class="grid">
+                    
+                    <div class="col-12 lg:col-6">
+                        <p-card header="Consultor Rápido de Precios" styleClass="h-full shadow-2 border-top-3 border-cyan-600">
+                            <p class="text-sm text-gray-500 mb-3 m-0">Verifique disponibilidad y precios al instante sin abrir una venta.</p>
+                            
+                            <div class="p-inputgroup mb-4 shadow-1 border-round-lg overflow-hidden">
+                                <input type="text" pInputText placeholder="Ej: Amoxicilina, código..." 
+                                    [(ngModel)]="textoBusquedaPrecio" (keyup.enter)="buscarPrecio()" autofocus>
+                                <button type="button" pButton icon="pi pi-search" class="p-button-info" 
+                                    (click)="buscarPrecio()" [loading]="buscandoPrecios"></button>
+                            </div>
+
+                            <p-table [value]="resultadosPrecio" styleClass="p-datatable-sm p-datatable-striped" [rows]="5" [paginator]="true">
                                 <ng-template pTemplate="header">
-                                    <tr>
+                                    <tr class="bg-gray-50">
                                         <th>Producto</th>
-                                        <th class="text-center">Stock Actual</th>
-                                        <th class="text-center">Estado</th>
+                                        <th class="text-center">Stock Físico</th>
+                                        <th class="text-right">Precio</th>
                                     </tr>
                                 </ng-template>
-                                <ng-template pTemplate="body" let-alerta>
+                                <ng-template pTemplate="body" let-prod>
                                     <tr>
-                                        <td class="font-bold text-700">{{ alerta.producto }}</td>
-                                        <td class="text-center">{{ alerta.stockActual }}</td>
+                                        <td class="font-bold text-cyan-900">{{prod.producto}}</td>
                                         <td class="text-center">
-                                            <span class="p-badge p-badge-warning px-2 py-1">{{ alerta.tipoAlerta
-                                                }}</span>
+                                            <p-tag [severity]="prod.stockTotal > 0 ? 'success' : 'danger'" [value]="prod.stockTotal"></p-tag>
+                                        </td>
+                                        <td class="text-right font-black text-gray-800">
+                                            {{prod.precio | currency:'PEN':'S/. ':'1.2-2'}}
+                                        </td>
+                                    </tr>
+                                </ng-template>
+                                <ng-template pTemplate="emptymessage">
+                                    <tr>
+                                        <td colspan="3" class="text-center p-4 text-500">
+                                            <i class="pi pi-info-circle text-2xl mb-2 block text-gray-400"></i>
+                                            Realice una búsqueda para ver los precios.
                                         </td>
                                     </tr>
                                 </ng-template>
                             </p-table>
                         </p-card>
                     </div>
+
+                    <div class="col-12 lg:col-6">
+                        <p-card header="Mi Rendimiento Semanal (S/.)" styleClass="h-full shadow-2">
+                            <p class="text-sm text-gray-500 mb-3 m-0">Evolución de mis ventas en los últimos 7 días.</p>
+                            <div *ngIf="chartDataDiaria?.labels?.length > 0; else sinDatos">
+                                <p-chart type="bar" [data]="chartDataDiaria" [options]="chartOptionsDiaria" height="280px"></p-chart>
+                            </div>
+                            <ng-template #sinDatos>
+                                <div class="flex flex-column align-items-center justify-content-center p-5 text-gray-400">
+                                    <i class="pi pi-chart-bar text-5xl mb-3"></i>
+                                    <span>Aún no hay ventas registradas en sus turnos recientes.</span>
+                                </div>
+                            </ng-template>
+                        </p-card>
+                    </div>
+
                 </div>
             </div>
-
             <router-outlet></router-outlet>
         </main>
     </div>
@@ -99,47 +131,25 @@
 
 <p-dialog header="Mi Perfil" [(visible)]="displayModalPerfil" [modal]="true" [style]="{width: '400px'}">
     <div class="flex flex-column align-items-center p-3">
-        <div class="w-6rem h-6rem border-circle bg-blue-100 flex align-items-center justify-content-center mb-3">
-            <i class="pi pi-user text-4xl text-blue-500"></i>
+        <div class="w-6rem h-6rem border-circle bg-cyan-100 flex align-items-center justify-content-center mb-3">
+            <i class="pi pi-user text-4xl text-cyan-600"></i>
         </div>
-        <h2 class="m-0">{{ usuarioPerfil.nombre }} {{ usuarioPerfil.apellidoP }}</h2>
-        <span class="text-500 font-medium mb-4">Técnico Farmacéutico</span>
+        <h2 class="m-0 text-cyan-900">{{ usuarioPerfil.nombre }}</h2>
+        <span class="text-500 font-medium mb-4 uppercase text-xs tracking-wide">Técnico Farmacéutico</span>
 
         <div class="w-full">
             <div class="flex justify-content-between py-2 border-bottom-1 surface-border">
                 <span class="text-500">Usuario</span>
-                <span class="font-bold">{{ usuarioPerfil.nombreUser }}</span>
+                <span class="font-bold text-gray-800">{{ usuarioPerfil.nombreUser }}</span>
             </div>
             <div class="flex justify-content-between py-2 border-bottom-1 surface-border">
                 <span class="text-500">Correo</span>
-                <span class="font-bold">{{ usuarioPerfil.correo }}</span>
+                <span class="font-bold text-gray-800">{{ usuarioPerfil.correo }}</span>
             </div>
             <div class="flex justify-content-between py-2">
                 <span class="text-500">Apellidos</span>
-                <span class="font-bold">{{ usuarioPerfil.apellidoP }} {{ usuarioPerfil.apellidoM }}</span>
+                <span class="font-bold text-gray-800">{{ usuarioPerfil.apellidoP }} {{ usuarioPerfil.apellidoM }}</span>
             </div>
         </div>
-
-        <!--<button pButton label="Cerrar" icon="pi pi-times" class="mt-4" (click)="displayModalPerfil = false"></button>-->
-    </div>
-</p-dialog>
-
-<p-dialog header="Productos con Stock Bajo" [(visible)]="displayModalStock" [modal]="true" [style]="{width: '600px'}">
-    <p-table [value]="listaStockBajo" [paginator]="true" [rows]="5" styleClass="p-datatable-sm">
-        <ng-template pTemplate="header">
-            <tr>
-                <th>Producto</th>
-                <th class="text-center">Stock Actual</th>
-            </tr>
-        </ng-template>
-        <ng-template pTemplate="body" let-prod>
-            <tr>
-                <td>{{ prod.producto }}</td>
-                <td class="text-center">{{ prod.stockTotal }}</td>
-            </tr>
-        </ng-template>
-    </p-table>
-    <div class="flex justify-content-end mt-3">
-        <button pButton label="Cerrar" class="p-button-text" (click)="displayModalStock = false"></button>
     </div>
 </p-dialog>

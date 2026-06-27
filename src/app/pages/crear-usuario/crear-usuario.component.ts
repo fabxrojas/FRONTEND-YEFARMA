@@ -176,7 +176,7 @@ export class CrearUsuarioComponent implements OnInit {
       apellidoM: '',
       correo: '',
       contrasena: '',
-      idRol: 2 // ¡CORREGIDO EL BUG AQUÍ!
+      idRol: 2 
     };
 
     this.botonModificarDesactivado = true;

@@ -1,0 +1,230 @@
+<p-toast></p-toast>
+
+<div class="p-4 w-full">
+    <div class="flex justify-content-between align-items-center mb-4">
+        <h2 class="m-0 text-cyan-800">
+            Nueva Orden de Compra
+        </h2>
+        <span class="p-tag p-tag-warning text-lg px-3 py-2"><i class="pi pi-info-circle mr-2"></i> CREANDO NUEVA
+            ORDEN</span>
+    </div>
+
+    <div class="grid mb-4">
+        <div class="col-12 md:col-6">
+            <p-card styleClass="shadow-2 border-top-3 border-cyan-600 h-full">
+                <h3 class="text-cyan-900 mt-0 mb-3 uppercase text-sm font-bold"><i class="pi pi-building mr-2"></i>
+                    Datos del Comprador (Emisor)</h3>
+
+                <div *ngIf="establecimientoActivo" class="flex flex-column gap-2 text-700">
+                    <div><span class="font-bold">Razón Social:</span> {{ establecimientoActivo.nombreComercial }} S.A.C.
+                    </div>
+                    <div><span class="font-bold">RUC:</span> {{ establecimientoActivo.ruc }}</div>
+                    <div><span class="font-bold">Dirección:</span> {{ establecimientoActivo.direccion }}</div>
+                    <div><span class="font-bold">Solicitado por:</span> Área de Logística y Compras</div>
+                </div>
+                <div *ngIf="!establecimientoActivo" class="text-500 italic">Cargando datos del establecimiento...</div>
+            </p-card>
+        </div>
+
+        <div class="col-12 md:col-6">
+            <p-card styleClass="shadow-2 border-top-3 border-orange-500 h-full bg-orange-50">
+                <h3 class="text-orange-900 mt-0 mb-3 uppercase text-sm font-bold"><i class="pi pi-truck mr-2"></i> Datos
+                    del Proveedor (Receptor)</h3>
+                <div class="p-fluid">
+                    <div class="field mb-3">
+                        <p-select [options]="proveedores" [(ngModel)]="nuevaOrden.proveedor" optionLabel="nombre"
+                            [filter]="true" placeholder="Seleccione un proveedor de la lista"
+                            styleClass="w-full bg-white" appendTo="body">
+                        </p-select>
+                    </div>
+
+                    <div *ngIf="nuevaOrden.proveedor" class="flex flex-column gap-2 text-700 text-sm">
+                        <div><span class="font-bold">RUC:</span> {{nuevaOrden.proveedor.ruc}}</div>
+                        <div><span class="font-bold">Dirección:</span> {{nuevaOrden.proveedor.direccion}}</div>
+                        <div><span class="font-bold">Contacto:</span> {{nuevaOrden.proveedor.correo}}</div>
+                    </div>
+                </div>
+            </p-card>
+        </div>
+    </div>
+
+    <p-card styleClass="shadow-2 mb-4">
+        <div class="grid p-fluid">
+            <div class="col-12 md:col-4 field mb-0">
+                <label class="font-bold text-xs text-700 uppercase">Condición de Pago:</label>
+                <p-select [options]="tiposPago" [(ngModel)]="nuevaOrden.tipoPago" optionLabel="descripcion"
+                    placeholder="Ej: Contado, Crédito" styleClass="w-full" appendTo="body">
+                </p-select>
+            </div>
+            <div class="col-12 md:col-4 field mb-0">
+                <label class="font-bold text-xs text-700 uppercase">Fecha Esperada de Entrega:</label>
+                <p-datepicker [(ngModel)]="nuevaOrden.fechaEsperada" [showIcon]="true" dateFormat="dd/mm/yy"
+                    [readonlyInput]="true" styleClass="w-full" placeholder="Seleccione en el calendario"
+                    appendTo="body"></p-datepicker>
+            </div>
+            <div class="col-12 md:col-4 field mb-0">
+                <label class="font-bold text-xs text-700 uppercase">Observaciones (Opcional):</label>
+                <input pInputText [(ngModel)]="nuevaOrden.observaciones"
+                    placeholder="Ej: Entregar por la puerta trasera" class="w-full">
+            </div>
+        </div>
+    </p-card>
+
+    <p-card header="Detalle de Productos a Solicitar" styleClass="shadow-2">
+
+        <div class="flex flex-wrap gap-3 align-items-end mb-4 bg-gray-50 p-4 border-round border-1 border-300 shadow-1">
+
+            <div style="flex: 2 1 100px;">
+                <label class="font-bold text-xs text-700 uppercase block mb-2">Medicamento:</label>
+                <p-autoComplete [(ngModel)]="productoSeleccionado" [suggestions]="resultadosBusqueda"
+                    (completeMethod)="buscarProducto($event)" (onSelect)="onProductoSelect($event)" field="producto"
+                    placeholder="Buscar medicamento..." styleClass="w-full" appendTo="body">
+                </p-autoComplete>
+            </div>
+
+            <div style="flex: 1 1 130px;">
+                <label class="font-bold text-xs text-700 uppercase block mb-2">Marca:</label>
+                <p-select [options]="marcas" [(ngModel)]="marcaSeleccionada" optionLabel="nombre" [filter]="true"
+                    placeholder="Seleccione..." styleClass="w-full" appendTo="body">
+                </p-select>
+            </div>
+
+            <div style="flex: 1 1 110px;">
+                <label class="font-bold text-xs text-700 uppercase block mb-2">Presentación:</label>
+                <p-select [options]="presentaciones" [(ngModel)]="presentacionSeleccionada" optionLabel="nombre"
+                    [filter]="true" placeholder="Seleccione..." styleClass="w-full" appendTo="body">
+                </p-select>
+            </div>
+
+            <div style="flex: 1 1 110px;">
+                <label class="font-bold text-xs text-700 uppercase block mb-2">Unidad:</label>
+                <p-select [options]="unidades" [(ngModel)]="unidadSeleccionada" optionLabel="abreviatura"
+                    [filter]="true" placeholder="Seleccione..." styleClass="w-full" appendTo="body">
+                </p-select>
+            </div>
+
+            <div style="flex: 1 1 90px;">
+                <label class="font-bold text-xs text-700 uppercase block mb-2">Cantidad:</label>
+                <p-inputNumber [(ngModel)]="cantidadInput" (onInput)="calcularSubtotalFila()" [min]="1" [max]="9999"
+                    maxlength="4" styleClass="w-full" inputStyleClass="text-center font-bold"></p-inputNumber>
+            </div>
+
+            <div style="flex: 1 1 110px;">
+                <label class="font-bold text-xs text-700 uppercase block mb-2">Precio(S/):</label>
+                <p-inputNumber [(ngModel)]="precioUnitarioInput" [readonly]="true" mode="decimal"
+                    [minFractionDigits]="2" styleClass="w-full"
+                    inputStyleClass="bg-gray-200 font-bold text-center"></p-inputNumber>
+            </div>
+
+            <div style="flex: 1 1 120px;">
+                <label class="font-bold text-xs text-700 uppercase block mb-2">Subtotal(S/):</label>
+                <p-inputNumber [(ngModel)]="subtotalCalculado" [readonly]="true" mode="decimal" [minFractionDigits]="2"
+                    styleClass="w-full"
+                    inputStyleClass="bg-cyan-50 text-cyan-900 font-bold text-center"></p-inputNumber>
+            </div>
+
+            <div class="flex-none">
+                <p-button icon="pi pi-plus" (onClick)="agregarDetalle()"
+                    styleClass="p-button-success shadow-2 p-button-lg" pTooltip="Añadir a la orden"
+                    tooltipPosition="top">
+                </p-button>
+            </div>
+        </div>
+
+
+
+        <p-table [value]="nuevaOrden.detalles" styleClass="p-datatable-sm p-datatable-striped border-1 border-200">
+            <ng-template pTemplate="header">
+                <tr class="bg-gray-100">
+                    <th>Cód. Producto</th>
+                    <th>Descripción</th>
+                    <th>Marca</th>
+                    <th>Presentación</th>
+                    <th>Unidad</th>
+                    <th class="text-center">Cantidad</th>
+                    <th class="text-right">Precio Unitario</th>
+                    <th class="text-right">Subtotal</th>
+                    <th class="text-center" style="width: 50px;">Acción</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-item let-ri="rowIndex">
+                <tr>
+                    <td class="font-medium text-600">{{item.producto.codigo || 'N/A'}}</td>
+                    <td class="font-bold text-800">
+                        {{item.producto.producto}}
+                        <span class="text-xs font-normal text-500 block">
+                            {{ item.producto.formaFarmaceutica?.nombre || item.producto.formaFarmaceutica || '' }}
+                        </span>
+                    </td>
+                    <td class="text-600">
+                        {{item.marcaSolicitada}}
+                    </td>
+                    <td class="text-600">
+                        {{item.presentacionSolicitada}}
+                    </td>
+                    <td class="text-600">
+                        {{item.unidadSolicitada}}
+                    </td>
+                    <td class="text-center font-bold text-lg">{{item.cantidad}}</td>
+                    <td class="text-right">S/ {{item.precioUnitario | number:'1.2-2'}}</td>
+                    <td class="text-right text-cyan-700 font-bold">S/ {{item.subtotal | number:'1.2-2'}}</td>
+                    <td class="text-center">
+                        <p-button icon="pi pi-trash" styleClass="p-button-danger p-button-text p-button-sm p-0"
+                            (onClick)="eliminarDetalle(ri)" pTooltip="Eliminar"></p-button>
+                    </td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td colspan="7" class="text-center p-5 text-500 font-italic">No hay productos agregados a la orden.
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+
+        <div class="flex justify-content-end align-items-center mt-4 pt-3 border-top-1 border-300">
+            <div class="text-right">
+                <div class="text-sm text-600 font-bold uppercase mb-1">Total a Pagar</div>
+                <div
+                    class="text-3xl font-black text-cyan-900 bg-cyan-50 px-4 py-2 border-round border-1 border-cyan-200">
+                    S/ {{totalOrden | number:'1.2-2'}}
+                </div>
+            </div>
+        </div>
+
+        <div class="flex justify-content-end gap-3 mt-5">
+            <p-button label="Cancelar" icon="pi pi-times" (onClick)="limpiarFormulario()"
+                styleClass="p-button-secondary p-button-outlined px-4"></p-button>
+            <p-button label="Generar Orden de Compra" icon="pi pi-check-circle" (onClick)="guardarOrden()"
+                styleClass="p-button-primary shadow-3 px-5" [disabled]="nuevaOrden.detalles.length === 0"></p-button>
+        </div>
+    </p-card>
+</div>
+
+<p-dialog header="COMPRA REGISTRADA" [(visible)]="mostrarResum" [modal]="true" [style]="{width: '400px'}"
+    [draggable]="false" [resizable]="false">
+    <div *ngIf="ordenGenerada" class="p-3 text-center">
+        <i class="pi pi-check-circle text-green-500 text-6xl mb-3"></i>
+        <h3 class="mt-0 mb-2">¡Orden Emitida con Éxito!</h3>
+
+        <div class="surface-ground p-3 border-round text-left mt-4">
+            <div class="flex justify-content-between mb-2">
+                <span class="text-600 font-bold text-sm">Código OC:</span>
+                <span class="text-900 font-black">{{ ordenGenerada.codigoOrden }}</span>
+            </div>
+            <div class="flex justify-content-between mb-2">
+                <span class="text-600 font-bold text-sm">Proveedor:</span>
+                <span class="text-900 font-bold text-right">{{ ordenGenerada.proveedor?.nombre }}</span>
+            </div>
+            <div class="flex justify-content-between">
+                <span class="text-600 font-bold text-sm">Total a Pagar:</span>
+                <span class="text-emerald-700 font-black">S/ {{ ordenGenerada.totalOrden | number:'1.2-2' }}</span>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <p-button label="Aceptar y Continuar" icon="pi pi-check" (onClick)="cerrarModalResumen()"
+                styleClass="w-full"></p-button>
+        </div>
+    </div>
+</p-dialog>

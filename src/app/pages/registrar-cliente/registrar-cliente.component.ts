@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ProveedorService } from '../../services/proveedor.service';
+import { ClienteService } from '../../services/cliente.service';
 import { MessageService } from 'primeng/api';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -13,8 +13,8 @@ import { ConfirmationService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
 @Component({
-  selector: 'app-registrar-proveedor',
-  templateUrl: './registrar-proveedor.component.html',
+  selector: 'app-registrar-cliente',
+  templateUrl: './registrar-cliente.component.html',
   standalone: true,
   imports: [
     CommonModule,
@@ -27,72 +27,69 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
   ],
   providers: [MessageService, ConfirmationService]
 })
-export class RegistrarProveedorComponent implements OnInit {
+export class RegistrarClienteComponent implements OnInit {
   // Lista para la tabla
-  proveedores: any[] = [];
-
+  clientes: any[] = [];
   formularioModificado: boolean = false;
 
-  nuevoProveedor: any = {
+  nuevoCliente: any = {
     nombre: '',
     ruc: '',
     correo: '',
     direccion: '',
     telefono: ''
   };
-
-  proveedorSeleccionado: any = null;
-  proveedorOriginal: any = null;
+  clienteSeleccionado: any = null;
+  clienteOriginal: any = null;
 
   constructor(
-    private proveedorService: ProveedorService,
+    private clienteService: ClienteService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService
   ) { }
 
   ngOnInit() {
-    this.cargarProveedores();
+    this.cargarClientes();
   }
 
   // --- SE EJECUTA AL HACER CLIC EN LA TABLA ---
   onRowSelect(event: any) {
-    this.nuevoProveedor = { ...event.data };
-    this.proveedorSeleccionado = event.data;
-    this.proveedorOriginal = { ...event.data };
-    this.formularioModificado = false; this.formularioModificado = false;
+    this.nuevoCliente = { ...event.data };
+    this.clienteSeleccionado = event.data;
+    this.clienteOriginal = { ...event.data };
+    this.formularioModificado = false;
   }
 
   esFormularioValido(): boolean {
-    if (!this.proveedorSeleccionado) return false;
-
-    return JSON.stringify(this.nuevoProveedor) !== JSON.stringify(this.proveedorOriginal);
+    if (!this.clienteSeleccionado) return false;
+    return JSON.stringify(this.nuevoCliente) !== JSON.stringify(this.clienteOriginal);
   }
 
-  cargarProveedores() {
-    this.proveedorService.getProveedores().subscribe({
+  cargarClientes() {
+    this.clienteService.getClientes().subscribe({
       next: (data) => {
-        this.proveedores = data;
+        this.clientes = data;
       },
-      error: (err) => console.error('Error al cargar proveedores', err)
+      error: (err) => console.error('Error al cargar clientes', err)
     });
   }
 
   registrar() {
-    if (!this.nuevoProveedor.nombre || !this.nuevoProveedor.ruc || !this.nuevoProveedor.correo) {
+    if (!this.nuevoCliente.nombre || !this.nuevoCliente.ruc || !this.nuevoCliente.correo) {
       this.messageService.add({ severity: 'warn', summary: 'Atención', detail: 'Complete los campos obligatorios.' });
       return;
     }
 
-    if (this.proveedorSeleccionado) {
-      this.modificarProveedor();
+    if (this.clienteSeleccionado) {
+      this.modificarCliente();
     } else {
       this.guardarNuevo();
     }
   }
 
-  modificarProveedor() {
+  modificarCliente() {
     this.confirmationService.confirm({
-      message: '¿Desea guardar los cambios realizados en este proveedor?',
+      message: '¿Desea guardar los cambios realizados en este cliente?',
       header: 'Confirmación de Modificación',
       icon: 'pi pi-exclamation-triangle',
       acceptLabel: 'Sí',
@@ -100,9 +97,9 @@ export class RegistrarProveedorComponent implements OnInit {
       acceptButtonStyleClass: 'p-button-info',
       rejectButtonStyleClass: 'p-button-danger',
       accept: () => {
-        const id = this.proveedorSeleccionado.idProveedor;
+        const id = this.clienteSeleccionado.idCliente;
 
-        this.proveedorService.actualizarProveedor(id, this.nuevoProveedor).subscribe({
+        this.clienteService.actualizarCliente(id, this.nuevoCliente).subscribe({
           next: () => {
             this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Datos modificados correctamente' });
             this.finalizarAccion();
@@ -113,11 +110,10 @@ export class RegistrarProveedorComponent implements OnInit {
     });
   }
 
-  eliminarProveedor() {
-    if (!this.proveedorSeleccionado) return;
-
+  eliminarCliente() {
+    if (!this.clienteSeleccionado) return;
     this.confirmationService.confirm({
-      message: `¿Está seguro de eliminar a ${this.proveedorSeleccionado.nombre}?`,
+      message: `¿Está seguro de eliminar a ${this.clienteSeleccionado.nombre}?`,
       header: 'Confirmación de Eliminación',
       icon: 'pi pi-trash',
       acceptLabel: 'Sí',
@@ -125,11 +121,11 @@ export class RegistrarProveedorComponent implements OnInit {
       acceptButtonStyleClass: 'p-button-danger',
       rejectButtonStyleClass: 'p-button-info',
       accept: () => {
-        const id = this.proveedorSeleccionado.idProveedor;
+        const id = this.clienteSeleccionado.idCliente;
 
-        this.proveedorService.eliminarProveedor(id).subscribe({
+        this.clienteService.eliminarCliente(id).subscribe({
           next: () => {
-            this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Proveedor borrado del sistema' });
+            this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Cliente borrado del sistema' });
             this.finalizarAccion();
           },
           error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo completar la eliminación' })
@@ -139,9 +135,9 @@ export class RegistrarProveedorComponent implements OnInit {
   }
 
   guardarNuevo() {
-    this.proveedorService.registrarProveedor(this.nuevoProveedor).subscribe({
+    this.clienteService.registrarCliente(this.nuevoCliente).subscribe({
       next: () => {
-        this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Proveedor registrado correctamente' });
+        this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Cliente registrado correctamente' });
         this.finalizarAccion();
       },
       error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo registrar' })
@@ -150,14 +146,14 @@ export class RegistrarProveedorComponent implements OnInit {
 
   finalizarAccion() {
     this.limpiarFormulario();
-    this.proveedorSeleccionado = null;
-    this.cargarProveedores();
+    this.clienteSeleccionado = null;
+    this.cargarClientes();
   }
 
   limpiarFormulario() {
-    this.nuevoProveedor = { nombre: '', ruc: '', correo: '', direccion: '', telefono: '' };
-    this.proveedorSeleccionado = null;
-    this.proveedorOriginal = null; 
+    this.nuevoCliente = { nombre: '', ruc: '', correo: '', direccion: '', telefono: '' };
+    this.clienteSeleccionado = null;
+    this.clienteOriginal = null;
     this.formularioModificado = false;
   }
 
