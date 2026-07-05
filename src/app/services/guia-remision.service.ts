@@ -6,9 +6,9 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class GuiaRemisionService {
-  private urlGuias = 'http://localhost:8081/api/guias-remision';
-  private urlEstablecimientos = 'http://localhost:8081/api/establecimientos';
-  private urlEstados = 'http://localhost:8081/api/estados-remision';
+  private urlGuias = 'https://backend-yefarma.onrender.com/api/guias-remision';
+  private urlEstablecimientos = 'https://backend-yefarma.onrender.com/api/establecimientos';
+  private urlEstados = 'https://backend-yefarma.onrender.com/api/estados-remision';
 
   constructor(private http: HttpClient) { }
 

@@ -6,8 +6,8 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class IngresoProductoService {
-  private apiUrl = 'http://localhost:8081/api/ingresos';
-  private unidadesUrl = 'http://localhost:8081/api/unidades-detalle'; // NUEVA RUTA
+  private apiUrl = 'https://backend-yefarma.onrender.com/api/ingresos';
+  private unidadesUrl = 'https://backend-yefarma.onrender.com/api/unidades-detalle'; // NUEVA RUTA
 
   constructor(private http: HttpClient) { }
 
@@ -24,7 +24,7 @@ export class IngresoProductoService {
   }
 
   obtenerUnidadesMedidaBase(): Observable<any[]> {
-    return this.http.get<any[]>('http://localhost:8081/api/unidades-medida'); 
+    return this.http.get<any[]>('https://backend-yefarma.onrender.com/api/unidades-medida'); 
   }
 
   obtenerUnidadesDetalle(): Observable<any[]> {

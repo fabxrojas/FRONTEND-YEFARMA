@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class InventarioService {
-  private url = 'http://localhost:8081/api/inventario';
+  private url = 'https://backend-yefarma.onrender.com/api/inventario';
 
   constructor(private http: HttpClient) {}
 

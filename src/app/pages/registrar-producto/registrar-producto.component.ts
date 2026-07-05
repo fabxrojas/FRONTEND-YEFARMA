@@ -178,7 +178,7 @@ export class RegistrarProductoComponent implements OnInit {
       return;
     }
 
-    this.isEditingRow = true; // <--- ¡AÑADIR ESTO! Bloquea los botones
+    this.isEditingRow = true; 
 
     const nuevoProducto = {
       id_producto: 'TEMP',

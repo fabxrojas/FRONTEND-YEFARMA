@@ -218,7 +218,7 @@ export class EmitirGuiaComponent implements OnInit {
   descargarPDF() {
     if (this.guiaGenerada && this.guiaGenerada.id_guia) {
       // Abre el PDF generado en una nueva pestaña
-      window.open(`http://localhost:8081/api/guias-remision/pdf/${this.guiaGenerada.id_guia}`, '_blank');
+      window.open(`https://backend-yefarma.onrender.com/api/guias-remision/pdf/${this.guiaGenerada.id_guia}`, '_blank');
     }
   }
 

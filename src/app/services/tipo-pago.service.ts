@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class TipoPagoService {
 
-  private apiUrl = 'http://localhost:8081/api/tipos-pago';
+  private apiUrl = 'https://backend-yefarma.onrender.com/api/tipos-pago';
 
   constructor(private http: HttpClient) { }
 

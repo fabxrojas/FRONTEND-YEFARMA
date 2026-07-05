@@ -76,7 +76,7 @@ export class HistorialOrdenesComponent implements OnInit {
   }
 
   descargarPDF(id: number) {
-    window.open(`http://localhost:8081/api/ordenes-compra/pdf/${id}`, '_blank');
+    window.open(`https://backend-yefarma.onrender.com/api/ordenes-compra/pdf/${id}`, '_blank');
   }
 
   anularOrden(orden: any) {
