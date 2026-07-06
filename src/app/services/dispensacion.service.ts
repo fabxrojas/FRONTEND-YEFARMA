@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class DispensacionService {
 
-  private apiUrl = 'https://backend-yefarma.onrender.com/api/dispensacion';
+  private apiUrl = 'http://localhost:8081/api/dispensacion';
 
   constructor(private http: HttpClient) { }
 

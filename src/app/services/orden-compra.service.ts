@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class OrdenCompraService {
-  private apiUrl = 'https://backend-yefarma.onrender.com/api/ordenes-compra';
+  private apiUrl = 'http://localhost:8081/api/ordenes-compra';
 
   constructor(private http: HttpClient) { }
 

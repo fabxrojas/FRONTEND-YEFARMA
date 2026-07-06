@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class UsuarioService {
   // Base URL para el controlador de usuarios
-  private apiUrl = 'https://backend-yefarma.onrender.com/api/usuarios';
+  private apiUrl = 'http://localhost:8081/api/usuarios';
 
   constructor(private http: HttpClient) { }
 

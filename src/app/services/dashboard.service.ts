@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class DashboardService {
-  private apiUrl = 'https://backend-yefarma.onrender.com/api/dashboard';
+  private apiUrl = 'http://localhost:8081/api/dashboard';
 
   constructor(private http: HttpClient) { }
 

@@ -74,7 +74,7 @@ export class HistorialGuiaComponent implements OnInit {
   }
 
   descargarPDF(id: number) {
-    window.open(`https://backend-yefarma.onrender.com/api/guias-remision/pdf/${id}`, '_blank');
+    window.open(`http://localhost:8081/api/guias-remision/pdf/${id}`, '_blank');
   }
 
   validarGuia(guia: any) {

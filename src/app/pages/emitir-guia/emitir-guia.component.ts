@@ -65,8 +65,8 @@ export class EmitirGuiaComponent implements OnInit {
     motivo: null,
     puntoPartida: '',
     puntoLlegada: '',
-    placaVehiculo: '',
-    licenciaConductor: '',
+    placaVehiculo: 'ABC-523', // Vehículo por defecto de la empresa
+    licenciaConductor: 'Q25316482', // Licencia del chofer de planta
     fechaTraslado: new Date(),
     detalles: []
   };
@@ -186,8 +186,10 @@ export class EmitirGuiaComponent implements OnInit {
   }
 
   guardarGuiaCompleta() {
-    if (!this.nuevaGuia.cliente || !this.nuevaGuia.establecimiento || !this.nuevaGuia.motivo || !this.nuevaGuia.fechaTraslado) {
-      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Complete Cliente, Motivo y Fecha de Traslado.' });
+    if (!this.nuevaGuia.cliente || !this.nuevaGuia.establecimiento || !this.nuevaGuia.motivo || 
+        !this.nuevaGuia.fechaTraslado || !this.nuevaGuia.placaVehiculo || !this.nuevaGuia.licenciaConductor) {
+      
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Debe completar todos los campos obligatorios (incluyendo Placa y Licencia).' });
       return;
     }
 
@@ -216,9 +218,20 @@ export class EmitirGuiaComponent implements OnInit {
   }
 
   descargarPDF() {
-    if (this.guiaGenerada && this.guiaGenerada.id_guia) {
-      // Abre el PDF generado en una nueva pestaña
-      window.open(`https://backend-yefarma.onrender.com/api/guias-remision/pdf/${this.guiaGenerada.id_guia}`, '_blank');
+    if (this.guiaGenerada && this.guiaGenerada.tokenPublico) {
+      const url = `http://192.168.100.3:8081/api/guias-remision/publico/${this.guiaGenerada.tokenPublico}`;
+
+      // Creamos un elemento <a> (enlace) invisible
+      const enlace = document.createElement('a');
+      enlace.href = url;
+      
+      // Al usar _self, el navegador procesa la descarga en la capa actual sin abrir pestañas
+      enlace.target = '_self'; 
+      
+      // Añadimos el enlace al HTML, simulamos el clic y luego lo limpiamos
+      document.body.appendChild(enlace);
+      enlace.click();
+      document.body.removeChild(enlace);
     }
   }
 
@@ -235,8 +248,8 @@ export class EmitirGuiaComponent implements OnInit {
       puntoLlegada: '',
       motivo: null,
       fechaTraslado: new Date(),
-      placaVehiculo: '',
-      licenciaConductor: '',
+      placaVehiculo: 'ABC-523', 
+      licenciaConductor: 'Q25316482', 
       detalles: []
     };
     this.limpiarCamposMercaderia();

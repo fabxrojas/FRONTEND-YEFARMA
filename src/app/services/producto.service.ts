@@ -8,12 +8,12 @@ import { ProductoConStockDTO } from '../dto/producto-con-stock.dto';
   providedIn: 'root'
 })
 export class ProductoService {
-  private apiUrl = 'https://backend-yefarma.onrender.com/api/productos';
-  private marcaUrl = 'https://backend-yefarma.onrender.com/api/marcas';
-  private urlUnidadesDetalle = 'https://backend-yefarma.onrender.com/api/unidades-detalle';
-  private urlUnidadesMedida = 'https://backend-yefarma.onrender.com/api/unidades-medida';
-  private urlProveedores = 'https://backend-yefarma.onrender.com/api/proveedores';
-  private urlMotivos = 'https://backend-yefarma.onrender.com/api/motivos-traslado';
+  private apiUrl = 'http://localhost:8081/api/productos';
+  private marcaUrl = 'http://localhost:8081/api/marcas';
+  private urlUnidadesDetalle = 'http://localhost:8081/api/unidades-detalle';
+  private urlUnidadesMedida = 'http://localhost:8081/api/unidades-medida';
+  private urlProveedores = 'http://localhost:8081/api/proveedores';
+  private urlMotivos = 'http://localhost:8081/api/motivos-traslado';
 
   constructor(private http: HttpClient) { }
 
@@ -51,7 +51,7 @@ export class ProductoService {
   }
 
   getUnidadesDetalle(): Observable<any[]> {
-    return this.http.get<any[]>('https://backend-yefarma.onrender.com/api/unidades-detalle');
+    return this.http.get<any[]>('http://localhost:8081/api/unidades-detalle');
   }
 
   getProveedores(): Observable<any[]> {

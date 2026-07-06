@@ -6,9 +6,9 @@ import { catchError, tap } from 'rxjs/operators';
 @Injectable({ providedIn: 'root' })
 export class ProveedorService {
   // Puerto 8081 según tu configuración de Spring Boot
-  private apiUrl = 'https://backend-yefarma.onrender.com/api/proveedores';
+  private apiUrl = 'http://localhost:8081/api/proveedores';
   // Nueva ruta para el stock del proveedor
-  private stockUrl = 'https://backend-yefarma.onrender.com/api/stock-proveedor';
+  private stockUrl = 'http://localhost:8081/api/stock-proveedor';
 
   constructor(private http: HttpClient) { }
 

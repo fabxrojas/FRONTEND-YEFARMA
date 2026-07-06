@@ -7,7 +7,7 @@ import { Observable, tap } from 'rxjs';
 })
 export class AuthService {
 
-  private apiUrl = 'https://backend-yefarma.onrender.com/api/auth/login';
+  private apiUrl = 'http://localhost:8081/api/auth/login';
 
   constructor(private http: HttpClient) { }
 
@@ -63,11 +63,11 @@ export class AuthService {
   }
 
   loginPaso1(credenciales: { username: string, password: string }): Observable<any> {
-    return this.http.post('https://backend-yefarma.onrender.com/api/auth/login-paso1', credenciales);
+    return this.http.post('http://localhost:8081/api/auth/login-paso1', credenciales);
   }
 
   loginPaso2(datos: { username: string, codigo: string }): Observable<any> {
-    return this.http.post<any>('https://backend-yefarma.onrender.com/api/auth/login-paso2', datos).pipe(
+    return this.http.post<any>('http://localhost:8081/api/auth/login-paso2', datos).pipe(
       tap(res => {
         if (res && res.status === 'success') {
           const usuarioGuardar = {
