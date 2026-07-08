@@ -51,7 +51,6 @@ export const MENU_ITEMS: { [key: string]: MenuItem[] } = {
   ],
   'TECNICO FARMACEUTICO': [
     { label: 'Inicio', icon: 'pi pi-home', routerLink: '/dashboard-tecnico' },
-    { label: 'Productos', icon: 'pi pi-list', routerLink: '/dashboard-tecnico/inventario/producto' },
     { label: 'Visualizar Stock', icon: 'pi pi-eye', routerLink: '/dashboard-tecnico/inventario/stock' },
     { label: 'Dispensación', icon: 'pi pi-external-link', routerLink: '/dashboard-tecnico/venta/dispensacion' }
   ]
