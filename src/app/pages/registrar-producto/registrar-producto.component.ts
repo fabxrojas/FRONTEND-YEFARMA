@@ -211,14 +211,33 @@ export class RegistrarProductoComponent implements OnInit {
       return;
     }
 
-    // 2. NUEVA VALIDACIÓN: Evitar el "Clon Exacto" (Duplicidad extrema)
+    // 2. NUEVA VALIDACIÓN: Registro Sanitario Único
+    if (producto.registroSanitario && producto.registroSanitario.trim() !== '') {
+      const regSanitarioIngresado = producto.registroSanitario.trim().toUpperCase();
+      
+      const registroDuplicado = this.productos.some(p => 
+        p.id_producto !== producto.id_producto && // Ignoramos el producto actual si lo estamos editando
+        p.registroSanitario?.trim().toUpperCase() === regSanitarioIngresado
+      );
+
+      if (registroDuplicado) {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Registro Inválido',
+          detail: `El Registro Sanitario ${regSanitarioIngresado} ya existe en tu catálogo.`
+        });
+        return; 
+      }
+    }
+
+    // 3. Validación: Evitar el "Clon Exacto" (Duplicidad extrema)
     const nombreAInsertar = producto.producto.trim().toLowerCase();
     const idFormaAInsertar = producto.formaFarmaceutica.id_forma_farma;
     const precioAInsertar = producto.precio;
 
     // Buscamos en la tabla si algún producto cumple con las 3 condiciones a la vez
     const existeDuplicado = this.productos.some(p =>
-      p.id_producto !== producto.id_producto && // Evita que se compare consigo mismo si solo estamos editando un producto antiguo
+      p.id_producto !== producto.id_producto && 
       p.producto?.trim().toLowerCase() === nombreAInsertar &&
       p.formaFarmaceutica?.id_forma_farma === idFormaAInsertar &&
       p.precio === precioAInsertar
@@ -226,25 +245,25 @@ export class RegistrarProductoComponent implements OnInit {
 
     if (existeDuplicado) {
       this.messageService.add({
-        severity: 'error', // Mensaje rojo bloqueante
+        severity: 'error', 
         summary: 'Error',
         detail: 'Ya existe en el catálogo un producto con ese mismo Nombre, Forma Farmacéutica y Precio exacto.'
       });
       return; 
     }
 
-    // 3. Si pasó las validaciones, construimos el objeto limpio para Spring Boot
+    // 4. Si pasó las validaciones, construimos el objeto limpio para Spring Boot
     const productoParaEnviar = {
       id_producto: producto.nuevo ? null : producto.id_producto,
-      producto: producto.producto,
+      producto: producto.producto.toUpperCase(), // Lo guardamos siempre en mayúsculas por orden
       precio: producto.precio,
       pesoUnitario: producto.pesoUnitario,
-      registroSanitario: producto.registroSanitario,
+      registroSanitario: producto.registroSanitario?.trim().toUpperCase(), // Lo mandamos limpio
       tipo: { id_tipo: producto.tipo.id_tipo },
       formaFarmaceutica: { id_forma_farma: producto.formaFarmaceutica.id_forma_farma }
     };
 
-    // 4. Envío al servicio
+    // 5. Envío al servicio
     this.productoService.registrar(productoParaEnviar).subscribe({
       next: () => {
         this.isEditingRow = false;
@@ -259,10 +278,12 @@ export class RegistrarProductoComponent implements OnInit {
       error: (err) => {
         this.isEditingRow = false;
         console.error("Error servidor:", err);
+        // Si el backend lo rechaza, mostramos el mensaje que nos envía Spring Boot
+        const mensajeBackend = err.error?.message || 'No se pudo guardar el producto.';
         this.messageService.add({
           severity: 'error',
-          summary: 'Error',
-          detail: 'No se pudo guardar el producto.'
+          summary: 'Error del Servidor',
+          detail: mensajeBackend
         });
       }
     });

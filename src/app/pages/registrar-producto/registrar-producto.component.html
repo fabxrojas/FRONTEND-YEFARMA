@@ -9,7 +9,7 @@
         <p-confirmDialog></p-confirmDialog>
 
         <div class="flex justify-content-end mb-3">
-            <button pButton label="Agregar producto" icon="pi pi-plus" class="p-button-info"
+            <button pButton label="Agregar producto" icon="pi pi-plus" class="p-button-success font-bold"
                 (click)="agregarNuevaFila()" [disabled]="isEditingRow"></button>
         </div>
 
@@ -74,9 +74,15 @@
                     <td>
                         <p-cellEditor>
                             <ng-template pTemplate="input">
-                                <input pInputText type="text" [(ngModel)]="prod.registroSanitario" class="w-full">
+                                <input pInputText type="text" [(ngModel)]="prod.registroSanitario" 
+                                       class="w-full" 
+                                       placeholder="Ej: EN-04587" 
+                                       style="text-transform: uppercase;">
                             </ng-template>
-                            <ng-template pTemplate="output">{{prod.registroSanitario}}</ng-template>
+                            <ng-template pTemplate="output">
+                                <span *ngIf="prod.registroSanitario">{{prod.registroSanitario}}</span>
+                                <span *ngIf="!prod.registroSanitario" class="text-500 italic text-xs">Sin registro</span>
+                            </ng-template>
                         </p-cellEditor>
                     </td>
 

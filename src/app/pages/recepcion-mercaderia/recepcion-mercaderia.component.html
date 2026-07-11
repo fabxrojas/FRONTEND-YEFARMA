@@ -107,23 +107,23 @@
     styleClass="p-fluid">
     <div *ngIf="detalleSeleccionado" class="mb-3 p-2 bg-gray-50 border-round">
         <span class="block font-bold text-cyan-900">{{ detalleSeleccionado.producto?.producto }}</span>
-        <span class="block text-sm text-gray-600">Revisando caja física enviada por el proveedor...</span>
+        <span class="block text-sm text-gray-600">Revisando mercadería física enviada por el proveedor...</span>
     </div>
 
     <div class="field mb-3">
-        <label class="font-bold text-sm text-cyan-800">Cantidad Real Recibida:</label>
+        <label class="font-bold text-sm text-cyan-800">Cantidad Real Recibida (Envases/Cajas):</label>
         <p-inputNumber [(ngModel)]="datosFisicos.cantidad_recibida" [min]="1" styleClass="w-full"></p-inputNumber>
         <small class="text-gray-500">Por defecto es la solicitada. Bájela si el proveedor entregó menos.</small>
     </div>
 
     <div class="field mb-3">
-        <label class="block font-bold text-sm text-cyan-800 mb-2">Unidad x Presentación (Ej: Caja x 100):</label>
+        <label class="block font-bold text-sm text-cyan-800 mb-2">Unidades por presentación (Ej: Caja x 100):</label>
         <div class="flex gap-2">
             <p-select [options]="listaUnidadesDetalle" [(ngModel)]="datosFisicos.unidad" optionLabel="label"
-                placeholder="Seleccionar..." appendTo="body" styleClass="w-full" class="flex-grow-1">
+                placeholder="Seleccionar multiplicador..." appendTo="body" styleClass="w-full" class="flex-grow-1">
             </p-select>
 
-            <button pButton icon="pi pi-plus" class="p-button-success" pTooltip="Añadir nueva presentación"
+            <button pButton icon="pi pi-plus" class="p-button-success" pTooltip="Añadir nuevo multiplicador"
                 (click)="abrirModalNuevaUnidad()"></button>
         </div>
     </div>
@@ -148,39 +148,48 @@
     </div>
 
     <ng-template pTemplate="footer">
-        <p-button label="Guardar" icon="pi pi-check" (onClick)="guardarDatosFisicos()"
+        <p-button label="Guardar Lote" icon="pi pi-check" (onClick)="guardarDatosFisicos()"
             styleClass="p-button-primary border-round-lg w-full">
         </p-button>
     </ng-template>
 </p-dialog>
 
 <!-- MINI-MODAL PARA CREAR NUEVA PRESENTACIÓN -->
-<p-dialog header="Registrar Nueva Presentación" [(visible)]="mostrarModalNuevaUnidad" [modal]="true"
-    [style]="{width: '400px'}">
+<p-dialog header="Registrar Multiplicador de Stock" [(visible)]="mostrarModalNuevaUnidad" [modal]="true"
+    [style]="{width: '450px'}">
     <div class="flex flex-column gap-3 pt-3">
 
         <div class="field">
-            <label class="font-bold text-sm text-cyan-800">Unidad Base <span class="text-red-500">*</span></label>
+            <label class="font-bold text-sm text-cyan-800">Unidad de Venta <span class="text-red-500">*</span></label>
             <p-select [options]="listaUnidadesBase" [(ngModel)]="nuevaUnidadBase" optionLabel="nombre"
-                (onChange)="verificarUnidadUnica()" placeholder="Ej: CAJA, BLISTER, UNIDAD..." appendTo="body"
+                (onChange)="verificarUnidadUnica()" placeholder="Ej: CAJA, FRASCO, BLISTER..." appendTo="body"
                 styleClass="w-full">
             </p-select>
         </div>
 
         <div class="field">
-            <label class="font-bold text-sm text-cyan-800">Cantidad Interna <span class="text-red-500">*</span></label>
+            <label class="font-bold text-sm text-cyan-800">Cantidad Interna para Inventario <span class="text-red-500">*</span></label>
             
             <p-inputNumber [(ngModel)]="nuevaUnidadCantidad" [min]="1" placeholder="Ej: 100" styleClass="w-full"
                 [disabled]="esUnidadIndivisible()">
             </p-inputNumber>
             
-            <small class="text-gray-500 block mt-1" *ngIf="!esUnidadIndivisible()">¿Cuántas unidades individuales vienen adentro?</small>
-            <small class="text-green-600 font-bold block mt-1" *ngIf="esUnidadIndivisible()"><i class="pi pi-lock text-xs"></i> Cantidad bloqueada a 1 por ser unidad mínima.</small>
+            <!-- MENSAJES DINÁMICOS PARA EVITAR CONFUSIÓN DE MILILITROS -->
+            <small class="text-gray-500 block mt-1" *ngIf="!esUnidadIndivisible()">¿Cuántas unidades (pastillas) individuales vienen adentro de la caja/blíster?</small>
+            
+            <div class="mt-2 p-2 bg-green-50 border-round border-1 border-green-200" *ngIf="esUnidadIndivisible()">
+                <small class="text-green-700 font-bold block">
+                    <i class="pi pi-lock text-sm mr-1"></i> Cantidad bloqueada a 1.
+                </small>
+                <small class="text-green-600 block mt-1">
+                    Al ser un envase entero (como un jarabe o alcohol), el stock cuenta el envase como "1 artículo". <b>NO ingrese aquí el volumen (mililitros o gramos).</b>
+                </small>
+            </div>
         </div>
 
     </div>
     <ng-template pTemplate="footer">
-        <button pButton label="Guardar Presentación" icon="pi pi-check" class="p-button-cyan"
+        <button pButton label="Guardar" icon="pi pi-check" class="p-button-cyan"
             (click)="guardarNuevaUnidad()"></button>
     </ng-template>
 </p-dialog>

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterOutlet } from '@angular/router';
 import { PanelMenuModule } from 'primeng/panelmenu';
@@ -15,6 +15,7 @@ import { DialogModule } from 'primeng/dialog';
 import { UsuarioService } from '../../services/usuario.service';
 import { RefreshService } from '../../services/refresh.service';
 import { TooltipModule } from 'primeng/tooltip';
+import { Subscription, interval } from 'rxjs';
 
 import { SidebarModule } from 'primeng/sidebar';
 
@@ -32,6 +33,7 @@ export class DashboardQuimicoComponent implements OnInit {
   items: MenuItem[] = [];
   userOptions: MenuItem[] = [];
   userName: string = '';
+  
 
   // Variables para los datos del dashboard
   dashboardData: DashboardDTO | null = null;
@@ -61,6 +63,8 @@ export class DashboardQuimicoComponent implements OnInit {
   displayModalPerfil: boolean = false;
   usuarioPerfil: any = {};
 
+  private autoRefreshSub: Subscription | null = null;
+
   constructor(
     public router: Router,
     private authService: AuthService,
@@ -77,6 +81,19 @@ export class DashboardQuimicoComponent implements OnInit {
       this.cargarDatosDashboard();
     });
 
+    // 4. NUEVO: AUTO-ACTUALIZADOR SILENCIOSO (Se ejecuta cada 15 segundos)
+    this.autoRefreshSub = interval(15000).subscribe(() => {
+      // Solo actualizamos si el modal de stock no está cargando para no interrumpir al usuario
+      if (!this.loadingModal) {
+        this.dashboardService.getDashboardData().subscribe(data => {
+          this.dashboardData = data;
+          this.configurarGraficoBarras();
+          this.configurarGraficosAvanzados();
+          this.configurarRendimientoPersonal();
+        });
+      }
+    });
+
     this.userOptions = [
       {
         label: 'Perfil',
@@ -86,6 +103,12 @@ export class DashboardQuimicoComponent implements OnInit {
         ]
       }
     ];
+  }
+
+  ngOnDestroy() {
+    if (this.autoRefreshSub) {
+      this.autoRefreshSub.unsubscribe();
+    }
   }
 
   cargarPerfil() {

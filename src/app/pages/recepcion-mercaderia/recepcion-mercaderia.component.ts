@@ -50,8 +50,11 @@ export class RecepcionMercaderiaComponent implements OnInit {
   };
 
   listaIngresosPreparados: any[] = [];
+  marcasDB: any[] = [];
+  presentacionesDB: any[] = [];
 
   // Lista definitiva de unidades que NO se pueden subdividir en la farmacia
+  // Si el usuario selecciona alguna de estas, el sistema automáticamente forzará la cantidad a 1
   unidadesIndivisibles: string[] = [
     'UNIDAD', 
     'TABLETA', 
@@ -59,11 +62,15 @@ export class RecepcionMercaderiaComponent implements OnInit {
     'CÁPSULA', 
     'AMPOLLA', 
     'FRASCO',
-    'SOBRE',       // Ej: Un sobre de Sal de Andrews no se abre para vender la mitad
+    'FRASCO ÁMPULA',
+    'SOBRE',       
     'SUPOSITORIO',
-    'TUBO'         // Ej: Un tubo de crema no se vende por gramos
+    'TUBO',
+    'CILINDRO',    
+    'ENVASE',      
+    'BOLSA',       
+    'JERINGA'      
   ];
-
 
   constructor(
     private messageService: MessageService,
@@ -76,6 +83,10 @@ export class RecepcionMercaderiaComponent implements OnInit {
   ngOnInit(): void {
     this.cargarUnidades();
     this.cargarUnidadesBase();
+    
+    // NUEVO: Descargamos las marcas y presentaciones en segundo plano
+    this.productoService.getMarcas().subscribe(data => this.marcasDB = data);
+    this.productoService.getPresentaciones().subscribe(data => this.presentacionesDB = data);
   }
 
   cargarUnidades() {
@@ -98,13 +109,11 @@ export class RecepcionMercaderiaComponent implements OnInit {
     });
   }
   
-
   abrirModalNuevaUnidad() {
     this.nuevaUnidadBase = null;
     this.nuevaUnidadCantidad = null;
     this.mostrarModalNuevaUnidad = true;
   }
-
 
   buscarOrdenCompra() {
     if (!this.codigoOCBusqueda.trim()) {
@@ -203,13 +212,18 @@ export class RecepcionMercaderiaComponent implements OnInit {
     const index = this.listaIngresosPreparados.findIndex(i => i.idDetalleOC === idReferencia);
     const idUsuarioActual = this.authService.getCurrentUserId();
 
+    const marcaReal = this.marcasDB.find(m => m.nombre.toUpperCase() === this.detalleSeleccionado.marcaSolicitada?.toUpperCase());
+    const presReal = this.presentacionesDB.find(p => p.nombre.toUpperCase() === this.detalleSeleccionado.presentacionSolicitada?.toUpperCase());
+
     const ingresoParaBD = {
       idDetalleOC: idReferencia,
       ordenCompra: { idOrden: this.ordenEncontrada.idOrden },
       producto: this.detalleSeleccionado.producto,
       proveedor: this.ordenEncontrada.proveedor,
-      marca: { id_marca: 1 }, 
-      presentacion: { id_presentacion: 1 }, 
+      
+      marca: marcaReal ? { id_marca: marcaReal.id_marca || marcaReal.idMarca } : { id_marca: 1 }, 
+      presentacion: presReal ? { id_presentacion: presReal.id_presentacion || presReal.idPresentacion } : { id_presentacion: 1 },
+      
       unidad: this.datosFisicos.unidad.unidadMedida,
       cant_por_presen: this.datosFisicos.unidad.cantidad,
       cantidad_ingresada: this.datosFisicos.cantidad_recibida,
@@ -234,17 +248,19 @@ export class RecepcionMercaderiaComponent implements OnInit {
       return;
     }
 
-    // CORRECCIÓN CLAVE: Usamos 'id_unidad' tal como está en tu base de datos
     const payload = {
-      unidadMedida: { idUnidad: this.nuevaUnidadBase.idUnidad },
+      unidadMedida: this.nuevaUnidadBase, 
       cantidad: this.nuevaUnidadCantidad
     };
 
+    // Imprimimos en consola para ver qué estamos enviando exactamente
+    console.log("Intentando guardar multiplicador:", payload);
+
     this.ingresoProductoService.crearUnidadDetalle(payload).subscribe({
       next: (nuevaUnidadGuardada) => {
-        this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Presentación registrada.' });
+        this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Unidades x presentación guardarda correctamente.' });
 
-        this.cargarUnidades();
+        this.cargarUnidades(); // Refresca la lista de la base de datos
 
         this.datosFisicos.unidad = {
           ...nuevaUnidadGuardada,
@@ -254,8 +270,8 @@ export class RecepcionMercaderiaComponent implements OnInit {
         this.mostrarModalNuevaUnidad = false;
       },
       error: (err) => {
-        console.error(err);
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'La presentación ya existe o hubo un fallo en el servidor.' });
+        console.error("Fallo exacto del servidor:", err);
+        this.messageService.add({ severity: 'error', summary: 'Error del Servidor', detail: 'Revisa la consola de Spring Boot para ver el motivo exacto.' });
       }
     });
   }
@@ -273,9 +289,6 @@ export class RecepcionMercaderiaComponent implements OnInit {
     this.ingresoProductoService.registrarIngresoBatch(this.listaIngresosPreparados).subscribe({
       next: () => {
         this.messageService.add({ severity: 'success', summary: 'Recepción Exitosa', detail: `El inventario de Yefarma ha sido actualizado.` });
-
-        // Aquí podrías llamar a tu OrdenCompraService para cambiar el estado de la OC a "RECEPCIONADA"
-
         this.ordenEncontrada = null;
         this.codigoOCBusqueda = '';
         this.listaIngresosPreparados = [];
@@ -284,13 +297,14 @@ export class RecepcionMercaderiaComponent implements OnInit {
     });
   }
 
+  // Lógica principal de protección
   verificarUnidadUnica() {
     if (this.nuevaUnidadBase) {
       const nombreUnidad = this.nuevaUnidadBase.nombre.toUpperCase();
       
       // Si el nombre de la unidad está dentro de nuestra lista de indivisibles...
       if (this.unidadesIndivisibles.includes(nombreUnidad)) {
-        this.nuevaUnidadCantidad = 1; // Lo forzamos a 1
+        this.nuevaUnidadCantidad = 1; // Lo forzamos a 1 para proteger el inventario
       } else {
         this.nuevaUnidadCantidad = null; // Lo liberamos para CAJAS o BLISTERS
       }
@@ -302,7 +316,6 @@ export class RecepcionMercaderiaComponent implements OnInit {
     return this.unidadesIndivisibles.includes(this.nuevaUnidadBase.nombre.toUpperCase());
   }
   
-
   limpiarFormulario() {
     this.ordenEncontrada = null;
     this.codigoOCBusqueda = '';

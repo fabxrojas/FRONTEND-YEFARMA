@@ -140,7 +140,7 @@ export class InventarioComponent implements OnInit {
       detalle: this.esMotivoOtro() ? this.motivoEspecifico : null
     };
 
-    console.log("Enviando al backend:", payload); // <-- MIRA LA CONSOLA (F12)
+    console.log("Enviando al backend:", payload); 
 
     this.inventarioService.registrarBajaLote(payload).subscribe({
       next: (res: any) => {
