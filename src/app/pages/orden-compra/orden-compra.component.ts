@@ -47,6 +47,8 @@ export class OrdenCompraComponent implements OnInit {
   productoSeleccionado: any = null;
   resultadosBusqueda: any[] = [];
 
+  fechaMinima: Date = new Date();
+
   // Combos seleccionados
   marcaSeleccionada: any = null;
   presentacionSeleccionada: any = null;
