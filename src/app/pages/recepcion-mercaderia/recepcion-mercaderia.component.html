@@ -120,10 +120,10 @@
         <label class="block font-bold text-sm text-cyan-800 mb-2">Unidades por presentación (Ej: Caja x 100):</label>
         <div class="flex gap-2">
             <p-select [options]="listaUnidadesDetalle" [(ngModel)]="datosFisicos.unidad" optionLabel="label"
-                placeholder="Seleccionar multiplicador..." appendTo="body" styleClass="w-full" class="flex-grow-1">
+                placeholder="Seleccionar..." appendTo="body" styleClass="w-full" class="flex-grow-1">
             </p-select>
 
-            <button pButton icon="pi pi-plus" class="p-button-success" pTooltip="Añadir nuevo multiplicador"
+            <button pButton icon="pi pi-plus" class="p-button-success" pTooltip="Añadir nueva unidad"
                 (click)="abrirModalNuevaUnidad()"></button>
         </div>
     </div>
